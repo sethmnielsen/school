@@ -1,0 +1,9 @@
+*.pdf
+*.jpg
+*.mat
+*.m~
+*.pptx
+*.pyc
+*.bak
+*.ipynb_checkpoints
+.DS_Store
