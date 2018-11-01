@@ -1,3 +1,7 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% problem 2g)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 run robot_6dof
 
 %number of tests
@@ -22,8 +26,6 @@ qf1 = zeros(10,6);
 qf2 = zeros(10,6);
 ksi_error1 = zeros(10,3);
 ksi_error2 = zeros(10,3);
-
-% Damped pseudo-inverse
 for i=1:10
     ksi_des = positions(:,i);
     qf1(i,:) = IK(qinit1, ksi_des, robot, 1);
@@ -31,7 +33,7 @@ for i=1:10
     ksi_error1(i,:) = ksi_des - FK(1:3, 4);
 end
 
-% Jacobian transpose
+
 for i=1:10
     ksi_des = positions(:,i);
     qf2(i,:) = IK(qinit1, ksi_des, robot, 2);
@@ -39,13 +41,13 @@ for i=1:10
     ksi_error2(i,:) = ksi_des - FK(1:3, 4);
 end
 
-robot.plot(jt_angles(:,5)')
+robot.plot(qinit1)
 hold on
-robotb.plot(qf1(5,:))
-robotc.plot(qf2(5,:))
+robotb.plot(qf1(1,:))
+robotc.plot(qf2(1,:))
 hold off
 
-function f = IK(qinit, ksi_des, robot, k)
+function f = IK(qinit, ksi_des, robot, j)
     k = 0.4;
     kd = 0.001;
 
@@ -55,15 +57,15 @@ function f = IK(qinit, ksi_des, robot, k)
     counter = 0;
     error = ksi_des - ksi;
     q = qinit';
-    epsilon = 0.01;
+    epsilon = 0.5;
     delta_t = 1;
     while norm(error) >= epsilon && counter < 1000
         J = robot.jacob0(q);
         J = J(1:3, :);
-        if k == 1 % damped pseudo-inverse
+        if j == 1
             J_dag = J'*inv(J*J' + (kd^2)*eye(3));
             qdot = J_dag * error * k;
-        else % Jacobian transpose
+        else
             qdot = J' * k*error;
         end
 

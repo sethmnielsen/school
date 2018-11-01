@@ -7,3 +7,6 @@
 *.bak
 *.ipynb_checkpoints
 .DS_Store
+*old/
+*sigsys/
+*.odt
