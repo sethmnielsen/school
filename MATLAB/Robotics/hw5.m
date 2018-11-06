@@ -35,5 +35,39 @@ R_BA = R_AB'
 tw1 = Twist('R', v1, [0 0 0])
 tw2 = Twist('R', v2, [0 0 0])
 
+%% 2
+
+omega = [1,2,3]';
+S = skew(omega);
+p = [2,3,4]';
+
+a = S * p
+b = cross(omega,p)
 
 
+%% 3
+
+% syms psi tha phi psid thad phid real;
+
+psi = 0.1;
+tha = 0.2;
+phi = 0.3;
+psid = 0.4;
+thad = 0.5;
+phid = 0.6;
+
+A = rotz(psi);
+B = roty(tha);
+C = rotz(phi);
+
+R = A*B*C;
+omega = [cos(psi)*sin(tha)*phid - sin(psi)*thad, ...
+         sin(psi)*sin(tha)*phid + cos(psi)*thad, ...
+         psid + cos(tha)*phid];
+       
+Sz = skew([0 0 1]);
+Sy = skew([0 1 0]);
+Sw = skew(omega);
+
+Rdot  = psid*Sz*A*B*C + A*thad*Sy*B*C + A*B*phid*Sz*C 
+Rdot2 = Sw * R 
