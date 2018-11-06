@@ -8,7 +8,6 @@ hh = np.zeros(m)
 f = np.random.randn(n)
 fn = np.hstack(([0,0,0,0],f))
 delta = .0001
-# d = np.zeros(n)
 P = 1/delta * np.eye(m)
 q = np.zeros(m)
 
