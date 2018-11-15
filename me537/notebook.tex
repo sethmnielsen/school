@@ -1,0 +1,685 @@
+
+% Default to the notebook output style
+
+    
+
+
+% Inherit from the specified cell style.
+
+
+
+
+    
+\documentclass[11pt]{article}
+
+    
+    
+    \usepackage[T1]{fontenc}
+    % Nicer default font (+ math font) than Computer Modern for most use cases
+    \usepackage{mathpazo}
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % We will generate all images so they have a width \maxwidth. This means
+    % that they will get their normal width if they fit onto the page, but
+    % are scaled down if they would overflow the margins.
+    \makeatletter
+    \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth
+    \else\Gin@nat@width\fi}
+    \makeatother
+    \let\Oldincludegraphics\includegraphics
+    % Set max figure width to be 80% of text width, for now hardcoded.
+    \renewcommand{\includegraphics}[1]{\Oldincludegraphics[width=.8\maxwidth]{#1}}
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionLabelFormat{nolabel}{}
+    \captionsetup{labelformat=nolabel}
+
+    \usepackage{adjustbox} % Used to constrain images to a maximum size 
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+    \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+    \usepackage[utf8x]{inputenc} % Allow utf-8 characters in the tex document
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics 
+                         % to support a larger range 
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    
+
+    
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+    
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatability definitions
+    \def\gt{>}
+    \def\lt{<}
+    % Document parameters
+    \title{HW6}
+    
+    
+    
+
+    % Pygments definitions
+    
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % Exact colors from NB
+    \definecolor{incolor}{rgb}{0.0, 0.0, 0.5}
+    \definecolor{outcolor}{rgb}{0.545, 0.0, 0.0}
+
+
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy 
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+    \begin{document}
+    
+    
+    \maketitle
+    
+    
+
+    
+    \section{Homework 6 - Seth Nielsen - ME
+537}\label{homework-6---seth-nielsen---me-537}
+
+    \textbf{1) Spong, Robot Modeling and Control Problems}
+
+\textbf{(a) Find the moments of inertia and cross products of inertia of
+a uniform rectangular solid with sides a, b, and c with respect to a
+coordinate frame with the origin at one corner and the axes along the
+edges of the solid.}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{syms} \PY{n}{m} \PY{n}{a} \PY{n}{b} \PY{n}{c} \PY{n}{real}
+        \PY{n}{r} \PY{o}{=} \PY{p}{[}\PY{n}{a}\PY{o}{/}\PY{l+m+mi}{2} \PY{n}{b}\PY{o}{/}\PY{l+m+mi}{2} \PY{n}{c}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{Ixx} \PY{o}{=} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{b}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{c}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
+        \PY{n}{Iyy} \PY{o}{=} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{a}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{c}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
+        \PY{n}{Izz} \PY{o}{=} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{a}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{b}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
+        
+        \PY{n}{Icom} \PY{o}{=} \PY{p}{[}\PY{n}{Ixx} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0} \PY{n}{Iyy} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{n}{Izz}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{I0} \PY{o}{=} \PY{n}{Icom} \PY{o}{\PYZhy{}} \PY{n}{m}\PY{o}{*}\PY{n}{skew}\PY{p}{(}\PY{n}{r}\PY{p}{)}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{;}
+        
+        \PY{n}{simplify}\PY{p}{(}\PY{n}{I0}\PY{p}{)}
+        
+        \PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}
+        
+        \PY{n}{ans} \PY{o}{=}
+         
+        \PY{p}{[} \PY{p}{(}\PY{n}{m}\PY{o}{*}\PY{p}{(}\PY{n}{b}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{c}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{3}\PY{p}{,}        \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{a}\PY{o}{*}\PY{n}{b}\PY{o}{*}\PY{n}{m}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{4}\PY{p}{,}        \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{a}\PY{o}{*}\PY{n}{c}\PY{o}{*}\PY{n}{m}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{4}\PY{p}{]}
+        \PY{p}{[}        \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{a}\PY{o}{*}\PY{n}{b}\PY{o}{*}\PY{n}{m}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{4}\PY{p}{,} \PY{p}{(}\PY{n}{m}\PY{o}{*}\PY{p}{(}\PY{n}{a}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{c}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{3}\PY{p}{,}        \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{b}\PY{o}{*}\PY{n}{c}\PY{o}{*}\PY{n}{m}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{4}\PY{p}{]}
+        \PY{p}{[}        \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{a}\PY{o}{*}\PY{n}{c}\PY{o}{*}\PY{n}{m}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{4}\PY{p}{,}        \PY{o}{\PYZhy{}}\PY{p}{(}\PY{n}{b}\PY{o}{*}\PY{n}{c}\PY{o}{*}\PY{n}{m}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{4}\PY{p}{,} \PY{p}{(}\PY{n}{m}\PY{o}{*}\PY{p}{(}\PY{n}{a}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{b}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{3}\PY{p}{]}
+\end{Verbatim}
+
+
+    The moments of inertia are along the diagonal of \(I_0\), and the
+products of inertia are the values on the off-diagonal.
+
+    \textbf{(b) Show that the inertia matrix \(M(q)\) for an n-link robot is
+always positive definite. (Look at the definition of a positive definite
+matrix on wikipedia if needed. The form of Kinetic energy for a n-link
+robot may help you here.)}
+
+    Kinetic energy \(K \geq 0\) by definition. Since
+\(K = \frac{1}{2} \dot{q}^\textsf{T} M(q) \dot{q}\), it is clear that
+the quantity \(\dot{q}^{\textsf{T}} M(q) \dot{q}\) must also be positive
+(or zero in the case of \(\dot{q} = 0\)). A matrix \(M\) is defined to
+be positive definite if the scalar \(z^\textsf{T} Mz\) is strictly
+positive for every non-zero column vector \(z\) of real numbers. This
+means the inertia matrix \(M(q)\) is always positive definite.
+
+    \textbf{(c) Consider a 3-link Cartesian manipulator (see picture with
+prismatic joint in the z, then y, then x direction of the global frame).
+Assume the links are rectangular instead of cylindrical and do the
+following:}
+
+\textbf{i. Compute the inertia tensor \(I_i\) for each link
+\(i = 1, 2, 3\) assuming that the links are uniform rectangular solids
+of length 1, width 1/4, height 1/4, and mass of 1.}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{l} \PY{o}{=} \PY{l+m+mi}{1}\PY{p}{;}
+        \PY{n}{w} \PY{o}{=} \PY{l+m+mf}{0.25}\PY{p}{;}
+        \PY{n}{m} \PY{o}{=} \PY{l+m+mi}{1}\PY{p}{;}
+        
+        \PY{n}{I1} \PY{o}{=} \PY{p}{[}\PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{l}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;} \PY{o}{.}\PY{o}{.}\PY{o}{.}
+              \PY{l+m+mi}{0} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{l}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)} \PY{l+m+mi}{0}\PY{p}{;} \PY{o}{.}\PY{o}{.}\PY{o}{.}
+              \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{]}
+        
+        \PY{n}{I2} \PY{o}{=} \PY{p}{[}\PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{l}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;} \PY{o}{.}\PY{o}{.}\PY{o}{.}
+              \PY{l+m+mi}{0} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)} \PY{l+m+mi}{0}\PY{p}{;}     \PY{o}{.}\PY{o}{.}\PY{o}{.}
+              \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{l}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{]}
+        
+        \PY{n}{I3} \PY{o}{=} \PY{p}{[}\PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;}     \PY{o}{.}\PY{o}{.}\PY{o}{.}
+              \PY{l+m+mi}{0} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{l}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)} \PY{l+m+mi}{0}\PY{p}{;} \PY{o}{.}\PY{o}{.}\PY{o}{.}
+              \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{p}{(}\PY{n}{m}\PY{o}{/}\PY{l+m+mi}{12}\PY{p}{)} \PY{o}{*} \PY{p}{(}\PY{n}{l}\PY{o}{\PYZca{}}\PY{l+m+mi}{2} \PY{o}{+} \PY{n}{w}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{]}
+        
+        \PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}
+        
+        \PY{n}{I1} \PY{o}{=}
+        
+            \PY{l+m+mf}{0.0885}         \PY{l+m+mi}{0}         \PY{l+m+mi}{0}
+                 \PY{l+m+mi}{0}    \PY{l+m+mf}{0.0885}         \PY{l+m+mi}{0}
+                 \PY{l+m+mi}{0}         \PY{l+m+mi}{0}    \PY{l+m+mf}{0.0104}
+        
+        
+        \PY{n}{I2} \PY{o}{=}
+        
+            \PY{l+m+mf}{0.0885}         \PY{l+m+mi}{0}         \PY{l+m+mi}{0}
+                 \PY{l+m+mi}{0}    \PY{l+m+mf}{0.0885}         \PY{l+m+mi}{0}
+                 \PY{l+m+mi}{0}         \PY{l+m+mi}{0}    \PY{l+m+mf}{0.0104}
+        
+        
+        \PY{n}{I3} \PY{o}{=}
+        
+            \PY{l+m+mf}{0.0885}         \PY{l+m+mi}{0}         \PY{l+m+mi}{0}
+                 \PY{l+m+mi}{0}    \PY{l+m+mf}{0.0885}         \PY{l+m+mi}{0}
+                 \PY{l+m+mi}{0}         \PY{l+m+mi}{0}    \PY{l+m+mf}{0.0104}
+\end{Verbatim}
+
+
+    \textbf{ii. Compute the 3x3 inertia matrix \(M(q)\) for this
+manipulator.}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{Jv1} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;}
+               \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;}
+               \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{Jv2} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{;}
+               \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0}\PY{p}{;}
+               \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{Jv3} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{1}\PY{p}{;}
+               \PY{l+m+mi}{0} \PY{l+m+mi}{1} \PY{l+m+mi}{0}\PY{p}{;}
+               \PY{l+m+mi}{1} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{M} \PY{o}{=} \PY{n}{m}\PY{o}{*}\PY{p}{(}\PY{n}{Jv1}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*Jv1 + Jv2}\PY{l+s+s1}{\PYZsq{}}\PY{o}{*}\PY{n}{Jv2} \PY{o}{+} \PY{n}{Jv3}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*Jv3)}
+               
+        \PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}
+        
+               
+        \PY{n}{M} \PY{o}{=}
+        
+             \PY{l+m+mi}{3}     \PY{l+m+mi}{0}     \PY{l+m+mi}{0}
+             \PY{l+m+mi}{0}     \PY{l+m+mi}{2}     \PY{l+m+mi}{0}
+             \PY{l+m+mi}{0}     \PY{l+m+mi}{0}     \PY{l+m+mi}{1}
+\end{Verbatim}
+
+
+    \textbf{iii. Show that the Christoffel symbols \(c_{ijk}\) are all zero
+for this robot. Interpret the meaning of this for the dynamic equations
+of motion.}
+
+    The Christoffel symbols are all zero because none of the terms of the
+mass matrix \(M(q)\) are a function of \(q\), since each joint is
+prismatic and thus the arm does not rotate.
+
+    \textbf{iv. Derive the equations of motion in matrix form.}
+
+    To find \(G(q)\), the potential energy can be calculated as:
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{syms} \PY{n}{q1} \PY{n}{q2} \PY{n}{real}
+        
+        \PY{n}{rc1} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{n}{l}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{;}
+        \PY{n}{rc2} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{n}{l}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{;} \PY{n}{l}\PY{o}{+}\PY{n}{q1}\PY{p}{]}\PY{p}{;}
+        \PY{n}{rc3} \PY{o}{=} \PY{p}{[}\PY{n}{l}\PY{o}{/}\PY{l+m+mi}{2}\PY{p}{;} \PY{n}{l}\PY{o}{+}\PY{n}{q2}\PY{p}{;} \PY{n}{l}\PY{o}{+}\PY{n}{q1}\PY{p}{]}\PY{p}{;}
+        \PY{n}{g} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mf}{9.81}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{P} \PY{o}{=} \PY{n}{m}\PY{o}{*}\PY{n}{g}\PY{o}{*}\PY{p}{(}\PY{n}{rc1} \PY{o}{+} \PY{n}{rc2} \PY{o}{+} \PY{n}{rc3}\PY{p}{)}
+        
+        \PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}
+        
+        \PY{n}{P} \PY{o}{=}
+         
+        \PY{p}{(}\PY{l+m+mi}{2943}\PY{o}{*}\PY{n}{q1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{100} \PY{o}{+} \PY{l+m+mi}{981}\PY{o}{/}\PY{l+m+mi}{40}
+\end{Verbatim}
+
+
+    Thus, \(g_{2} = g_{3} = 0\), and
+
+\begin{align}
+g_1 &= \frac{\partial P}{\partial q_1} = 29.43
+\end{align}
+
+    Setting \(C(q,\dot{q})\dot{q} = 0\) and combining terms:
+
+\begin{align}
+f &= M(q)\ddot{q} + G(q) \\ \\
+f &= \begin{bmatrix}
+3 & 0 & 0 \\
+0 & 2 & 0 \\
+0 & 0 & 1 \end{bmatrix} + \begin{bmatrix}29.43\\0\\0\end{bmatrix}\\ \\
+f &= \begin{bmatrix}
+32.43 & 29.43 & 29.43 \\
+29.43 & 31.43 & 29.43 \\
+29.43 & 29.43 & 30.43 \end{bmatrix}
+\end{align}
+
+    \textbf{(d) Use symbolic software (like the ``syms'' command in MATLAB)
+to derive the symbolic Euler-Lagrange equations of motion for a planar
+three-link RRR robot with each link length being 0.4m. The center of
+mass for each link is at a distance of 0.2m from the end. Please assume
+that the robot is contained in the x-y plane with x being the horizontal
+direction and gravity being lined up with the y axis. It is recommended
+that you use the robotics toolbox, but you may not use the dynamic
+functions in the toolbox. Please leave the equations in symbolic form
+with the following variables:
+\(m_1, m_2, m_3, I_{xx}, I_{yy}, I_{zz}, q_1, q_2, q_3, q̇_1 , q̇_2, q̇_3, g\)}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{syms} \PY{n}{m1} \PY{n}{m2} \PY{n}{m3} \PY{n}{Ixx} \PY{n}{Iyy} \PY{n}{Izz} \PY{n}{q1} \PY{n}{q2} \PY{n}{q3} \PY{n}{qd1} \PY{n}{qd2} \PY{n}{qd3} \PY{n}{qdd1} \PY{n}{qdd2} \PY{n}{qdd3} \PY{n}{g} \PY{n}{real}
+        
+        \PY{n}{m} \PY{o}{=} \PY{p}{[}\PY{n}{m1}\PY{p}{;} \PY{n}{m2}\PY{p}{;} \PY{n}{m3}\PY{p}{]}\PY{p}{;}
+        \PY{n}{q} \PY{o}{=} \PY{p}{[}\PY{n}{q1}\PY{p}{;} \PY{n}{q2}\PY{p}{;} \PY{n}{q3}\PY{p}{]}\PY{p}{;}
+        \PY{n}{qd} \PY{o}{=} \PY{p}{[}\PY{n}{qd1}\PY{p}{;} \PY{n}{qd2}\PY{p}{;} \PY{n}{qd3}\PY{p}{]}\PY{p}{;}
+        \PY{n}{qdd} \PY{o}{=} \PY{p}{[}\PY{n}{qdd1}\PY{p}{;} \PY{n}{qdd2}\PY{p}{;} \PY{n}{qdd3}\PY{p}{]}\PY{p}{;}
+        \PY{n}{gv} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;}  \PY{n}{g}\PY{p}{;}  \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{l} \PY{o}{=} \PY{l+m+mf}{0.4}\PY{p}{;}
+        \PY{n}{c} \PY{o}{=} \PY{l+m+mf}{0.2}\PY{p}{;}
+        \PY{n}{q0} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{robot3} \PY{o}{=} \PY{n}{SerialLink}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{n}{l} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{n}{l} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0} \PY{l+m+mi}{0} \PY{n}{l} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gravity}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{0} \PY{o}{\PYZhy{}}\PY{l+m+mf}{9.81} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{3}
+            \PY{n}{robot3}\PY{o}{.}\PY{n}{links}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{o}{.}\PY{n}{I} \PY{o}{=} \PY{p}{[}\PY{n}{Ixx} \PY{n}{Iyy} \PY{n}{Izz}\PY{p}{]}\PY{p}{;}
+        \PY{n}{end}
+        
+        \PY{n}{z\PYZus{}00} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+        \PY{n}{z\PYZus{}01} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+        \PY{n}{z\PYZus{}02} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{O\PYZus{}00} \PY{o}{=} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{O\PYZus{}01} \PY{o}{=} \PY{n}{l}\PY{o}{*}\PY{p}{[}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{;} \PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{O\PYZus{}02} \PY{o}{=} \PY{n}{l}\PY{o}{*}\PY{p}{[}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{+}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{p}{)}\PY{p}{;} \PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{+}\PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{p}{)}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{O\PYZus{}0c1} \PY{o}{=} \PY{n}{c}\PY{o}{*}\PY{p}{[}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{;} \PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{O\PYZus{}0c2} \PY{o}{=} \PY{p}{[}\PY{n}{l}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{+}\PY{n}{c}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{p}{)}\PY{p}{;} \PY{n}{l}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{+}\PY{n}{c}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{p}{)}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        \PY{n}{O\PYZus{}0c3} \PY{o}{=} \PY{p}{[}\PY{n}{l}\PY{o}{*}\PY{p}{(}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{+}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{+}\PY{n}{c}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{o}{+}\PY{n}{q3}\PY{p}{)}\PY{p}{;} \PY{n}{l}\PY{o}{*}\PY{p}{(}\PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{+}\PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{+}\PY{n}{c}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q1}\PY{o}{+}\PY{n}{q2}\PY{o}{+}\PY{n}{q3}\PY{p}{)}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{Jv} \PY{o}{=} \PY{n}{sym}\PY{p}{(}\PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+        \PY{n}{Jw} \PY{o}{=} \PY{n}{sym}\PY{p}{(}\PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+        \PY{n}{R} \PY{o}{=} \PY{n}{sym}\PY{p}{(}\PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+        
+        \PY{n}{Jv}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{=} \PY{p}{[}\PY{n}{cross}\PY{p}{(}\PY{n}{z\PYZus{}00}\PY{p}{,} \PY{n}{O\PYZus{}0c1} \PY{o}{\PYZhy{}} \PY{n}{O\PYZus{}00}\PY{p}{)} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{]}\PY{p}{;}
+        \PY{n}{Jw}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{=} \PY{p}{[}\PY{n}{z\PYZus{}00}                      \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{Jv}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)} \PY{o}{=} \PY{p}{[}\PY{n}{cross}\PY{p}{(}\PY{n}{z\PYZus{}00}\PY{p}{,} \PY{n}{O\PYZus{}0c2} \PY{o}{\PYZhy{}} \PY{n}{O\PYZus{}00}\PY{p}{)} \PY{n}{cross}\PY{p}{(}\PY{n}{z\PYZus{}01}\PY{p}{,} \PY{n}{O\PYZus{}0c2} \PY{o}{\PYZhy{}} \PY{n}{O\PYZus{}01}\PY{p}{)} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{]}\PY{p}{;}
+        \PY{n}{Jw}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)} \PY{o}{=} \PY{p}{[}\PY{n}{z\PYZus{}00}                      \PY{n}{z\PYZus{}01}                      \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{;} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{Jv}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)} \PY{o}{=} \PY{p}{[}\PY{n}{cross}\PY{p}{(}\PY{n}{z\PYZus{}00}\PY{p}{,} \PY{n}{O\PYZus{}0c3} \PY{o}{\PYZhy{}} \PY{n}{O\PYZus{}00}\PY{p}{)} \PY{n}{cross}\PY{p}{(}\PY{n}{z\PYZus{}01}\PY{p}{,} \PY{n}{O\PYZus{}0c3} \PY{o}{\PYZhy{}} \PY{n}{O\PYZus{}01}\PY{p}{)} \PY{n}{cross}\PY{p}{(}\PY{n}{z\PYZus{}02}\PY{p}{,} \PY{n}{O\PYZus{}0c3} \PY{o}{\PYZhy{}} \PY{n}{O\PYZus{}02}\PY{p}{)}\PY{p}{]}\PY{p}{;}
+        \PY{n}{Jw}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)} \PY{o}{=} \PY{p}{[}\PY{n}{z\PYZus{}00}                      \PY{n}{z\PYZus{}01}                      \PY{n}{z\PYZus{}02}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{R}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)} \PY{o}{=} \PY{n}{rotz}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{;}
+        \PY{n}{R}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)} \PY{o}{=} \PY{n}{rotz}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{*}\PY{n}{rotz}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{;}
+        \PY{n}{R}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)} \PY{o}{=} \PY{n}{rotz}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{o}{*}\PY{n}{rotz}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{o}{*}\PY{n}{rotz}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{;}
+        
+        \PY{o}{\PYZpc{}} \PY{n}{Mass} \PY{n}{matrix}
+        \PY{n}{M} \PY{o}{=} \PY{n}{sym}\PY{p}{(}\PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{3}
+            \PY{n}{M} \PY{o}{=} \PY{n}{M} \PY{o}{+} \PY{n}{m}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{o}{*}\PY{n}{Jv}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*Jv(:,:,i) + ...}
+                \PY{n}{Jw}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*Jw(:,:,i)*R(:,:,i)*robot3.links(i).I*R(:,:,i)}\PY{l+s+s1}{\PYZsq{}}\PY{o}{*}\PY{n}{Jw}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)}\PY{p}{;}
+        \PY{n}{end}
+        
+        \PY{o}{\PYZpc{}} \PY{n}{Coriolis} \PY{n}{matrix}
+        \PY{n}{C} \PY{o}{=} \PY{n}{sym}\PY{p}{(}\PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{k}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{3}
+            \PY{k}{for} \PY{n}{j}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{3}
+                \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{3}
+                    \PY{n}{C}\PY{p}{(}\PY{n}{k}\PY{p}{,}\PY{n}{j}\PY{p}{)} \PY{o}{=} \PY{n}{C}\PY{p}{(}\PY{n}{k}\PY{p}{,}\PY{n}{j}\PY{p}{)} \PY{o}{+} \PY{l+m+mf}{0.5}\PY{o}{*}\PY{p}{(}\PY{n}{diff}\PY{p}{(}\PY{n}{M}\PY{p}{(}\PY{n}{k}\PY{p}{,}\PY{n}{j}\PY{p}{)}\PY{p}{,}\PY{n}{q}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{n}{diff}\PY{p}{(}\PY{n}{M}\PY{p}{(}\PY{n}{k}\PY{p}{,}\PY{n}{i}\PY{p}{)}\PY{p}{,}\PY{n}{q}\PY{p}{(}\PY{n}{j}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{diff}\PY{p}{(}\PY{n}{M}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{n}{j}\PY{p}{)}\PY{p}{,}\PY{n}{q}\PY{p}{(}\PY{n}{k}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{o}{*}\PY{n}{qd}\PY{p}{(}\PY{n}{i}\PY{p}{)}\PY{p}{;}
+                \PY{n}{end}
+            \PY{n}{end}
+        \PY{n}{end}
+        
+        \PY{o}{\PYZpc{}} \PY{n}{Gravity} \PY{n}{vector}
+        \PY{n}{P} \PY{o}{=} \PY{n}{m}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{*}\PY{n}{gv}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*O\PYZus{}0c1;}
+        \PY{n}{P} \PY{o}{=} \PY{n}{P} \PY{o}{+} \PY{n}{m}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}\PY{o}{*}\PY{n}{gv}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*O\PYZus{}0c2;}
+        \PY{n}{P} \PY{o}{=} \PY{n}{P} \PY{o}{+} \PY{n}{m}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}\PY{o}{*}\PY{n}{gv}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{*O\PYZus{}0c3;}
+        
+        \PY{n}{G} \PY{o}{=} \PY{p}{[}\PY{n}{diff}\PY{p}{(}\PY{n}{P}\PY{p}{,}\PY{n}{q1}\PY{p}{)}\PY{p}{;} \PY{n}{diff}\PY{p}{(}\PY{n}{P}\PY{p}{,}\PY{n}{q2}\PY{p}{)}\PY{p}{;} \PY{n}{diff}\PY{p}{(}\PY{n}{P}\PY{p}{,}\PY{n}{q3}\PY{p}{)}\PY{p}{]}\PY{p}{;}
+        
+        \PY{n}{tau} \PY{o}{=} \PY{n}{simplify}\PY{p}{(}\PY{n}{M}\PY{o}{*}\PY{n}{qdd} \PY{o}{+} \PY{n}{C}\PY{o}{*}\PY{n}{qd} \PY{o}{+} \PY{n}{G}\PY{p}{)}
+        
+        \PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}\PY{o}{\PYZhy{}}
+        
+        \PY{n}{tau} \PY{o}{=}
+         
+         \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd1} \PY{o}{+} \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd2} \PY{o}{+} \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd3} \PY{o}{+} \PY{p}{(}\PY{n}{m1}\PY{o}{*}\PY{n}{qdd1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd2}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{9}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd3}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{g}\PY{o}{*}\PY{n}{m1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{g}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{g}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{8}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{g}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd2}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd3}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{qd2}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd2}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd3}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{g}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{g}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd3}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{qd3}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{8}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd3}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{qd3}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25}
+                                                                                                                                                                                                                                                                                                                                                                                               \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd1} \PY{o}{+} \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd2} \PY{o}{+} \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd3} \PY{o}{+} \PY{p}{(}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd2}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd3}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{g}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{qd1}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd3}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{g}\PY{o}{*}\PY{n}{m2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{g}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd3}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{\PYZhy{}} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{qd3}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd1} \PY{o}{+} \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd2} \PY{o}{+} \PY{n}{Izz}\PY{o}{*}\PY{n}{qdd3} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd3}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd2}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{n}{g}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q1} \PY{o}{+} \PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{5} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd2}\PY{o}{\PYZca{}}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{2}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qdd1}\PY{o}{*}\PY{n}{cos}\PY{p}{(}\PY{n}{q2} \PY{o}{+} \PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25} \PY{o}{+} \PY{p}{(}\PY{l+m+mi}{4}\PY{o}{*}\PY{n}{m3}\PY{o}{*}\PY{n}{qd1}\PY{o}{*}\PY{n}{qd2}\PY{o}{*}\PY{n}{sin}\PY{p}{(}\PY{n}{q3}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{25}
+         
+\end{Verbatim}
+
+
+    \textbf{2. Use the dynamic model of Baxter in the toolbox to do the
+following:}
+
+\textbf{Given the file ``desired accel.mat'' calculate the joint torques
+\(τ\) necessary to cause this acceleration. Turn in plots of the joint
+torques for each joint. You are only given variables for joint position,
+\(q\), and time. You will have to use these to find \(\dot{q}\) and
+\(\ddot{q}\).}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{p}{[}\PY{n}{left}\PY{p}{,} \PY{n}{right}\PY{p}{]} \PY{o}{=} \PY{n}{mdl\PYZus{}baxter}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{sim}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+        
+        \PY{n}{q0} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{l+m+mi}{7}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{;}
+        
+        \PY{n}{dt} \PY{o}{=} \PY{n}{t}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{;}
+        \PY{n}{qx} \PY{o}{=} \PY{p}{[}\PY{n}{q0}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{; q];}
+        \PY{n}{qy} \PY{o}{=} \PY{p}{[}\PY{n}{q}\PY{p}{;} \PY{n}{q0}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{];}
+        \PY{n}{qd} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{n}{length}\PY{p}{(}\PY{n}{q}\PY{p}{)}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{)}\PY{p}{;}
+        \PY{n}{qdd} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{n}{length}\PY{p}{(}\PY{n}{q}\PY{p}{)}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{)}\PY{p}{;}
+        
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{7}
+            \PY{n}{qd}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)} \PY{o}{=} \PY{p}{(}\PY{n}{qy}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{qx}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{dt}\PY{p}{;}
+        \PY{n}{end}
+        \PY{n}{qd} \PY{o}{=} \PY{n}{qd}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{:}\PY{n}{end}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{;}
+        \PY{n}{qdx} \PY{o}{=} \PY{p}{[}\PY{n}{q0}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{; qd];}
+        \PY{n}{qdy} \PY{o}{=} \PY{p}{[}\PY{n}{qd}\PY{p}{;} \PY{n}{q0}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{];}
+        
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{l+m+mi}{7}
+            \PY{n}{qdd}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)} \PY{o}{=} \PY{p}{(}\PY{n}{qdy}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n}{qdx}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{n}{i}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{n}{dt}\PY{p}{;}
+        \PY{n}{end}
+        \PY{n}{qdd} \PY{o}{=} \PY{n}{qdd}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{:}\PY{n}{end}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{;}
+        
+        
+        \PY{o}{\PYZpc{}}\PY{k}{calculating} the mass, coriolis and gravity terms
+        \PY{n}{tau} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{n}{length}\PY{p}{(}\PY{n}{q}\PY{p}{)}\PY{p}{,} \PY{l+m+mi}{7}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{:}\PY{n}{length}\PY{p}{(}\PY{n}{q}\PY{p}{)}
+            \PY{n}{M} \PY{o}{=} \PY{n}{left}\PY{o}{.}\PY{n}{inertia}\PY{p}{(}\PY{n}{q}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+            \PY{n}{C} \PY{o}{=} \PY{n}{left}\PY{o}{.}\PY{n}{coriolis}\PY{p}{(}\PY{n}{q}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{,} \PY{n}{qd}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+            \PY{n}{G} \PY{o}{=} \PY{n}{left}\PY{o}{.}\PY{n}{gravload}\PY{p}{(}\PY{n}{q}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{)}\PY{p}{;}
+        
+            \PY{n}{tau}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{=} \PY{n}{M} \PY{o}{*} \PY{n}{qdd}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ + C * qd(i,:)}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n}{G}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{;}
+        \PY{n}{end}
+        
+        \PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,}\PY{n}{tau}\PY{p}{(}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}t}\PY{l+s+s1}{au}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+
+
+    \begin{figure}[htbp]
+\centering
+\includegraphics{attachment:hw6_2_plot.jpg}
+\caption{hw6\_2\_plot.jpg}
+\end{figure}
+
+    \textbf{3. Use the provided ``puma560 torque profile.mat'' which is for
+the mdl puma560 arm to calculate \(\ddot{q}, \dot{q}, q\) for the entire
+torque profile. With regards to this, do the following:}
+
+\textbf{(a) Use the ``p560 startup script.m'' and simulink model
+provided with this document to calculate the joint variables
+\(\ddot{q}, \dot{q}, q\) (this should be straight forward, but I
+encourage you to look carefully at the simulink model and code to make
+sure you understand it). To access the output of the simulink
+simulation, you'll need to do this ``out.get('q\_sim')'' for each of the
+following variable names - q\_sim, qd\_sim, qdd\_sim and t\_sim. For
+this simulation, we are including viscous friction, but neglecting
+Coulomb friction. This is the purpose of line 8 in ``p560 startup
+script.m''.}
+
+    \includegraphics{attachment:q_sim_plots3.jpg}
+\includegraphics{attachment:q_sim_plots2.jpg}
+\includegraphics{attachment:q_sim_plots1.jpg}
+
+    \textbf{(b) Use ode45 (or even first-order Euler integration) with the
+``accel'' function that is a function of the robot model ``p560'' to get
+\(\ddot{q}, \dot{q}, q\).}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{n}{mdl\PYZus{}puma560}\PY{p}{;}
+        \PY{n}{p560} \PY{o}{=} \PY{n}{p560}\PY{o}{.}\PY{n}{nofriction}\PY{p}{;}
+        \PY{n}{robot} \PY{o}{=} \PY{n}{p560}\PY{p}{;}
+        \PY{n}{load} \PY{n}{puma560\PYZus{}torque\PYZus{}profile}\PY{o}{.}\PY{n}{mat}
+        
+        \PY{n}{dt} \PY{o}{=} \PY{l+m+mf}{0.01}\PY{p}{;}
+        \PY{n}{qdd\PYZus{}o} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{n}{length}\PY{p}{(}\PY{n}{torque}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{6}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{:}\PY{n}{length}\PY{p}{(}\PY{n}{torque}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}
+            \PY{n}{qdd\PYZus{}o}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{=} \PY{n}{qdd\PYZus{}o}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{+} \PY{p}{(}\PY{n}{torque}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{+} \PY{n}{torque}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{2} \PY{o}{*} \PY{n}{dt}\PY{p}{;}
+        \PY{n}{end}
+        
+        \PY{n}{qd\PYZus{}o} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{n}{length}\PY{p}{(}\PY{n}{torque}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{6}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{:}\PY{n}{length}\PY{p}{(}\PY{n}{torque}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}
+            \PY{n}{qd\PYZus{}o}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{=} \PY{n}{qd\PYZus{}o}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{+} \PY{p}{(}\PY{n}{qdd}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{+} \PY{n}{qdd}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{2} \PY{o}{*} \PY{n}{dt}\PY{p}{;}
+        \PY{n}{end}
+        
+        \PY{n}{q\PYZus{}o} \PY{o}{=} \PY{n}{zeros}\PY{p}{(}\PY{n}{length}\PY{p}{(}\PY{n}{torque}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{6}\PY{p}{)}\PY{p}{;}
+        \PY{k}{for} \PY{n}{i}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{:}\PY{n}{length}\PY{p}{(}\PY{n}{torque}\PY{p}{)}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}
+            \PY{n}{q\PYZus{}o}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{=} \PY{n}{q\PYZus{}o}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{+} \PY{p}{(}\PY{n}{qd}\PY{p}{(}\PY{n}{i}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{p}{:}\PY{p}{)} \PY{o}{+} \PY{n}{qd}\PY{p}{(}\PY{n}{i}\PY{p}{,}\PY{p}{:}\PY{p}{)}\PY{p}{)}\PY{o}{/}\PY{l+m+mi}{2} \PY{o}{*} \PY{n}{dt}\PY{p}{;}
+        \PY{n}{end}
+        
+        \PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)}
+        \PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,}\PY{n}{q\PYZus{}o}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{q}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{q from integration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}
+        \PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,}\PY{n}{qd\PYZus{}o}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{qd}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{qdot from integration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{subplot}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}
+        \PY{n}{plot}\PY{p}{(}\PY{n}{t}\PY{p}{,}\PY{n}{qdd\PYZus{}o}\PY{p}{)}
+        \PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{t}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{qdd}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{qddot from integration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+
+    \includegraphics{attachment:q_int_plots3.jpg}
+\includegraphics{attachment:q_int_plots2.jpg}
+\includegraphics{attachment:q_int_plots1.jpg}
+
+    \textbf{(c) Check to see if both methods give the same values or not and
+report your findings. They should at least give very similar results.
+Turn in plots of results for both methods and code for part b).}
+
+    Both methods gave very similar results for the position and the
+velocity. However, acceleration turned out to be a bit different. It is
+interesting that the other two plots still turned out similar.
+
+
+    % Add a bibliography block to the postdoc
+    
+    
+    
+    \end{document}
