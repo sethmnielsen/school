@@ -21,6 +21,6 @@ for i in range(n):
     e = d - y     # error
 
     hhat = hhat + k * e  # update of estimated parameters
-    P = P - k * q @ P    # P update
+    P = P - k * q @ P    # P update1
 
 print('hhat:',hhat)
