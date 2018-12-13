@@ -1,0 +1,111 @@
+
+Review HTTP
+
+Web API Implementation
+	Javadocs for HttpServer
+	Ticket to Ride example
+	Server and Client
+	File Handler
+	
+JSON Generation/Parsing
+
+	GSON
+	
+	import com.google.gson.*;
+	
+	SomeClass anObject = new SomeClass();
+	
+	Gson gson = new Gson();
+	
+	// Convert object to JSON string
+	String jsonStr = gson.toJson(anObject);
+	
+	// Convert JSON string to object 
+	SomeClass anObjectCopy = gson.fromJson(jsonStr, SomeClass.class);
+	
+	
+	Dealing with InputStream's and OutputStream's
+		InputStream is a sequence of bytes that can be read (show Javadocs)
+		OutputStream is a sequence of bytes that can be written (show Javadocs)
+
+		Reader is a sequence of characters that can be read (show Javadocs)
+		Writer is a sequence of characters that can be written (show Javadocs)
+		
+		HTTP request bodies are accessed through Input/OutputStream's
+			1. OutputStream on client: HttpURLConnection.getOutputStream()			
+			2. InputStream on server: HttpExchange.getRequestBody()
+			
+		HTTP response bodies are accessed through Input/OutputStream's
+			1. OutputStream on server: HttpExchange.getResponseBody()
+			2. InputStream on client: HttpURLConnection.getInputStream()
+			
+		GSON can convert objects to and from Strings
+		It can also convert objects to and from Readers/Writer's
+		
+		Convert InputStream to Reader: InputStreamReader class
+		Convert OutputStream to Writer: OutputStreamWriter class
+	
+	
+	JSON Tasks
+		1. Reading/Writing web API Request and Result objects
+			a. How would you append a LoginRequest object to an HTTP request body?
+			
+			LoginRequest loginRequest = ...
+			Writer writer = new OutputStreamWriter(httpConn.getOutputStream());
+			String jsonStr = gson.toJson(loginRequest, writer);
+			
+			
+		2. Convert JSON string to web API Request or Result object
+			a. How would you read a LoginRequest object from an HTTP request body?
+			
+			Reader reader = new InputStreamReader(httpExch.getRequestBody());
+			LoginRequest loginRequest = gson.fromJson(reader, LoginRequest.class);	
+			
+			
+		3. Load provided JSON files for data generation
+			a. How would you parse the JSON data in the "locations.json" file?
+			
+			class Location {
+				String latitude;
+				String longitude;
+				String city;
+				String country;
+			}
+			
+			class LocationData {
+				Location[] data;
+			}
+			
+			Reader reader = new FileReader("locations.json");
+			LocationData locData = gson.fromJson(reader, LocationData.class);
+
+File Handler
+	Your server needs an HTTP handler that will serve up the HTML, CSS, and image
+		files for the web API test page.
+		
+	This handler is different than the web API method handlers, because it 
+		doesn't implement a web API.
+	
+	Rather, it simply returns files that are requested by a web browser.
+	
+	Your FileHandler should have a context of "/", which makes it the default
+		handler when no other handler context matches the requres URL
+	
+	In your project's root folder, create a sub-folder to store the web API test
+		files in the "web" folder in the project zip file
+	
+	When your FileHandler receives an HTTP request, it should do the following:
+		1. Retrieve the request URL from the HttpExchange
+		2. Translate the requet URL path to a physical file path on your server
+		3. Open the requested file, and return its contents in the HTTP 
+			response body
+
+		import java.nio.file.*;
+		
+		String filePathStr = "the/path/of/a/file";
+		Path filePath = FileSystems.getDefault().getPath(filePathStr);
+		Files.copy(filePath, httpExch.getResponseBody());
+		
+Writing Quality Code
+
+Writing test driver, shell script

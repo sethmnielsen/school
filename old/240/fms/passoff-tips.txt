@@ -1,0 +1,15 @@
+Your server will be tested as follows:
+	Registering a user
+	Registering the same user
+	Valid login
+	Invalid login
+	Getting the list of people
+	Getting the list of events
+	Shutting down the server and running the tests above
+	Clear
+	Load, followed by:
+		Login
+		Find specific person
+		Get all events
+	Trying to retrieve information that belongs to another user
+	Fill

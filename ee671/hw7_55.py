@@ -1,6 +1,6 @@
 import numpy as np
 
-m = 5  # number of parameters
+m = 3  # number of parameters
 n = 10  # iterations
 
 h = np.array([1,2,3,4,5])  # impulse response
@@ -18,7 +18,6 @@ q = np.zeros(m)
 
 for i in range(n):
     d = fn[i:i+5] @ h  # fn update
-    print(d)
     q = np.hstack((f[i],q[:-1]))  # q update
 
     k = P @ q / (1 + q.T @ P @ q)
