@@ -14,32 +14,40 @@ np.set_printoptions(precision=3)
 
 msd = msdDynamics()
 ctrl = msdController()
-reference = signalGenerator(amplitude=30*np.pi/180.0, frequency=0.05)
 
 # dataPlot = plotData()
 # animation = msdAnimation()
+reference = signalGenerator(amplitude=10, frequency=0.5)
 
 # u - input (f)
 # msd.outputs()[0]: z - true output (d)
 
 m = 3     # number of parameters (k, b, m)
-n = 10000  # iterations
+n = 100000  # iterations
 
 hhat = np.zeros(m)         # initial estimated parameters
 
-h = np.array([param.k, param.b, param.m])
-f = np.random.randn(n)     # normally-distributed random input
+h = np.array([param.b/param.m, param.k/param.m, 1/param.m])
+f = np.random.randn(n)*5 + 2.5     # normally-distributed random input
 fn = np.hstack(([0,0],f))  # convenience array used to shift through input (f)
 q = np.zeros(m)  # input data for one time step
-delta = .0001
+delta = .000001
 P = 1/delta * np.eye(m)  # initial P
+
+d_arr = np.zeros(n)
+y_arr = np.zeros(n)
+t_arr = np.zeros(n)
 
 t = param.t_start  # time starts at t_start
 for i in range(n):
+    ref_input = reference.sin(t)
+    msd.propagateDynamics(ref_input)  # Propagate the dynamics
     # msd.propagateDynamics([f[i]])  # Propagate the dynamics
-    # d = msd.outputs()[0]
-    d = fn[i:i+3] @ h
-    q = fn[i:i+3]
+    d = msd.outputs()[0]
+    # d = msd.states()
+    # d = fn[i:i+3] @ h
+    # q = fn[i:i+3]
+    q = np.hstack((ref_input[0],q[:-1]))  # q update
 
     k = P @ q / (1 + q.T @ P @ q)  # kalman gain vector
     y = q @ hhat  # filter output
@@ -48,6 +56,11 @@ for i in range(n):
     hhat = hhat + k * e  # update of estimated parameters
     P = P - k * q @ P    # P update
 
+    t_arr[i] = t
+    d_arr[i] = d
+    y_arr[i] = y
+
+    t = t + param.Ts  # advance time by Ts
 
     # d = fn[i:i+3] @ h  # true output
     # q = fn[i:i+m]      # q update
@@ -82,7 +95,29 @@ for i in range(n):
     # plt.pause(0.000001)  # the pause causes the figure to be displayed during the sim
 
 print('hhat:',hhat)
+print('h   :',h)
+print('d:', d)
+print('y:', y)
+print('states:', msd.states())
 # Keeps the program from closing until the user presses a button.
 # print('Press key to close')
-# plt.waitforbuttonpress()
-# plt.close()
+
+s = 0
+fig1 = plt.figure(dpi=150)
+plt.plot(t_arr[s:], d_arr[s:], label='d')
+plt.xlabel('t')
+plt.ylabel('d')
+
+fig2 = plt.figure(dpi=150)
+plt.plot(t_arr[s:], y_arr[s:], label='y')
+plt.xlabel('t')
+plt.ylabel('y')
+
+# fig3 = plt.figure(dpi=150)
+# plt.plot(t_arr[-s:], e_arr[-s:], label='e')
+# plt.xlabel('t')
+# plt.ylabel('e')
+
+plt.show()
+plt.waitforbuttonpress()
+plt.close()

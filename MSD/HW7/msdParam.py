@@ -11,7 +11,7 @@ radius = 0.5
 # Simulation Parameters
 t_start = 0.0;  # Start time of simulation
 t_end = 50.0;   # End time of simulation
-Ts = 0.05;      # sample time for simulation
+Ts = 0.01;      # sample time for simulation
 t_plot = 0.1;   # the plotting and animation is updated at this rate
 
 # parameters for animation
@@ -21,7 +21,7 @@ c = 1.5
 
 # Initial Conditions
 z0 = 0.0;
-zd0 = 0.0;
+zd0 = 1.0;
 
 # dirty derivative parameters
 sigma = 0.05  # cutoff freq for dirty derivative

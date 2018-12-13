@@ -73,4 +73,4 @@ class msdDynamics:
         '''
             Returns all current states as a list
         '''
-        return self.full_state.T.tolist()
+        return self.full_state
