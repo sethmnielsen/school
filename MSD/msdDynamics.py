@@ -26,6 +26,7 @@ class msdDynamics:
         self.k = P.k * (1+2*alpha*np.random.rand()-alpha)  # Spring constant, N/m
         self.b = P.b * (1+2*alpha*np.random.rand()-alpha)  # Damping coefficient, Ns
         self.Ts = P.Ts  # sample rate at which the dynamics are propagated
+        print('Ts = ', self.Ts)
 
     def propagateDynamics(self, u):
         '''
@@ -65,7 +66,7 @@ class msdDynamics:
         # re-label states for readability
         z = self.state.item(0)
         # add Gaussian noise to outputs
-        z_m = z + random.gauss(0, 0.01)
+        z_m = z + random.gauss(0, 0.00000001)
         # return measured outputs
         return [z_m]
 

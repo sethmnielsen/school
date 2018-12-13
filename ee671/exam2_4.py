@@ -19,6 +19,7 @@ q = np.zeros(m)
 t_vec = np.zeros(n)
 c_hvec = np.zeros((n,m))
 c_vec = np.zeros((n,m))
+u_vec = np.zeros(n)
 
 for k in range(n):
     t = k * Ts
@@ -35,6 +36,7 @@ for k in range(n):
 
     t_vec[k] = t
     c_hvec[k] = c_h
+    u_vec[k] = u
 
 print('c_h=\n',c_h)
 
@@ -42,6 +44,11 @@ print('c_h=\n',c_h)
 c_vec[:,0] = c[0]
 c_vec[:,1] = c[1]
 c_vec[:,2] = c[2]
+
+fig2 = plt.figure(dpi=150)
+plt.plot(t_vec, u_vec, label='a1_hat')
+plt.xlabel('t')
+plt.ylabel('u')
 
 fig = plt.figure(dpi=150)
 plt.plot(t_vec, c_hvec[:,0], label='a1_hat')
