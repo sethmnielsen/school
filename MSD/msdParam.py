@@ -19,7 +19,7 @@ c = 1.5
 
 # Initial Conditions
 z0 = 0.0;
-zd0 = 0.0;
+zd0 = 1.0;
 
 # dirty derivative parameters
 sigma = 0.05  # cutoff freq for dirty derivative

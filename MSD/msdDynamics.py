@@ -10,8 +10,10 @@ class msdDynamics:
 
     def __init__(self):
         # Initial state conditions
-        self.state = np.matrix([[P.z0],      # initial angle
-                                [P.zd0]])  # initial angular rate
+        self.state = np.matrix([[P.z0],      # initial position
+                                [P.zd0]])  # initial velocity
+
+        self.full_state = np.array([P.z0, P.zd0, 0.0])  # acceleration added
         #################################################
         # The parameters for any physical system are never known exactly.  Feedback
         # systems need to be designed to be robust to this uncertainty.  In the simulation
@@ -37,6 +39,8 @@ class msdDynamics:
         k3 = self.derivatives(self.state + self.Ts/2*k2, u)
         k4 = self.derivatives(self.state + self.Ts*k3, u)
         self.state += self.Ts/6 * (k1 + 2*k2 + 2*k3 + k4)
+        self.full_state[:2] = np.asarray(self.state).flatten()
+        self.full_state[2] = k4[1]
 
     def derivatives(self, state, u):
         '''
@@ -61,7 +65,7 @@ class msdDynamics:
         # re-label states for readability
         z = self.state.item(0)
         # add Gaussian noise to outputs
-        z_m = z + random.gauss(0, 0.00000000001)
+        z_m = z + random.gauss(0, 0.01)
         # return measured outputs
         return [z_m]
 
@@ -69,4 +73,4 @@ class msdDynamics:
         '''
             Returns all current states as a list
         '''
-        return self.state.T.tolist()[0]
+        return self.full_state.T.tolist()

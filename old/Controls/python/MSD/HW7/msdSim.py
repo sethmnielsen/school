@@ -23,8 +23,8 @@ animation = msdAnimation()
 t = P.t_start  # time starts at t_start
 while t < P.t_end:  # main simulation loop
     # Get referenced inputs from signal generators
-    # ref_input = reference.square(t)
-    ref_input = [1]
+    ref_input = reference.sin(t)
+    # ref_input = [1]
     # Propagate dynamics in between plot samples
     t_next_plot = t + P.t_plot
     while t < t_next_plot: # updates control and dynamics at faster simulation rate
