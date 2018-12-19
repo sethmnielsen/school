@@ -1,5 +1,5 @@
-import sys
-sys.path.append('..')  # add parent directory
+# import sys
+# sys.path.append('..')  # add parent directory
 import matplotlib.pyplot as plt
 import numpy as np
 import msdParam as P
@@ -14,14 +14,20 @@ sns.set_style("white")
 # instantiate msd, controller, and reference classes
 msd = msdDynamics()
 ctrl = msdController()
+reference = signalGenerator(amplitude=30*np.pi/180.0, frequency=0.05)
 
 # instantiate the simulation plots and animation
 dataPlot = plotData()
 animation = msdAnimation()
 
+# u - input
+# msd.states() - true output
+
 t = P.t_start  # time starts at t_start
 while t < P.t_end:  # main simulation loop
-    ref_input = [1]
+    # Get referenced inputs from signal generators
+    ref_input = reference.sin(t)
+    # ref_input = [1]
     # Propagate dynamics in between plot samples
     t_next_plot = t + P.t_plot
     while t < t_next_plot: # updates control and dynamics at faster simulation rate
@@ -31,7 +37,7 @@ while t < P.t_end:  # main simulation loop
     # update animation and data plots
     animation.drawmsd(msd.states())
     dataPlot.updatePlots(t, ref_input, msd.states(), u)
-    plt.pause(0.0001)  # the pause causes the figure to be displayed during the simulation
+    plt.pause(0.000001)  # the pause causes the figure to be displayed during the simulation
 
 # Keeps the program from closing until the user presses a button.
 print('Press key to close')

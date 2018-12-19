@@ -1,16 +1,16 @@
 import numpy as np
-import msdParamHW10 as P
-import sys
-sys.path.append('..')  # add parent directory
+import msdParamHW7 as P
+# import sys
+# sys.path.append('..')  # add parent directory
 import msdParam as P0
-from PIDControl import PIDControl
+from PDControl import PDControl
 
 
 class msdController:
 
     def __init__(self):
-        # Instantiates the PID object
-        self.zCtrl = PIDControl(P.kp, P.ki, P.kd, P0.F_max, P.beta, P.Ts)
+        # Instantiates the PD object
+        self.zCtrl = PDControl(P.kp, P.kd, P0.F_max, P.beta, P.Ts)
         self.limit = P0.F_max
 
     def u(self, y_r, y):
@@ -19,16 +19,11 @@ class msdController:
         z_r = y_r[0]
         z = y[0]
 
-        # print "z =", z
-
         # compute equilibrium Force Fe
         Fe = P0.k * z
 
-        # compute the linearized torque using PID
-        F_til = self.zCtrl.PID(z_r, z, True)
-
-        # print "Fe =",Fe
-        # print "F_til =",F_til
+        # compute the linearized torque using PD
+        F_til = self.zCtrl.PD(z_r, z, False)
 
         # compute total torque
         F = Fe + F_til

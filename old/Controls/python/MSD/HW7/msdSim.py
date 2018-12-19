@@ -34,7 +34,7 @@ while t < P.t_end:  # main simulation loop
     # update animation and data plots
     animation.drawmsd(msd.states())
     dataPlot.updatePlots(t, ref_input, msd.states(), u)
-    plt.pause(0.0001)  # the pause causes the figure to be displayed during the simulation
+    plt.pause(100.0)  # the pause causes the figure to be displayed during the simulation
 
 # Keeps the program from closing until the user presses a button.
 print('Press key to close')
