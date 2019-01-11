@@ -13,7 +13,6 @@ class msdDynamics:
         self.state = np.matrix([[P.z0],      # initial position
                                 [P.zd0]])  # initial velocity
 
-        self.full_state = np.array([P.z0, P.zd0, 0.0])  # acceleration added
         #################################################
         # The parameters for any physical system are never known exactly.  Feedback
         # systems need to be designed to be robust to this uncertainty.  In the simulation
@@ -21,12 +20,11 @@ class msdDynamics:
         # that represents alpha*100 % of the parameter, i.e., alpha = 0.2, means that the parameter
         # may change by up to 20%.  A different parameter value is chosen every time the simulation
         # is run.
-        alpha = 0.0  # Uncertainty parameter
+        alpha = 0.1  # Uncertainty parameter
         self.m = P.m * (1+2*alpha*np.random.rand()-alpha)  # Mass of the msd, kg
         self.k = P.k * (1+2*alpha*np.random.rand()-alpha)  # Spring constant, N/m
         self.b = P.b * (1+2*alpha*np.random.rand()-alpha)  # Damping coefficient, Ns
         self.Ts = P.Ts  # sample rate at which the dynamics are propagated
-        print('Ts = ', self.Ts)
 
     def propagateDynamics(self, u):
         '''
@@ -40,8 +38,6 @@ class msdDynamics:
         k3 = self.derivatives(self.state + self.Ts/2*k2, u)
         k4 = self.derivatives(self.state + self.Ts*k3, u)
         self.state += self.Ts/6 * (k1 + 2*k2 + 2*k3 + k4)
-        self.full_state[:2] = np.asarray(self.state).flatten()
-        self.full_state[2] = k4[1]
 
     def derivatives(self, state, u):
         '''
@@ -52,7 +48,7 @@ class msdDynamics:
         zd = state.item(1)
         tau = u[0]
 
-	# The equations of motion.
+	    # Equations of motion
         zdd = (tau - self.b*zd - self.k*z)/self.m
         # build xdot and return
         xdot = np.matrix([[zd], [zdd]])
@@ -61,12 +57,12 @@ class msdDynamics:
     def outputs(self):
         '''
             Returns the measured outputs as a list
-            [theta] with added Gaussian noise
+            [z] with added Gaussian noise
         '''
         # re-label states for readability
         z = self.state.item(0)
         # add Gaussian noise to outputs
-        z_m = z + random.gauss(0, 0.00000001)
+        z_m = z + random.gauss(0, 0.001)
         # return measured outputs
         return [z_m]
 
@@ -74,4 +70,4 @@ class msdDynamics:
         '''
             Returns all current states as a list
         '''
-        return self.full_state
+        return self.state.T.tolist()[0]
