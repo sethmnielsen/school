@@ -39,14 +39,15 @@ M(:,1) = calc_tau(q, qd, qdd1, rob) - G;
 M(:,2) = calc_tau(q, qd, qdd2, rob) - G;
 M(:,3) = calc_tau(q, qd, qdd3, rob) - G;
 
-M
-M_inertia = rob.inertia(q)
+M_inertia = rob.inertia(q);
 
 qd = [pi/6 -pi/4 pi/3];
 qdd = [-pi/6 pi/3 pi/6];
 
-Cqd = calc_tau(q, qd, qdd, rob) - G - M*qdd'
-Cqd_coriolis = rob.coriolis(q, qd) * qd'
+Cqd = calc_tau(q, qd, qdd, rob) - G - M*qdd';
+Cqd_coriolis = rob.coriolis(q, qd) * qd';
+
+taus = M*qdd' + Cqd + G
 
 function Torques = calc_tau(q, qd, qdd, rob)
     n = 3;
