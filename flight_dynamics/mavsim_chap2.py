@@ -1,14 +1,14 @@
 """
-mavSimPy 
+mavSimPy
     - Chapter 2 assignment for Beard & McLain, PUP, 2012
-    - Update history:  
+    - Update history:
         1/10/2019 - RWB
 """
 import sys
 sys.path.append('..')
 
 # import viewers and video writer
-#from chap2.spacecraft_viewer import spacecraft_viewer
+# from chap2.spacecraft_viewer import spacecraft_viewer
 from chap2.mav_viewer import mav_viewer
 from chap2.video_writer import video_writer
 
@@ -58,6 +58,3 @@ while sim_time < SIM.end_time:
 
 print("Press Ctrl-Q to exit...")
 if VIDEO == True: video.close()
-
-
-
