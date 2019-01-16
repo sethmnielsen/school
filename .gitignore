@@ -2,7 +2,6 @@
 *.mat
 *.m~
 *.pptx
-*.pyc
 *.bak
 *.ipynb_checkpoints
 .DS_Store
@@ -11,3 +10,5 @@
 *.odt
 *.jpg
 *.tex
+
+*__pycache__
