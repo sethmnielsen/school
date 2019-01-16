@@ -37,12 +37,12 @@ class mav_viewer():
             state.theta  # pitch angle
             state.psi  # yaw angle
         """
-        spacecraft_position = np.array([[state.pn], [state.pe], [-state.h]])  # NED coordinates
+        mav_position = np.array([[state.pn], [state.pe], [-state.h]])  # NED coordinates
         # attitude of spacecraft as a rotation matrix R from body to inertial
         R = self._Euler2Rotation(state.phi, state.theta, state.psi)
         # rotate and translate points defining spacecraft
         rotated_points = self._rotate_points(self.points, R)
-        translated_points = self._translate_points(rotated_points, spacecraft_position)
+        translated_points = self._translate_points(rotated_points, mav_position)
         # convert North-East Down to East-North-Up for rendering
         R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
         translated_points = R @ translated_points
