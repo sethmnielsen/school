@@ -35,8 +35,10 @@ sim_time = SIM.start_time
 # main simulation loop
 T = 2.5
 while sim_time < SIM.end_time:
+    print(sim_time)
     #-------vary states to check viewer-------------
     if sim_time < SIM.end_time/6:
+        print('hi')
         state.pn += 10*SIM.ts_simulation
     elif sim_time < 2*SIM.end_time/6:
         state.pe += 10*SIM.ts_simulation
