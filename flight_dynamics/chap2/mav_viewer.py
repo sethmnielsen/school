@@ -121,7 +121,7 @@ class mav_viewer():
                            [-fuse_l3, 0, -tail_h],  # point 16
                           ]).T
         # scale points for better rendering
-        scale = 10
+        scale = 30
         points = scale * points
 
         #   define the colors for each face of triangular mesh
@@ -132,16 +132,17 @@ class mav_viewer():
         meshColors = np.empty((13, 3, 4), dtype=np.float32)
         meshColors[0] = yellow  # front
         meshColors[1] = yellow  # front
-        meshColors[2] = blue  # back
-        meshColors[3] = blue  # back
+        meshColors[2] = yellow  # back
+        meshColors[3] = yellow  # back
         meshColors[4] = blue  # right
         meshColors[5] = blue  # right
         meshColors[6] = blue  # left
         meshColors[7] = blue  # left
-        meshColors[8] = blue  # top
-        meshColors[9] = blue  # top
+        meshColors[8] = red  # top
+        meshColors[9] = red  # top
         meshColors[10] = green  # bottom
         meshColors[11] = green  # bottom
+        meshColors[12] = green  # bottom
         return points, meshColors
 
     def _points_to_mesh(self, points):
@@ -151,19 +152,19 @@ class mav_viewer():
           (a rectangle requires two triangular mesh faces)
         """
         points=points.T
-        mesh = np.array([[points[1], points[2], points[3]],     # nose
-                         [points[1], points[2], points[5]],     # nose
-                         [points[1], points[3], points[4]],     # nose
-                         [points[1], points[4], points[5]],     # nose
-                         [points[6], points[2], points[3]],     # fuselage
-                         [points[6], points[3], points[4]],     # fuselage
-                         [points[6], points[4], points[5]],     # fuselage
-                         [points[2], points[5], points[2]],     # fuselage
-                         [points[7], points[8], points[9]],     # wing
-                         [points[7], points[9], points[10]],    # wing
-                         [points[11], points[12], points[13]],  # tailwing
-                         [points[11], points[13], points[14]],  # tailwing
-                         [points[6], points[15], points[16]],   # tail
+        mesh = np.array([[points[0], points[1], points[2]],     # nose
+                         [points[0], points[1], points[4]],     # nose
+                         [points[0], points[2], points[3]],     # nose
+                         [points[0], points[3], points[4]],     # nose
+                         [points[5], points[1], points[2]],     # fuselage
+                         [points[5], points[2], points[3]],     # fuselage
+                         [points[5], points[3], points[4]],     # fuselage
+                         [points[1], points[4], points[1]],     # fuselage
+                         [points[6], points[7], points[8]],     # wing
+                         [points[6], points[8], points[9]],    # wing
+                         [points[10], points[11], points[12]],  # tailwing
+                         [points[10], points[12], points[13]],  # tailwing
+                         [points[5], points[14], points[15]],   # tail
                          ])
         return mesh
 
