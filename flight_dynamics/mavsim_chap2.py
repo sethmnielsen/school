@@ -31,25 +31,50 @@ if VIDEO == True:
 
 # initialize the simulation time
 sim_time = SIM.start_time
+print("SIM.end_time/6:", SIM.end_time/6)
+def trans_rot(sim_time):
+    if sim_time < SIM.end_time/6:
+        # print(SIM.end_time/6)
+        print(sim_time)
+        state.pn += 10*SIM.ts_simulation
+    elif sim_time < 2*SIM.end_time/6:
+        # print(1)
+        state.pe += 10*SIM.ts_simulation
+    elif sim_time < 3*SIM.end_time/6:
+        # print(2)
+        state.h += 10*SIM.ts_simulation
+    elif sim_time < 4*SIM.end_time/6:
+        # print(3)
+        state.phi += 0.1*SIM.ts_simulation
+    elif sim_time < 5*SIM.end_time/6:
+        # print(4)
+        state.theta += 0.1*SIM.ts_simulation
+    else:
+        # print(5)
+        state.psi += 0.1*SIM.ts_simulation
+
+def rot_trans(sim_time):
+    if sim_time < SIM.end_time/6:
+        state.phi += 0.1*SIM.ts_simulation
+    elif sim_time < 2*SIM.end_time/6:
+        state.theta += 0.1*SIM.ts_simulation
+    elif sim_time < 3*SIM.end_time/6:
+        state.psi += 0.1*SIM.ts_simulation
+    elif sim_time < 4*SIM.end_time/6:
+        state.pn += 10*SIM.ts_simulation
+    elif sim_time < 5*SIM.end_time/6:
+        state.pe += 10*SIM.ts_simulation
+    else:
+        state.h += 10*SIM.ts_simulation
+
 
 # main simulation loop
 T = 2.5
 while sim_time < SIM.end_time:
-    print(sim_time)
     #-------vary states to check viewer-------------
-    if sim_time < SIM.end_time/6:
-        print('hi')
-        state.pn += 10*SIM.ts_simulation
-    elif sim_time < 2*SIM.end_time/6:
-        state.pe += 10*SIM.ts_simulation
-    elif sim_time < 3*SIM.end_time/6:
-        state.h += 10*SIM.ts_simulation
-    elif sim_time < 4*SIM.end_time/6:
-        state.phi += 0.1*SIM.ts_simulation
-    elif sim_time < 5*SIM.end_time/6:
-        state.theta += 0.1*SIM.ts_simulation
-    else:
-        state.psi += 0.1*SIM.ts_simulation
+    # print(sim_time)
+    trans_rot(sim_time)
+    # rot_trans(sim_time)
 
     #-------update viewer and video-------------
     mav_view.update(state)
