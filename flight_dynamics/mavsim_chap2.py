@@ -73,6 +73,7 @@ T = 2.5
 while sim_time < SIM.end_time:
     #-------vary states to check viewer-------------
     # print(sim_time)
+    
     trans_rot(sim_time)
     # rot_trans(sim_time)
 
