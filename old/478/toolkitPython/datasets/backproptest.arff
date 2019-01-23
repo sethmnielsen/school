@@ -1,9 +1,0 @@
-@RELATION animal-or-pokemon
-
-@ATTRIBUTE superpowers       {0, 1}
-@ATTRIBUTE lives-in-pokeball {0, 1}
-@ATTRIBUTE class             {pokemon, animal}
-
-@DATA
-0, 0, animal
-0, 1, pokemon
