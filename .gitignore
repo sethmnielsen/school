@@ -1,4 +1,3 @@
-*.pdf
 *.mat
 *.m~
 *.pptx
@@ -7,8 +6,7 @@
 .DS_Store
 
 *sigsys/
-*.odt
-*.jpg
 *.tex
 
 *__pycache__
+old
