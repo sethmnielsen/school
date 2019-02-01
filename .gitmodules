@@ -1,0 +1,3 @@
+[submodule "flight_dynamics"]
+	path = flight_dynamics
+	url = git@github.com:sethmnielsen/mavsim_template_files.git
