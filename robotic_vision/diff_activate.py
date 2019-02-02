@@ -1,25 +1,24 @@
 import cv2
 import numpy as np
 
-video = cv2.VideoCapture(0)
+from IPython.core.debugger import Pdb
+
+video = cv2.VideoCapture('./ECEn_631_Group_1-master/media/chex.avi')
 
 n = 0
-i = 50
-output = np.array([])
+i = 0
 frame = np.array([])
 prev_frame = np.array([])
 write = False
 fourCC = cv2.VideoWriter_fourcc(*'MPEG')
 while 1:
-    prev_frame = frame
     ret, frame = video.read()
+    prev_frame = frame
     gscale = cv2.cvtColor( frame, cv2.COLOR_BGR2GRAY )
 
-    elif n == 4:
-        diff = cv2.absdiff(frame, prev_frame)
-        output = diff
+    diff = cv2.absdiff(frame, prev_frame)
 
-    cv2.imshow('Window', output)
+    cv2.imshow('Window', diff)
 
     key = cv2.waitKey(5)
     if key == ord('q'):
