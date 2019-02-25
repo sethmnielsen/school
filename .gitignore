@@ -4,6 +4,8 @@
 *.bak
 *.ipynb_checkpoints
 .DS_Store
+*.bmp
+*.jpg
 
 *sigsys/
 *.tex
