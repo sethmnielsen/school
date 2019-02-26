@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import glob
+import pickle as pkl
 from IPython.core.debugger import Pdb
 
 np.set_printoptions(suppress=True)
@@ -38,15 +39,14 @@ def calibrationMono(img_files, param_file):
     shape_arr = np.asarray(shape)
     objpoints_arr = np.asarray(objpoints)
     imgpoints_arr = np.asarray(imgpoints)
-    fs_write = cv2.FileStorage(param_file, cv2.FILE_STORAGE_WRITE)
-    fs_write.write("mtx", mtx)
-    fs_write.write("dist", dist)
-    fs_write.write("objpoints", objpoints_arr)
-    fs_write.write("imgpoints", imgpoints_arr)
-    fs_write.write("shape", shape_arr)
-    fs_write.release()
+    with open(param_file, 'wb') as f:
+        data = [mtx, dist, objpoints, imgpoints, shape]
+        pkl.dump(data, f)
 
-
-
-calibrationMono('./3/my_imgs/stereo/stereoL*.bmp', 'left_cam.yaml')
-calibrationMono('./3/my_imgs/stereo/stereoR*.bmp', 'right_cam.yaml')
+print("Calibrating left camera...")
+calibrationMono('./3/my_imgs/stereo/stereoL*.bmp', './3/left_cam.pkl')
+print("Done!")
+print("Calibrating right camera...")
+calibrationMono('./3/my_imgs/stereo/stereoR*.bmp', './3/right_cam.pkl')
+print("Done!")
+print("Pickle files successfully written")
