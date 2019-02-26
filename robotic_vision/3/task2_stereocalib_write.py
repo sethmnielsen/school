@@ -35,26 +35,18 @@ def calibrationMono(img_files, param_file):
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,
                                                        shape, None, None)
 
-    fs_write = cv2.FileStorage('camera_param.yaml', cv2.FILE_STORAGE_WRITE)
+    shape_arr = np.asarray(shape)
+    objpoints_arr = np.asarray(objpoints)
+    imgpoints_arr = np.asarray(imgpoints)
+    fs_write = cv2.FileStorage(param_file, cv2.FILE_STORAGE_WRITE)
     fs_write.write("mtx", mtx)
     fs_write.write("dist", dist)
-    fs_write.write("objpoints", dist)
-    fs_write.write("shape", shape".."A)
+    fs_write.write("objpoints", objpoints_arr)
+    fs_write.write("imgpoints", imgpoints_arr)
+    fs_write.write("shape", shape_arr)
     fs_write.release()
 
-    return imgpoints, ret, mtx, dist, objpoints, shape
 
 
-imgpoints_L, ret, mtxL, distL, _, shape = calibrationMono('./3/my_imgs/stereo/stereoL*.bmp', 'left_cam.yaml')
-imgpoints_R, ret, mtxR, distR, objpoints, _ = calibrationMono('./3/my_imgs/stereo/stereoR*.bmp', 'right_cam.yaml')
-
-
-# Pdb().set_trace()
-retval, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = \
-    cv2.stereoCalibrate(objpoints, imgpoints_L, imgpoints_R, mtxL, distL, mtxR, distR, shape,
-    flags=cv2.CALIB_FIX_INTRINSIC)
-
-print('R:\n', R)
-print('T:\n', T)
-print('E:\n', E)
-print('F:\n', F)
+calibrationMono('./3/my_imgs/stereo/stereoL*.bmp', 'left_cam.yaml')
+calibrationMono('./3/my_imgs/stereo/stereoR*.bmp', 'right_cam.yaml')

@@ -5,46 +5,31 @@ from IPython.core.debugger import Pdb
 
 np.set_printoptions(suppress=True)
 
-def calibrationMono(filenames):
-    w = 10
-    h = 7
+fs_readL = cv2.FileStorage('./3/left_cam.yaml', cv2.FILE_STORAGE_READ)
+mtxL = fs_readL.getNode('mtx').mat()
+distL = fs_readL.getNode('dist').mat()
+objpoints = fs_readL.getNode('objpoints').mat().aslist()
+imgpoints_L = fs_readL.getNode('imgpoints').mat().aslist()
+shape_arr = fs_readL.getNode('shape').mat()
+shape = (shape_arr[0], shape_arr[1])
+fs_readL.release()
 
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1e-5)
-    objp = np.zeros((w*h,3), np.float32)
-    objp[:,:2] = np.mgrid[0:w,0:h].T.reshape(-1,2) * 3.88636
-    
-    objpoints = []  # 3d points in real world space
-    imgpoints = []  # 2d points in image plane
-    images = sorted(glob.glob(filenames))
-    for file in images:
-        img = cv2.imread(file)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-        ret, corners = cv2.findChessboardCorners(gray, (w,h), None)
-
-        objpoints.append(objp)
-
-        corners = cv2.cornerSubPix(gray, corners, (w,h), (-1,-1), criteria)
-        imgpoints.append(corners)
-        cv2.drawChessboardCorners(img, (w,h), corners, ret)
-
-        cv2.imshow('img', img)
-        cv2.waitKey(100)
-
-    shape = gray.shape[::-1]
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,
-                                                       shape, None, None)
-
-    return imgpoints, ret, mtx, dist, rvecs, tvecs, objpoints, shape
-
-
-imgpoints_L, ret, mtxL, distL, rvecsL, tvecsL, _, shape = calibrationMono('./3/my_imgs/stereo/stereoL*.bmp')
-imgpoints_R, ret, mtxR, distR, rvecsR, tvecsR, objpoints, _ = calibrationMono('./3/my_imgs/stereo/stereoR*.bmp')
+fs_readR = cv2.FileStorage('./3/right_cam.yaml', cv2.FILE_STORAGE_READ)
+mtxR = fs_readR.getNode('mtx').mat()
+distR = fs_readR.getNode('dist').mat()
+imgpoints_L = fs_readR.getNode('imgpoints').mat().aslist()
+fs_readR.release()
 
 # Pdb().set_trace()
 retval, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = \
     cv2.stereoCalibrate(objpoints, imgpoints_L, imgpoints_R, mtxL, distL, mtxR, distR, shape,
     flags=cv2.CALIB_FIX_INTRINSIC)
+
+fs_write = cv2.FileStorage('RTEF.yaml', cv2.FILE_STORAGE_WRITE)
+fs_write.write('R', R)
+fs_write.write('T', T)
+fs_write.write('E', E)
+fs_write.write('F', F)
 
 print('R:\n', R)
 print('T:\n', T)
