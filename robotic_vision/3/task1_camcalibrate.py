@@ -29,7 +29,6 @@ for file in images:
     imgpoints.append(corners)
     cv2.drawChessboardCorners(img, (w,h), corners, ret)
 
-    print(file)
     cv2.imshow('img', img)
     cv2.waitKey(1000)
 

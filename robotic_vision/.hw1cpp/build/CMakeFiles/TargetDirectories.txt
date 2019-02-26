@@ -1,4 +1,0 @@
-/home/seth/school/robotic_vision/hw1/build/CMakeFiles/edit_cache.dir
-/home/seth/school/robotic_vision/hw1/build/CMakeFiles/live_video.dir
-/home/seth/school/robotic_vision/hw1/build/CMakeFiles/rebuild_cache.dir
-/home/seth/school/robotic_vision/hw1/build/CMakeFiles/feature_detect.dir
