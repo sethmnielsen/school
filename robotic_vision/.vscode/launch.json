@@ -13,8 +13,8 @@
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },
-            "console": "none",
-            "debugStdLib": true
+            "console": "integratedTerminal",
+            "debugStdLib": false
         },
         {
             "name": "Python: Remote Attach",

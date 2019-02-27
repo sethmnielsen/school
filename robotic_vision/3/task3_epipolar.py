@@ -23,7 +23,7 @@ def drawlines(img1,img2,lines,pts1,pts2):
     lines - corresponding epilines 
     '''
     r, c, ch = img1.shape
-    color = (200,50,255)
+    color = tuple(np.random.randint(0,255,3).tolist())
     for line,pt1,pt2 in zip(lines,pts1,pts2):
         line = line.flatten()
         x0,y0 = map(int, [0, -line[2]/line[1] ])
@@ -65,8 +65,8 @@ for ptL, ptR in zip(ptsL, ptsR):
 linesL = cv2.computeCorrespondEpilines(ptsL, 1, F)
 linesR = cv2.computeCorrespondEpilines(ptsR, 1, F)
 
-imgL, imgR = drawlines(img_undstL, img_undstR, linesL, ptsL, ptsR)
-imgR, imgL = drawlines(imgR, imgL, linesR, ptsR, ptsL)
+imgL, imgR = drawlines(img_undstL, img_undstR, linesL, ptsR, ptsL)
+# imgR, imgL = drawlines(imgR, imgL, linesL, ptsL, ptsR)
 
 cv2.imshow('imgL', imgL)
 cv2.imshow('imgR', imgR)

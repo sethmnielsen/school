@@ -20,7 +20,7 @@ def calibrationMono(img_files, param_file):
     count = 0
     for file in images:
         count += 1
-        if count % 3 != 0:
+        if count % 3 == 0:
             continue
         img = cv2.imread(file)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
