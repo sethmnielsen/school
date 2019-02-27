@@ -9,7 +9,12 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "cwd": "${workspaceRoot}",      
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}"
+            },
+            "console": "none",
+            "debugStdLib": true
         },
         {
             "name": "Python: Remote Attach",

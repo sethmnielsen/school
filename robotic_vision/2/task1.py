@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('./calibration_imgs/AR1.jpg')
+img = cv2.imread('./2/calibration_imgs/AR1.jpg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 ret, corners = cv2.findChessboardCorners(gray, (10,7), None)

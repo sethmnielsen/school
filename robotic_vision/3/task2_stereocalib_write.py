@@ -44,9 +44,9 @@ def calibrationMono(img_files, param_file):
         pkl.dump(data, f)
 
 print("Calibrating left camera...")
-calibrationMono('./3/my_imgs/stereo/stereoL*.bmp', './3/left_cam.pkl')
+calibrationMono('./3/my_imgs/left/leftL*.bmp', './3/left_cam.pkl')
 print("Done!")
 print("Calibrating right camera...")
-calibrationMono('./3/my_imgs/stereo/stereoR*.bmp', './3/right_cam.pkl')
+calibrationMono('./3/my_imgs/right/rightR*.bmp', './3/right_cam.pkl')
 print("Done!")
 print("Pickle files successfully written")
