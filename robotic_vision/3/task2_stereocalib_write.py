@@ -17,7 +17,11 @@ def calibrationMono(img_files, param_file):
     objpoints = []  # 3d points in real world space
     imgpoints = []  # 2d points in image plane
     images = sorted(glob.glob(img_files))
+    count = 0
     for file in images:
+        count += 1
+        if count % 3 != 0:
+            continue
         img = cv2.imread(file)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -36,9 +40,6 @@ def calibrationMono(img_files, param_file):
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,
                                                        shape, None, None)
 
-    shape_arr = np.asarray(shape)
-    objpoints_arr = np.asarray(objpoints)
-    imgpoints_arr = np.asarray(imgpoints)
     with open(param_file, 'wb') as f:
         data = [mtx, dist, objpoints, imgpoints, shape]
         pkl.dump(data, f)
