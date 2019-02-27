@@ -26,7 +26,7 @@ def createImgPoints(img_files):
 
         objpoints.append(objp)
         
-        corners = cv2.cornerSubPix(gray, corners, (5,5), (-1,-1), criteria)
+        corners = cv2.cornerSubPix(gray, corners, (w,h), (-1,-1), criteria)
         imgpoints.append(corners)
         cv2.drawChessboardCorners(img, (w,h), corners, ret)
 
@@ -53,9 +53,7 @@ retval, cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, R, T, E, F = \
     flags=cv2.CALIB_FIX_INTRINSIC)
 
 print("Done!")
-
 print("\nWriting RTEF pickle file...")
-
 with open("./3/RTEF.pkl", 'wb') as f:
     data = [R, T, E, F]
     pkl.dump(data, f)

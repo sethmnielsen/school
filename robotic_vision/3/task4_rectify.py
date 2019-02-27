@@ -3,6 +3,8 @@ import numpy as np
 import pickle as pkl
 from IPython.core.debugger import Pdb
 
+np.set_printoptions(suppress=True)
+
 def findCorners(img):
     size = (10,7)
     flgs = cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE
@@ -16,7 +18,7 @@ def drawLines(img):
     color = (0,0,255)
     x1, x2 = 0, 640
     for pt in pts:
-        cv2.line(img, (x1, pt[1]), (x2, pt[1]), color, 3)
+        cv2.line(img, (x1, pt[1]), (x2, pt[1]), color, 2)
     
 def read_files(img_file, param_file):
     img = cv2.imread(img_file)
@@ -36,8 +38,9 @@ def rectify(img, mtx, dist, Rx, Px):
 
     return output, diff
 
-left_img_file  = './3/my_imgs/stereo/stereoL40.bmp'
-right_img_file = './3/my_imgs/stereo/stereoR40.bmp'
+num = 40
+left_img_file  = './3/my_imgs/stereo/stereoL{}.bmp'.format(num)
+right_img_file = './3/my_imgs/stereo/stereoR{}.bmp'.format(num)
 left_params = './3/left_cam.pkl'
 right_params = './3/right_cam.pkl'
 

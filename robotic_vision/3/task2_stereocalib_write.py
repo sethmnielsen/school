@@ -13,6 +13,7 @@ def calibrationMono(img_files, param_file):
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     objp = np.zeros((w*h,3), np.float32)
     objp[:,:2] = np.mgrid[0:w,0:h].T.reshape(-1,2) * 3.88636
+    # objp[:,:2] = np.mgrid[0:w,0:h].T.reshape(-1,2) * 2.0
     
     objpoints = []  # 3d points in real world space
     imgpoints = []  # 2d points in image plane
@@ -26,7 +27,7 @@ def calibrationMono(img_files, param_file):
 
         objpoints.append(objp)
 
-        corners = cv2.cornerSubPix(gray, corners, (5,5), (-1,-1), criteria)
+        corners = cv2.cornerSubPix(gray, corners, (w,h), (-1,-1), criteria)
         imgpoints.append(corners)
         cv2.drawChessboardCorners(img, (w,h), corners, ret)
 
@@ -40,9 +41,15 @@ def calibrationMono(img_files, param_file):
     with open(param_file, 'wb') as f:
         data = [mtx, dist, objpoints, imgpoints, shape]
         pkl.dump(data, f)
+    
+    print('\nmtx:', mtx)
+    print('dist:', dist)
+    # print('objpoints:', objpoints)
+    # print('imgpoints:', imgpoints)
 
 print("Calibrating right camera...")
 calibrationMono('./3/my_imgs/right/rightR*.bmp', './3/right_cam.pkl')
+# calibrationMono('./3/right_camera_practice/CameraR*.bmp', './3/right_cam.pkl')
 print("Done!")
 print("Calibrating left camera...")
 calibrationMono('./3/my_imgs/left/leftL*.bmp', './3/left_cam.pkl')

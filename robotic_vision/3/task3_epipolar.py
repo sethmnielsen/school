@@ -58,7 +58,6 @@ for ptL, ptR in zip(ptsL, ptsR):
     cv2.circle(imgL, tuple(ptL), 10, colorL)
     cv2.circle(imgR, tuple(ptR), 10, colorR)
 
-# lines = np.zeros(3)
 linesL = cv2.computeCorrespondEpilines(ptsL, 1, F)
 linesR = cv2.computeCorrespondEpilines(ptsR, 1, F)
 
