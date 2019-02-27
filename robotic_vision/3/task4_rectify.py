@@ -13,10 +13,10 @@ def findCorners(img):
 
 def drawLines(img):
     pts = findCorners(img)
-    color = (255,0,0)
+    color = (0,0,255)
     x1, x2 = 0, 640
     for pt in pts:
-        cv2.line(img, (x1, pt.y), (x2, pt.y), color)
+        cv2.line(img, (x1, pt[1]), (x2, pt[1]), color, 3)
     
 def read_files(img_file, param_file):
     img = cv2.imread(img_file)
@@ -27,18 +27,17 @@ def read_files(img_file, param_file):
 
     return gray, mtx, dist
 
-def rectify(img, mtx, dist, R1, P1):
-    map1, map2 = cv2.initUndistortRectifyMap(mtx, dist, R1, P1, img.shape, cv2.CV_32FC1)
+def rectify(img, mtx, dist, Rx, Px):
+    map1, map2 = cv2.initUndistortRectifyMap(mtx, dist, Rx, Px, img.shape[::-1], cv2.CV_32FC1)
     output = cv2.remap(img, map1, map2, cv2.INTER_LINEAR)
-    # cv2.imshow("hi", output)
-    # cv2.waitKey(0)
     diff = cv2.absdiff(img, output)
-    drawLines(img)
+    output = cv2.cvtColor(output, cv2.COLOR_GRAY2BGR)
+    drawLines(output)
 
     return output, diff
 
-left_img_file  = './3/my_imgs/stereo/stereoL80.bmp'
-right_img_file = './3/my_imgs/stereo/stereoR80.bmp'
+left_img_file  = './3/my_imgs/stereo/stereoL40.bmp'
+right_img_file = './3/my_imgs/stereo/stereoR40.bmp'
 left_params = './3/left_cam.pkl'
 right_params = './3/right_cam.pkl'
 
@@ -48,10 +47,10 @@ imgR, mtxR, distR = read_files(right_img_file, right_params)
 with open('./3/RTEF.pkl', 'rb') as f:
     R, T, E, F = pkl.load(f)
 
-R1, R2, P1, P2, Q, _, _ = cv2.stereoRectify(mtxL, distL, mtxR, distR, imgL.shape, R, T)
+R1, R2, P1, P2, Q, _, _ = cv2.stereoRectify(mtxL, distL, mtxR, distR, imgL.shape[::-1], R, T)
 
 outputL, diffL = rectify(imgL, mtxL, distL, R1, P1)
-outputR, diffR = rectify(imgR, mtxR, distR, R1, P1)
+outputR, diffR = rectify(imgR, mtxR, distR, R2, P2)
 
 cv2.imshow('imgL', imgL)
 cv2.imshow('outputL', outputL)

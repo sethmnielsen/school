@@ -17,24 +17,19 @@ def findCorners(imgL, imgR):
     return ptsL, ptsR
     
 
-def drawlines(img1,img2,lines,pts1,pts2):
+def drawlines(img, lines, color):
     ''' 
-    img1 - image on which we draw the epilines for the points in img2
+    img - image on which we draw the epilines for the points in img2
     lines - corresponding epilines 
     '''
-    r, c, ch = img1.shape
-    color = tuple(np.random.randint(0,255,3).tolist())
-    for line,pt1,pt2 in zip(lines,pts1,pts2):
+    r, c, ch = img.shape
+    # color = tuple(np.random.randint(0,255,3).tolist())
+    for line in lines:
         line = line.flatten()
         x0,y0 = map(int, [0, -line[2]/line[1] ])
         x1,y1 = map(int, [c, -(line[2]+line[0]*c)/line[1] ])
-        # Pdb().set_trace()
-        cv2.line(img1, (x0,y0), (x1,y1), color,1)
-  
-        cv2.circle(img1,tuple(pt1),5,color,-1)
-        cv2.circle(img2,tuple(pt2),5,color,-1)
-  
-    return img1, img2
+        cv2.line(img, (x0,y0), (x1,y1), color,1)
+    return img
 
 
 num = 25
@@ -52,26 +47,28 @@ imgL = cv2.imread('./3/my_imgs/stereo/stereoL{}.bmp'.format(num))
 imgR = cv2.imread('./3/my_imgs/stereo/stereoR{}.bmp'.format(num))
 
 # Distortion correction
-img_undstL = cv2.undistort(imgL, mtxL, distL)
-img_undstR = cv2.undistort(imgR, mtxR, distR)
+imgL = cv2.undistort(imgL, mtxL, distL)
+imgR = cv2.undistort(imgR, mtxR, distR)
 
-ptsL, ptsR = findCorners(img_undstL, img_undstR)
+ptsL, ptsR = findCorners(imgL, imgR)
 
+colorL = (0,0,255)
+colorR = (255,0,0)
 for ptL, ptR in zip(ptsL, ptsR):
-    cv2.circle(img_undstL, tuple(ptL), 10, (0, 0, 255))
-    cv2.circle(img_undstR, tuple(ptR), 10, (0, 0, 255))
+    cv2.circle(imgL, tuple(ptL), 10, colorL)
+    cv2.circle(imgR, tuple(ptR), 10, colorR)
 
 # lines = np.zeros(3)
 linesL = cv2.computeCorrespondEpilines(ptsL, 1, F)
 linesR = cv2.computeCorrespondEpilines(ptsR, 1, F)
 
-imgL, imgR = drawlines(img_undstL, img_undstR, linesL, ptsR, ptsL)
-# imgR, imgL = drawlines(imgR, imgL, linesL, ptsL, ptsR)
+drawlines(imgL, linesR, colorR)
+drawlines(imgR, linesL, colorL)
 
-cv2.imshow('imgL', imgL)
-cv2.imshow('imgR', imgR)
-cv2.waitKey(0)
+# cv2.imshow('imgL', imgL)
+# cv2.imshow('imgR', imgR)
+# cv2.waitKey(0)
 
-# plt.subplot(121),plt.imshow(imgL)
-# plt.subplot(122),plt.imshow(imgR)
-# plt.show()
+plt.subplot(121),plt.imshow(imgL)
+plt.subplot(122),plt.imshow(imgR)
+plt.show()
