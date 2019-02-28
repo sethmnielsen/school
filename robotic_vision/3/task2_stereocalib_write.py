@@ -44,12 +44,10 @@ def calibrationMono(img_files, param_file):
     
     print('\nmtx:', mtx)
     print('dist:', dist)
-    # print('objpoints:', objpoints)
-    # print('imgpoints:', imgpoints)
+
 
 print("Calibrating right camera...")
 calibrationMono('./3/my_imgs/right/rightR*.bmp', './3/right_cam.pkl')
-# calibrationMono('./3/right_camera_practice/CameraR*.bmp', './3/right_cam.pkl')
 print("Done!")
 print("Calibrating left camera...")
 calibrationMono('./3/my_imgs/left/leftL*.bmp', './3/left_cam.pkl')

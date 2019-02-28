@@ -43,6 +43,11 @@ with open("./3/left_cam.pkl", 'rb') as f:
 with open("./3/right_cam.pkl", 'rb') as f:
     mtxR, distR, _, _, _ = pkl.load(f)
 
+print('Left intrinsic params:\n', mtxL)
+print('Left distortion coeff:\n', distL)
+print('Right intrinsic params:\n', mtxR)
+print('Right distortion coeff:\n', distR)
+
 imgpoints_L, objpoints, shape = createImgPoints('./3/my_imgs/stereo/stereoL*.bmp')
 imgpoints_R, objpoints, shape = createImgPoints('./3/my_imgs/stereo/stereoR*.bmp')
 

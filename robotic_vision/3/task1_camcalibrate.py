@@ -15,7 +15,7 @@ objp[:,:2] = np.mgrid[0:w,0:h].T.reshape(-1,2)
 objpoints = []  # 3d points in real world space
 imgpoints = []  # 2d points in image plane
 
-images = sorted(glob.glob('./3/imgs_catcher/imageL*.bmp'))
+images = sorted(glob.glob('./3/my_imgs/imageL*.bmp'))
 
 for file in images:
     img = cv2.imread(file)
