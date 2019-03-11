@@ -5,16 +5,10 @@
 using namespace std;
 
 struct CamData {
-    cv::Mat img_raw;
-    cv::Mat img_gray;
-    cv::Mat mtx;
-    cv::Mat dist;
-    vector<cv::Point2f> pts;
-    vector<cv::Point3f> output_pts;
-    cv::Mat R;
-    cv::Mat P;
-    vector<cv::Point3f> persp;
-    cv::Mat 
+    string name;
+    cv::Mat img, mtx, dist, R, P;
+    vector<cv::Point2f> pts, output_pts;
+    vector<cv::Point3f> persp, pts_3d;
 };
 
 void chessboard(CamData &cam, string param_file)
@@ -24,43 +18,66 @@ void chessboard(CamData &cam, string param_file)
     cv::TermCriteria criteria(cv::TermCriteria::EPS + 
                               cv::TermCriteria::MAX_ITER, 30, 0.001);
 
-    cv::cvtColor(cam.img_raw, cam.img_gray, cv::COLOR_BGR2GRAY);
+    cv::Mat gray;
+    cv::cvtColor(cam.img, gray, cv::COLOR_BGR2GRAY);
     vector<cv::Point2f> corners;
     int flags(cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
-    bool success = cv::findChessboardCorners(cam.img_gray, chess_size, corners, flags);
-    cv::cornerSubPix(cam.img_gray, corners, cv::Size(5,5), cv::Size(-1,-1), criteria);
+    bool success = cv::findChessboardCorners(gray, chess_size, corners, flags);
+    cv::cornerSubPix(gray, corners, cv::Size(5,5), cv::Size(-1,-1), criteria);
     
     cv::FileStorage fin(param_file, cv::FileStorage::READ);
     fin["mtx"] >> cam.mtx;
     fin["dist"] >> cam.dist;
     fin.release();
 
-    vector<cv::Point2f> pts{corners[0], corners[9], corners[69], corners[60]};
-    for(int i=0; i < 4; i++) 
-    {
-        cam.pts.push_back(pts[i]);
-    }
+    vector<cv::Point2f> pts{corners[0], corners[9], corners[60], corners[69]};
+    for(int i=0; i < 4; i++) { cam.pts.push_back(pts[i]); }
 }
 
-void undistort(CamData &cam, CamData cam2, cv::Mat Q)
+void calc_3dpoints(CamData &cam, CamData cam2, cv::Mat Q)
 {
-    cv::undistortPoints(cam.pts, cam.output_pts, cam.mtx, cam.dist, cam.R, cam.P);
-
+    CamData camL, camR;
+    if(cam.name.compare("Left")) {
+        camL = cam;
+        camR = cam2;
+    }
+    else {
+        camL = cam2;
+        camR = cam;
+    }
     for(int i=0; i < cam.output_pts.size(); i++)
     {
         cv::Point3f pt(cam.output_pts[i].x, cam.output_pts[i].y, 
-                       cam.output_pts[i].x - cam2.output_pts[i].x);
+                       camR.output_pts[i].x - camL.output_pts[i].x);
         cam.persp.push_back(pt);
     }
 
-    cv::perspectiveTransform(cam.persp, )
+    cv::perspectiveTransform(cam.persp, cam.pts_3d, Q);
+
+    cout << cam.name << " pts:\n" << cam.pts_3d[0] << endl
+                                  << cam.pts_3d[1] << endl
+                                  << cam.pts_3d[2] << endl
+                                  << cam.pts_3d[3] << "\n\n";
+}
+
+void draw_circles(CamData &cam)
+{
+    for(int i=0; i < cam.pts_3d.size(); i++)
+    {
+        cv::circle(cam.img, cv::Point2f(cam.pts[i].x, cam.pts[i].y), 
+                   5, cv::Scalar(0,0,255), 2, 8);
+
+    }
+    cv::imshow(cam.name, cam.img);
 }
 
 int main() 
 {
     CamData camL, camR;
-    camL.img_raw = cv::imread("../3/my_imgs/stereo/stereoL26.bmp");
-    camR.img_raw = cv::imread("../3/my_imgs/stereo/stereoR26.bmp");
+    camL.name = "Left";
+    camR.name = "Right";
+    camL.img = cv::imread("../3/my_imgs/stereo/stereoL26.bmp");
+    camR.img = cv::imread("../3/my_imgs/stereo/stereoR26.bmp");
     string param_fileL{"./left_cam.yaml"};
     string param_fileR{"./right_cam.yaml"};
     
@@ -78,13 +95,19 @@ int main()
     fin.release();
     
     // Rectification params
-    cv::Mat Q;
-    cv::stereoRectify(camL.mtx, camL.dist, camR.mtx, camR.dist, camL.img_raw.size(), 
-                      R, T, camL.R, camR.R, camL.P, camR.P, Q);
+    cv::Mat R1, R2, P1, P2, Q;
+    cv::stereoRectify(camL.mtx, camL.dist, camR.mtx, camR.dist, camL.img.size(), 
+                      R, T, R1, R2, P1, P2, Q);
 
-    undistort(camL, camR, Q);
-    undistort(camR, camL, Q);
+    cv::undistortPoints(camL.pts, camL.output_pts, camL.mtx, camL.dist, R1, P1);
+    cv::undistortPoints(camR.pts, camR.output_pts, camR.mtx, camR.dist, R2, P2);
+    calc_3dpoints(camL, camR, Q);
+    calc_3dpoints(camR, camL, Q);
 
+    // Draw and show results
+    draw_circles(camL);
+    draw_circles(camR);
+    cv::waitKey(0);
 
     return 0;
 }

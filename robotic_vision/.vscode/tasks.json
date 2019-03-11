@@ -4,11 +4,35 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "make",
+            "label": "make_plinko",
             "type": "shell",
             "command": "make",
             "options": {
                 "cwd": "${workspaceRoot}/group1/plinko/basic"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true,
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        {
+            "label": "make_hw",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceRoot}/4/"
             },
             "group": {
                 "kind": "build",

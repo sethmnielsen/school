@@ -1,12 +1,12 @@
 %YAML:1.0
 ---
-intrinsic: !!opencv-matrix
+mtx: !!opencv-matrix
    rows: 3
    cols: 3
    dt: d
    data: [ 1.7213792394157197e+03, 0., 3.2920098153914046e+02, 0.,
        1.7251383586977570e+03, 2.4237969569972296e+02, 0., 0., 1. ]
-distortion: !!opencv-matrix
+dist: !!opencv-matrix
    rows: 1
    cols: 5
    dt: d
