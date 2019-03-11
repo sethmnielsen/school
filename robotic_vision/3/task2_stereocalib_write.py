@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import glob
 import pickle as pkl
-from IPython.core.debugger import Pdb
 
 np.set_printoptions(suppress=True)
 
@@ -18,6 +17,10 @@ def calibrationMono(img_files, param_file):
     objpoints = []  # 3d points in real world space
     imgpoints = []  # 2d points in image plane
     images = sorted(glob.glob(img_files))
+    if len(images) == 0:
+        print("No images")
+        return
+
     for file in images:
         img = cv2.imread(file)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -38,18 +41,23 @@ def calibrationMono(img_files, param_file):
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,
                                                        shape, None, None)
 
-    with open(param_file, 'wb') as f:
-        data = [mtx, dist, objpoints, imgpoints, shape]
-        pkl.dump(data, f)
+    # with open(param_file, 'wb') as f:
+        # data = [mtx, dist, objpoints, imgpoints, shape]
+        # pkl.dump(data, f)
+    
+    fs_write = cv2.FileStorage(param_file, cv2.FILE_STORAGE_WRITE)
+    fs_write.write("mtx", mtx)
+    fs_write.write("dist", dist)
+    fs_write.release()
     
     print('\nmtx:', mtx)
     print('dist:', dist)
 
 
 print("Calibrating right camera...")
-calibrationMono('./3/my_imgs/right/rightR*.bmp', './3/right_cam.pkl')
+calibrationMono('/home/seth/school/robotic_vision/3/my_imgs/right/rightR*.bmp', '../4/right_cam.yaml')
 print("Done!")
 print("Calibrating left camera...")
-calibrationMono('./3/my_imgs/left/leftL*.bmp', './3/left_cam.pkl')
+calibrationMono('/home/seth/school/robotic_vision/3/my_imgs/left/leftL*.bmp', '../4/left_cam.yaml')
 print("Done!")
 print("Pickle files successfully written")
