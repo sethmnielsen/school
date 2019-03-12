@@ -76,17 +76,17 @@ int main()
     CamData camL, camR;
     camL.name = "Left";
     camR.name = "Right";
-    camL.img = cv::imread("../3/my_imgs/stereo/stereoL26.bmp");
-    camR.img = cv::imread("../3/my_imgs/stereo/stereoR26.bmp");
-    string param_fileL{"./left_cam.yaml"};
-    string param_fileR{"./right_cam.yaml"};
+    camL.img = cv::imread("../../3/my_imgs/stereo/stereoL26.bmp");
+    camR.img = cv::imread("../../3/my_imgs/stereo/stereoR26.bmp");
+    string param_fileL{"params/left_cam.yaml"};
+    string param_fileR{"params/right_cam.yaml"};
     
     // Get intrinsic parameters
     chessboard(camL, param_fileL);
     chessboard(camR, param_fileR);
     
     // Get extrinsic parameters
-    cv::FileStorage fin("stereo.yaml", cv::FileStorage::READ);
+    cv::FileStorage fin("params/stereo.yaml", cv::FileStorage::READ);
     cv::Mat R, T, E, F;
     fin["R"] >> R;
     fin["E"] >> E;

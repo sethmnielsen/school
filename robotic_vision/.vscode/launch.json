@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/4/3dmeasure",
+            "program": "${workspaceFolder}/4/tracking",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/4/",

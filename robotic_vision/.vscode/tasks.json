@@ -10,13 +10,12 @@
             "options": {
                 "cwd": "${workspaceRoot}/group1/plinko/basic"
             },
-            "group": {
-                "kind": "build",
-                "isDefault": true,
-            },
+            "group": "build",
             "problemMatcher": {
                 "owner": "cpp",
-                "fileLocation": ["absolute"],
+                "fileLocation": [
+                    "absolute"
+                ],
                 "pattern": {
                     "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
                     "file": 1,
@@ -32,15 +31,17 @@
             "type": "shell",
             "command": "make",
             "options": {
-                "cwd": "${workspaceRoot}/4/"
+                "cwd": "${workspaceRoot}/4/build"
             },
             "group": {
                 "kind": "build",
-                "isDefault": true,
+                "isDefault": true
             },
             "problemMatcher": {
                 "owner": "cpp",
-                "fileLocation": ["absolute"],
+                "fileLocation": [
+                    "absolute"
+                ],
                 "pattern": {
                     "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
                     "file": 1,
