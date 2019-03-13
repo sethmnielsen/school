@@ -13,60 +13,62 @@ typedef vector<fs::path> pvec;
 
 struct CamData {
     string name;
-    cv::Mat img0, mtx, dist, R, P;
-    vector<cv::Point2f> pts, output_pts;
-    vector<cv::Point3f> persp, pts_3d;
     cv::Rect roi;
     pvec img_files;
-    vector<cv::KeyPoint> keypoints;
+    vector<cv::Mat> imgs;
+    vector<vector<cv::KeyPoint>> keypoints;
 };
 
-cv::SimpleBlobDetector::Params set_params();
 bool find_ball(CamData &cam, cv::Ptr<cv::SimpleBlobDetector> &detector, int i);
+void find_middle(vector<cv::KeyPoint> &kps);
 void track_ball(CamData &cam, int i);
+void display_img(CamData &cam, cv::Mat img, string title);
+const cv::SimpleBlobDetector::Params set_params();
+void create_windows(CamData &camL, CamData &camR);
 
-int main()
+int main(int argc, char** argv)
 {   
     CamData camL, camR;
     camL.name = "Left";
     camR.name = "Right";
 
     pvec files;
-    fs::path p("/home/seth/school/robotic_vision/4/bb_imgs/1");
+    string n = "2";
+    if (argc > 1) { n = argv[1]; }
+    string dir = "/home/seth/school/robotic_vision/4/bb_imgs/" + n;
+    fs::path p(dir);
     copy(fs::directory_iterator(p), fs::directory_iterator(), back_inserter(files));
     sort(files.begin(), files.end());
     camL.img_files = pvec(files.begin(), files.begin() + (files.size()/2));
     camR.img_files = pvec(files.begin() + (files.size()/2), files.end());
 
-    int w(300);
-    camL.roi = cv::Rect(350, 50, w, w);
-    camR.roi = cv::Rect(225, 50, w, w);
+    int w(200);
+    camL.roi = cv::Rect(350, 0, w, w);
+    camR.roi = cv::Rect(100, 0, w, w);
 
-    cv::SimpleBlobDetector::Params params = set_params();
+    const cv::SimpleBlobDetector::Params params = set_params();
     cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
-    // Set initial image and crop it
-    cv::Mat bgL = cv::imread( string(camL.img_files[0]) )( camL.roi );
-    cv::Mat bgR = cv::imread( string(camR.img_files[0]) )( camR.roi );
-    cv::cvtColor( bgL, camL.img0, cv::COLOR_BGR2GRAY );
-    cv::cvtColor( bgR, camR.img0, cv::COLOR_BGR2GRAY );
 
-    // cv::imshow("window", camL.img0);
-    // cv::waitKey(0);
+    create_windows(camL, camR);
 
-    for (int i=1; i < camL.img_files.size(); i++)
-    {
-        if (find_ball(camL, detector, i) && find_ball(camR, detector, i)) 
-        {
+    int t = 0;
+    for (int i=0; i < camL.img_files.size(); i++)
+    {   
+        bool ballL = find_ball(camL, detector, i);
+        bool ballR = find_ball(camR, detector, i);
+        if (ballL && ballR) 
+        {   
+            t = 100;
             track_ball(camL, i);
             track_ball(camR, i);
         }
-        cv::Mat img = cv::imread(string(camL.img_files[i]));
-        img = img(camL.roi);
-        cv::Mat gray, enlarged;
-        cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);      
-        cv::resize(gray, enlarged, cv::Size(gray.cols*3, gray.rows*3), cv::INTER_NEAREST);
-        cv::imshow("window", enlarged);
-        cv::waitKey(100);
+        else
+        {
+            t = 10;
+            display_img(camL, camL.imgs[i], camL.name);
+            display_img(camR, camR.imgs[i], camR.name);
+        }
+        if (cv::waitKey(t) == 113) break;
     }
 
     return 0;
@@ -80,41 +82,93 @@ bool find_ball(CamData &cam, cv::Ptr<cv::SimpleBlobDetector> &detector, int i)
     img = cv::imread(string(cam.img_files[i]));
     img = img(cam.roi);
     cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
+    cam.imgs.push_back(gray);
+    if (i == 0)
+    {
+        vector<cv::KeyPoint> kp;
+        cam.keypoints.push_back(kp);
+        return false;
+    }
 
-    cv::Mat frame;
-    cv::absdiff(cam.img0, gray, frame);
-    cv::threshold(frame, frame, 20, 255, 0);
+    cv::Mat bin;
+    cv::absdiff(cam.imgs[0], gray, bin);
+    cv::threshold(bin, bin, 20, 255, 0);
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(7,7));
-    cv::erode(frame, frame, element);
-    cv::dilate(frame, frame, element);
+    cv::erode(bin, bin, element);
+    cv::dilate(bin, bin, element);
 
-    detector->detect(frame, cam.keypoints);
+    vector<cv::KeyPoint> kps;
+    detector->detect(bin, kps);
 
-    if (cam.keypoints.size()) { found_ball = true; }
+    if (kps.size()) { found_ball = true; }
+    if (kps.size() > 1) { find_middle(kps); }
+
+    cam.keypoints.push_back(kps);
     
+    string title = "Binary " + cam.name;
+    display_img(cam, bin, title);
+
     return found_ball;
+}
+
+void find_middle(vector<cv::KeyPoint> &kps)
+{   
+    cv::KeyPoint kp(0,0,0);
+    for (int i=0; i < kps.size(); i++)
+    {
+        kp.pt.x += kps[i].pt.x;
+        kp.pt.y += kps[i].pt.y;
+        if (kps[i].size > kp.size)
+            kp.size = kps[i].size;
+    }
+
+    kp.pt.x /= kps.size();
+    kp.pt.y /= kps.size();
+
+    vector<cv::KeyPoint> new_vec;
+    new_vec.push_back(kp);
+    kps = new_vec;
 }
 
 void track_ball(CamData &cam, int i)
 {
-    // cv::Point2f pos()
-    // stringstream ss;
-    // ss << cam.name << " Keypoint " << i << ": ( " << cam.keypoints[i].pt.x << ", "
-                                                //   << cam.keypoints[i].pt.y << " )\n";
-    // cout << ss.str();
+    cv::Mat img_kps;
+    cv::drawKeypoints(cam.imgs[i], cam.keypoints[i], img_kps, 
+        cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
+    display_img(cam, img_kps, cam.name);
 }
 
-cv::SimpleBlobDetector::Params set_params()
+void display_img(CamData &cam, cv::Mat img, string title)
+{
+    cv::Mat enlarged;
+    cv::resize(img, enlarged, cv::Size(img.cols*2.5, img.rows*2.5), cv::INTER_NEAREST);
+    cv::imshow(title, enlarged);
+}
+
+const cv::SimpleBlobDetector::Params set_params()
 {
     cv::SimpleBlobDetector::Params params;
     params.minThreshold = 100;
     params.maxThreshold = 255;
     params.filterByColor = true;
     params.blobColor = 255;
-    // params.filterByArea = false;
-    // params.filterByCircularity = false;
-    // params.filterByConvexity = false;
-    // params.filterByInertia = false;
 
     return params;
+}
+
+void create_windows(CamData &camL, CamData &camR)
+{
+    cv::namedWindow(camL.name);
+    cv::namedWindow(camR.name);
+    string binL = "Binary " + camL.name;
+    string binR = "Binary " + camR.name;
+    cv::namedWindow(binL);
+    cv::namedWindow(binR);
+
+    int x1(100), x2(610), y2(575);
+    cv::moveWindow(camL.name, x1, 0);
+    cv::moveWindow(camR.name, x2, 0);
+    cv::moveWindow(binL, x1,y2);
+    cv::moveWindow(binR, x2,y2);
 }
