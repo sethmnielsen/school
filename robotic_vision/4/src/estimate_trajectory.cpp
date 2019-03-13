@@ -191,7 +191,7 @@ const cv::SimpleBlobDetector::Params TrajectoryEstimator::set_params()
     params.maxThreshold = 255;
     params.filterByColor = true;
     params.blobColor = 255;
-
+ 
     return params;
 }
 
