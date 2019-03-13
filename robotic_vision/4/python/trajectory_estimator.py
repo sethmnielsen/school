@@ -22,6 +22,31 @@ if __name__ == '__main__':
     s = np.linalg.inv(A.T @ A) @ A.T @ z
     print('s:', s)
 
+    #### Problem 12 part a ####
+
+    d = np.array([1, 1, 2, 3, 5, 8, 13])
+
+    A = np.array([[1, 1],
+                  [2, 1],
+                  [3, 2],
+                  [5, 3],
+                  [8, 5],
+                  [13, 8]])
+
+    R = A.T @ A
+
+    A_ac = np.vstack([[1, 0], A, [0, 13]])
+    R_ac = A_ac.T @ A_ac
+
+    #### Part b ####
+    ## i
+    A_ = A[:-1]
+    a = np.linalg.inv(A_.T @ A_) @ A_.T @ d[2:]
+
+    ## ii
+    d_ac = np.hstack([ d[1:], [0,0] ])
+    a_ac = np.linalg.inv(A_ac.T @ A_ac) @ A_ac.T @ d_ac
+
     ### Plotting
     PLOT = True
     if PLOT:
