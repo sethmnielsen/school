@@ -33,6 +33,14 @@
             "options": {
                 "cwd": "${workspaceRoot}/4/build"
             },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            },
             "group": {
                 "kind": "build",
                 "isDefault": true

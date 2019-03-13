@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/4/bin/tracking",
+            "program": "${workspaceFolder}/4/bin/estimate_trajectory",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/4/",
@@ -24,11 +24,30 @@
             ]
         },
         {
+            "name": "cppdbg python3",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/seth/.virtualenvs/default/bin/python3",
+            "args": ["${workspaceFolder}/4/python/trajectory_estimator.py"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/4/python",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "Python: Current File (Integrated Terminal)",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "cwd": "${workspaceFolder}/3",
+            "program": "${workspaceRoot}/4/python/trajectory_estimator.py",
+            "cwd": "${workspaceFolder}/4/python",
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },

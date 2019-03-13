@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <fstream>
 
 cv::Mat absoluteDifference(cv::Mat gray_frame, cv::Mat prev_frame);
 cv::Mat computeThreshold(cv::Mat gray_frame, int thresh, int high_val, int type);
@@ -36,9 +37,36 @@ int main()
   cv::SimpleBlobDetector::Params params = setupParams();
   cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
 
+  cv::FileStorage fin("../leftIntrinsics.txt", cv::FileStorage::READ);
+  cv::Mat camera_matL, dst_coeffL;
+  fin["Camera_Matrix"] >> camera_matL;
+  fin["Distortion_Params"] >> dst_coeffL;
+  fin.release();
+
+  fin.open("../rightIntrinsics.txt", cv::FileStorage::READ);
+  cv::Mat camera_matR, dst_coeffR;
+  fin["Camera_Matrix"] >> camera_matR;
+  fin["Distortion_Params"] >> dst_coeffL;
+  fin.release();
+
+  fin.open("../stereo_params.txt", cv::FileStorage::READ);
+  //Extrinsic Parameters
+  cv::Mat R, T, E, F;
+  fin["R"] >> R;
+  fin["T"] >> T;
+  fin["E"] >> E;
+  fin["F"] >> F;
+  fin.release();
+
+  //Rectification Parameters
+  cv::Mat P1, P2, R1, R2, Q;
+  cv::stereoRectify(camera_matL, dst_coeffL, camera_matR, dst_coeffR, backgroundL.size(),
+                    R, T, R1, R2, P1, P2, Q);
+
   cv::Mat g_imgL, g_imgR;
   int counter(0);
   bool ball_foundL(false), ball_foundR(false);
+  std::ofstream fout ("../ball_traj.txt");
   for(int i(20); i < 100; i++)
   {
     std::string file_num;
@@ -86,9 +114,10 @@ int main()
     {
       //Average the blob keypts to determine center of ball
       double center_x_L(0.0), center_y_L(0.0);
-      averageKeyPoints(centersL, center_x_L, center_y_L);
-      center_x_L += roiL.x;
+      averageKeyPoints(centersL, center_x_L, center_y_L); //Returns the average in the roi
+      center_x_L += roiL.x; // Convert position back to the original img
       center_y_L += roiR.y;
+
 
       double center_x_R(0.0), center_y_R(0.0);
       averageKeyPoints(centersR, center_x_R, center_y_R);
@@ -101,23 +130,38 @@ int main()
       roiR.x = floor(center_x_R) - box_size/2.0;
       roiR.y = floor(center_y_R) - box_size/2.0;
 
-      cv::circle(imgL, cv::Point2f(center_x_L, center_y_L), 30, cv::Scalar(0, 0, 255), 3, 8);
-      cv::circle(imgR, cv::Point2f(center_x_R, center_y_R), 30, cv::Scalar(0, 0, 255), 3, 8);
-    }
+      //undistort and rectify pts
+      std::vector<cv::Point2f> outputL, outputR;
+      std::vector<cv::Point2f> ptsL{cv::Point2f(center_x_L, center_y_L)};
+      std::vector<cv::Point2f> ptsR{cv::Point2f(center_x_R, center_y_R)};
+      cv::undistortPoints(ptsL, outputL, camera_matL, dst_coeffL, R1, P1);
+      cv::undistortPoints(ptsR, outputR, camera_matR, dst_coeffR, R2, P2);
+      //Note: The output y values are not the same (probably b/c keypts do not match exactly)
 
-    if((i - 23)%5 == 0 && counter < 4)
-    {
-      counter++;
-      cv::imwrite("task2_" + std::to_string(i) + "L.jpg", imgL);
-      cv::imwrite("task2_" + std::to_string(i) + "R.jpg", imgR);
+      //Do perspective transform
+      std::vector<cv::Point3f> perspL;
+      perspL.push_back(cv::Point3f(outputL[0].x, outputL[0].y, outputL[0].x - outputR[0].x));
+
+      std::vector<cv::Point3f> finalL;
+      //This spits out the coordinates in the left camera frame
+      cv::perspectiveTransform(perspL, finalL, Q);
+
+      //Conversion to the balls coordinate frames
+      finalL[0].x -= 10.135;
+      finalL[0].y -= 29.0;
+      finalL[0].z -= 21.0;
+
+      fout << finalL[0].x << "\t" << finalL[0].y << "\t" << finalL[0].z << "\t\n";
+      std::cout << finalL[0] << std::endl;
     }
 
     cv::imshow("Left", binL);
     cv::imshow("Right", binR);
-    cv::imshow("LeftI", imgL);
-    cv::imshow("RightI", imgR);
+    // cv::imshow("LeftI", imgL);
+    // cv::imshow("RightI", imgR);
     cv::waitKey(0);
   }
+  fout.close();
 
   return 0;
 }
