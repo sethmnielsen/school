@@ -15,27 +15,39 @@ if __name__ == '__main__':
     pts = np.zeros((100,3));
     for i in range(100):
         pts[i] = trj.run(i)
-        if pts[i,0] != 0:
-            print(i, ':', pts[i])
     
     begin = 32
     end = 63
     x = pts[:,0][begin:end]
     y = pts[:,1][begin:end]
     z = pts[:,2][begin:end]
+    
+    vz = (z[-1] - z[-6]) / 5 * 60  # velocity in inches/sec
+    t = -z[-1] / vz                # time to reach z = 0
+
+    vx = (x[-1] - x[-6]) / 5 * 60
+    x0 = vx * t + x[-1]
+
+    vy = (y[-1] - y[-6]) / 5 * 60
+    y0 = vy * t + y[-1]
+    
+    xp = np.array([x[-1], x0])
+    yp = np.array([y[-1], y0])
+    zp = np.array([z[-1], 0])
 
     ### Plotting
     if PLOT:
         fig1 = plt.figure()
-        # plt.plot(zv[1:], xv, label='xv and zv')
-        plt.plot(z, x, label='x and z')
+        plt.plot(x, z, label='measured')
+        plt.plot(xp, zp, label='predicted')
         plt.legend(loc='upper right')
-        plt.xlabel('z')
-        plt.ylabel('x')
+        plt.xlabel('x')
+        plt.ylabel('z')
 
         fig2 = plt.figure()
-        plt.plot(z, y, label='y and z')
+        plt.plot(y, z, label='measured')
+        plt.plot(yp, zp, label='predicted')
         plt.legend(loc='upper right')
-        plt.xlabel('z')
-        plt.ylabel('y')
+        plt.xlabel('y')
+        plt.ylabel('z')
         plt.show()

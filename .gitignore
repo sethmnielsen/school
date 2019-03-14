@@ -6,6 +6,7 @@
 .DS_Store
 *.bmp
 *.jpg
+*.zip 
 
 *sigsys/
 *.tex
@@ -15,4 +16,6 @@ old
 
 *build/
 *bin/
+*.o
 *.so
+*.~
