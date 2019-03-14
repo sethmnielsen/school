@@ -68,6 +68,8 @@ void draw_circles(CamData &cam)
                    5, cv::Scalar(0,0,255), 2, 8);
 
     }
+    string filename = cam.name + "_task1.jpg";
+    cv::imwrite(filename, cam.img);
     cv::imshow(cam.name, cam.img);
 }
 
@@ -78,15 +80,15 @@ int main()
     camR.name = "Right";
     camL.img = cv::imread("../../3/my_imgs/stereo/stereoL26.bmp");
     camR.img = cv::imread("../../3/my_imgs/stereo/stereoR26.bmp");
-    string param_fileL{"params/left_cam.yaml"};
-    string param_fileR{"params/right_cam.yaml"};
+    string param_fileL{"../params/left_cam.yaml"};
+    string param_fileR{"../params/right_cam.yaml"};
     
     // Get intrinsic parameters
     chessboard(camL, param_fileL);
     chessboard(camR, param_fileR);
     
     // Get extrinsic parameters
-    cv::FileStorage fin("params/stereo.yaml", cv::FileStorage::READ);
+    cv::FileStorage fin("../params/stereo.yaml", cv::FileStorage::READ);
     cv::Mat R, T, E, F;
     fin["R"] >> R;
     fin["E"] >> E;

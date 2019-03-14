@@ -9,7 +9,7 @@ from IPython.core.debugger import Pdb
 if __name__ == '__main__':
     trj = TrajectoryEstimator()
     DISPLAY = False
-    PLOT = False
+    PLOT = True
     trj.init(DISPLAY)
     
     pts = np.zeros((100,3));
@@ -33,9 +33,15 @@ if __name__ == '__main__':
     hx = np.linalg.inv(A_ac.T @ A_ac) @ A_ac.T @ xd
     hy = np.linalg.inv(A_ac.T @ A_ac) @ A_ac.T @ yd
 
-    print('A:\n', A_ac)
-    print('hx:\n', hx)
-    print('hy:\n', hy)
+    zv = np.append(z, 0)
+    A = np.array([zv[:-1], zv[1:]]).T
+    Av = np.vstack([[zv[0], 0], A, [0, zv[-1]]])
+
+    xv = A @ hx
+    yv = A @ hy
+
+    # print('xv:\n', xv)
+    # print('yv:\n', yv)
     
     Pdb().set_trace()
 
@@ -65,15 +71,15 @@ if __name__ == '__main__':
     ### Plotting
     if PLOT:
         fig1 = plt.figure()
-        plt.plot(z[1:], xd, label='x and z')
-        plt.plot(z, A_ac @ hx)
+        plt.plot(zv[1:], yv, label='xv and zv')
+        plt.plot(z, y, label='x and z')
         plt.legend(loc='upper right')
-        plt.xlabel('x')
-        plt.ylabel('z')
+        plt.xlabel('z')
+        plt.ylabel('y')
 
-        fig2 = plt.figure()
-        plt.plot(y, z, label='y and z')
-        plt.legend(loc='upper right')
-        plt.xlabel('y')
-        plt.ylabel('z')
+        # fig2 = plt.figure()
+        # plt.plot(y, z, label='y and z')
+        # plt.legend(loc='upper right')
+        # plt.xlabel('y')
+        # plt.ylabel('z')
         plt.show()
