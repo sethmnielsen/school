@@ -24,62 +24,18 @@ if __name__ == '__main__':
     y = pts[:,1][begin:end]
     z = pts[:,2][begin:end]
 
-    # A = np.array([x, y]).T
-    A = np.array([z[:-1], z[1:]]).T
-    A_ac = np.vstack([[z[0], 0], A, [0, z[-1]]])
-
-    xd = np.hstack([ x[1:], [0,0] ])
-    yd = np.hstack([ y[1:], [0,0] ])
-    hx = np.linalg.inv(A_ac.T @ A_ac) @ A_ac.T @ xd
-    hy = np.linalg.inv(A_ac.T @ A_ac) @ A_ac.T @ yd
-
-    zv = np.append(z, 0)
-    A = np.array([zv[:-1], zv[1:]]).T
-    Av = np.vstack([[zv[0], 0], A, [0, zv[-1]]])
-
-    xv = A @ hx
-    yv = A @ hy
-
-    # print('xv:\n', xv)
-    # print('yv:\n', yv)
-    
-    Pdb().set_trace()
-
-    #### Problem 12 part a ####
-
-    # d = np.array([1, 1, 2, 3, 5, 8, 13])
-
-    # A = np.array([[1, 1],
-    #               [2, 1],
-    #               [3, 2],
-    #               [5, 3],
-    #               [8, 5],
-    #               [13, 8]])
-
-    # A_ac = np.vstack([[1, 0], A, [0, 13]])
-    # R_ac = A_ac.T @ A_ac
-
-    # #### Part b ####
-    # ## i
-    # A_ = A[:-1]
-    # a = np.linalg.inv(A_.T @ A_) @ A_.T @ d[2:]
-
-    # ## ii
-    # d_ac = np.hstack([ d[1:], [0,0] ])
-    # a_ac = np.linalg.inv(A_ac.T @ A_ac) @ A_ac.T @ d_ac
-
     ### Plotting
     if PLOT:
         fig1 = plt.figure()
-        plt.plot(zv[1:], yv, label='xv and zv')
-        plt.plot(z, y, label='x and z')
+        # plt.plot(zv[1:], xv, label='xv and zv')
+        plt.plot(z, x, label='x and z')
+        plt.legend(loc='upper right')
+        plt.xlabel('z')
+        plt.ylabel('x')
+
+        fig2 = plt.figure()
+        plt.plot(z, y, label='y and z')
         plt.legend(loc='upper right')
         plt.xlabel('z')
         plt.ylabel('y')
-
-        # fig2 = plt.figure()
-        # plt.plot(y, z, label='y and z')
-        # plt.legend(loc='upper right')
-        # plt.xlabel('y')
-        # plt.ylabel('z')
         plt.show()
