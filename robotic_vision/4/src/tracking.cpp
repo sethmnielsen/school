@@ -136,6 +136,11 @@ void track_ball(CamData &cam, int i)
     cv::drawKeypoints(cam.imgs[i], cam.keypoints[i], img_kps, 
         cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
 
+    if ( (i-26) % 5 == 0) 
+    {
+        string filename = "imgs/" + cam.name + to_string(i) + "_task2.jpg";
+        cv::imwrite(filename, img_kps);
+    }
     display_img(cam, img_kps, cam.name);
 }
 
