@@ -6,6 +6,7 @@
 .DS_Store
 *.bmp
 *.jpg
+*.mp4
 *.zip 
 
 *sigsys/
