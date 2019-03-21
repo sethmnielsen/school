@@ -17,11 +17,11 @@ int main(int argc, char **argv)
     skip_frames = 10;
     
   VideoCapture cap("/home/seth/school/robotic_vision/5/MotionFieldVideo.mp4");
-  Size winSize(31, 31);
+  Size subPixWinSize(10, 10), winSize(21, 21);
 
   TermCriteria crit{TermCriteria::COUNT + TermCriteria::EPS, 40, 0.001};
-  int MAX_CORNERS(500), PYRAMID_LEVEL(0);
-  double quality(0.01), min_dist(10.0), min_eig(0.001);
+  int MAX_CORNERS(500), PYRAMID_LEVEL(2);
+  double quality(0.01), min_dist(10.0), min_eig(0.02);
 
   vector<Point2f> corners;
   vector<Point2f> prev_corners;
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   
   Mat gray, prev_gray, frame;
   int frame_num = 0;
-  cout << "-- Auto sequence start..." << endl;
+  cout << "-- Beginning launch sequence..." << endl;
   while (true)
   {
     if ( frame.empty() )
@@ -52,6 +52,7 @@ int main(int argc, char **argv)
       gray.copyTo(prev_gray);
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, quality, min_dist);
+    // cornerSubPix(prev_gray, prev_corners, subPixWinSize, Size(-1, -1), crit);
 
     vector<uchar> status;
     vector<float> err;
