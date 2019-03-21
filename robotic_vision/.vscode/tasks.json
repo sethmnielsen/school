@@ -29,9 +29,9 @@
         {
             "label": "make_hw",
             "type": "shell",
-            "command": "make",
+            "command": "make && ./optical_flow",
             "options": {
-                "cwd": "${workspaceRoot}/4/build"
+                "cwd": "${workspaceRoot}/5/build"
             },
             "presentation": {
                 "echo": true,
