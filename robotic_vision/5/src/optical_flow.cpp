@@ -20,8 +20,8 @@ int main(int argc, char **argv)
   Size winSize(31, 31);
 
   TermCriteria crit{TermCriteria::COUNT + TermCriteria::EPS, 40, 0.001};
-  int MAX_CORNERS(500), PYRAMID_LEVEL(0);
-  double quality(0.01), min_dist(10.0), min_eig(0.001);
+  int MAX_CORNERS(500), PYRAMID_LEVEL(3);
+  double quality(0.01), min_dist(10.0), min_eig(0.01);
 
   vector<Point2f> corners;
   vector<Point2f> prev_corners;
@@ -64,13 +64,14 @@ int main(int argc, char **argv)
     int counter(0);
     for (int i=0; i < prev_corners.size(); i++)
     {
-      if ( !status[i] )
-        continue;
-      circle(frame, prev_corners[i], 3, Scalar(0,255,0), -1);
-      line(frame, prev_corners[i], corners[i], Scalar(0,0,255), 1);
-      counter++;
+      if ( status[i] && err[i] < 20 )
+      {
+        circle(frame, prev_corners[i], 3, Scalar(0,255,0), -1);
+        line(frame, prev_corners[i], corners[i], Scalar(0,0,255), 1);
+        counter++;
+      }
     }
-    cout << "circles: " << counter << endl;
+    cout << "Corners: " << counter << "; percentage: " << (double)counter / prev_corners.size() * 100.0 << endl;
     
     cv::imshow("Optical Flow", frame);
     char c = (char)waitKey(40);

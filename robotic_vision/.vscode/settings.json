@@ -53,7 +53,8 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "core": "cpp"
     },
     "python.terminal.executeInFileDir": true
 }
