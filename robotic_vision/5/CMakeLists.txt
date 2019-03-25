@@ -19,6 +19,3 @@ target_link_libraries(feature_matching ${OpenCV_LIBS})
 
 add_executable(multiframe_tracking src/multiframe_tracking.cpp)
 target_link_libraries(multiframe_tracking ${OpenCV_LIBS})
-
-add_executable(brendon src/brendon.cpp)
-target_link_libraries(brendon ${OpenCV_LIBS})
