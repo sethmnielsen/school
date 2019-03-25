@@ -21,8 +21,9 @@ int main()
 
 void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename)
 {
+  int cc = cv::VideoWriter::fourcc('M', 'P', 'E', 'G');
   Size size(1920, 1080);
-  VideoWriter vid_out(filename, VideoWriter::fourcc('M', 'P', 'E', 'G'), 20, size, true);
+  VideoWriter vid_out(filename, cc, 20, size, true);
 
   for (int i=0; i < vid1.size(); i++)
     vid_out << vid1[i];
@@ -34,7 +35,9 @@ void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename)
 vector<Mat> motion_field(int m)
 {
   VideoCapture cap("/home/seth/school/robotic_vision/5/MotionFieldVideo.mp4");
-  vector<Mat> vid;
+  int frame_count = int(cap.get(cv::CAP_PROP_FRAME_COUNT)) / m;
+  cout << "Frame count: " << frame_count << endl;
+  vector<Mat> vid(frame_count);
   
   int w(5);
   int ws = w*11;
@@ -49,7 +52,7 @@ vector<Mat> motion_field(int m)
 
   Mat gray, prev_gray, frame;
   cout << "-- Beginning launch sequence..." << endl;
-  while (true)
+  for (int k=0; k < frame_count; k++)
   {
     if ( frame.empty() )
     {
@@ -63,7 +66,7 @@ vector<Mat> motion_field(int m)
     goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, QUALITY, MIN_DIST);
     orig_corners = prev_corners;
 
-    for (int k=0; k < m; k++)
+    for (int j=0; j < m; j++)
     {
       cap >> frame;
       if (frame.empty())
@@ -111,7 +114,6 @@ vector<Mat> motion_field(int m)
         }
       }
       orig_corners = temp;
-      gray.copyTo(prev_gray);
     }
 
     if (frame.empty())
@@ -122,14 +124,23 @@ vector<Mat> motion_field(int m)
       circle(frame, orig_corners[i], 3, Scalar(0,255,0), -1);
       line(frame, orig_corners[i], prev_corners[i], Scalar(0,0,255), 1);
     }
-    vid.push_back(frame);
-    cv::imshow("Multi-Frame Tracking", frame);
+    vid[k] = frame;
+    // cv::imshow("Multi-Frame Tracking", frame);
+    // char c = (char)waitKey(1);
+    // if ( c == 'q' )
+      // break;
+  }
+  cap.release();
+
+  for (int i=0; i < vid.size(); i++)
+  {
+    cv::imshow("Multi-Frame Tracking", vid[i]);
     char c = (char)waitKey(1);
     if ( c == 'q' )
       break;
   }
-
-  cap.release();
+  
+  exit(0);
   return vid;
 }
 

@@ -6,17 +6,34 @@
 using namespace std;
 using namespace cv;
 
+vector<Mat> motion_field(int skip_frames);
+void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename); 
 
-int main(int argc, char **argv)
+int main()
 {
+  std::vector<cv::Mat> vid1, vid2;
+  vid1 = motion_field(1);
+  vid2 = motion_field(10);
+  record_video(vid1, vid2, "multiframe_task3.avi");
+  return 0;
+}
 
-  int skip_frames = 0;
-  if ( argc > 1)
-    skip_frames = stoi(argv[1]);
-  else
-    skip_frames = 10;
-    
+void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename)
+{
+  Size size(1920, 1080);
+  VideoWriter vid_out(filename, VideoWriter::fourcc('M', 'P', 'E', 'G'), 20, size, true);
+
+  for (int i=0; i < vid1.size(); i++)
+    vid_out << vid1[i];
+  for (int i=0; i < vid2.size(); i++)
+    vid_out << vid2[i];
+  vid_out.release();
+}
+
+vector<Mat> motion_field(int skip_frames)
+{
   VideoCapture cap("/home/seth/school/robotic_vision/5/MotionFieldVideo.mp4");
+  vector<Mat> vid;
   Size winSize(31, 31);
 
   TermCriteria crit{TermCriteria::COUNT + TermCriteria::EPS, 40, 0.001};
@@ -74,5 +91,5 @@ int main(int argc, char **argv)
   }
   cap.release();
 
-  return 0;
+  return vid;
 }

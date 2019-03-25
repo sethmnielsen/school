@@ -119,7 +119,7 @@ std::vector<cv::Mat> skipFrames(int n_frames)
         cv::line(img, orig_corners[i], prev_corners[i], cv::Scalar(0, 0, 255), 1);
       }
       cv::imshow("MotionField", img);
-      char c = (char)cv::waitKey(0);
+      char c = (char)cv::waitKey(1);
       if ( c == 'q' )
         break;
     
@@ -148,9 +148,11 @@ void makeVideo(std::vector<cv::Mat> v1, std::vector<cv::Mat> v2, std::string fil
 int main()
 {
   std::vector<cv::Mat> set1, set2;
-//   set1 = skipFrames(1); //number of sequential frames to match images in
+  set1 = skipFrames(1); //number of sequential frames to match images in
   set2 = skipFrames(10);
-//   makeVideo(set1, set2, "task3.avi");
+  std::cout << "set1 size: " << set1.size() << std::endl;
+  std::cout << "set2 size: " << set2.size() << std::endl;
+  makeVideo(set1, set2, "task3.avi");
 
   return 0;
 }
