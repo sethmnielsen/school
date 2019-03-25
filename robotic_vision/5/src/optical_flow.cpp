@@ -26,9 +26,6 @@ int main(int argc, char **argv)
   vector<Point2f> corners;
   vector<Point2f> prev_corners;
 
-  // namedWindow("prev_gray", WINDOW_NORMAL | WINDOW_KEEPRATIO | WINDOW_GUI_EXPANDED);
-  // namedWindow("gray", WINDOW_NORMAL | WINDOW_KEEPRATIO | WINDOW_GUI_EXPANDED);
-  
   Mat gray, prev_gray, frame;
   int frame_num = 0;
   cout << "-- Auto sequence start..." << endl;
@@ -55,9 +52,6 @@ int main(int argc, char **argv)
 
     vector<uchar> status;
     vector<float> err;
-    // cv::imshow("prev_gray", prev_gray);
-    // cv::imshow("gray", gray);
-    // waitKey(1);
     calcOpticalFlowPyrLK(prev_gray, gray, prev_corners, corners, status, err, winSize,
                          PYRAMID_LEVEL, crit, 0, min_eig);
 

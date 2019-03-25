@@ -12,12 +12,23 @@ void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename);
 
 int main()
 {
-  std::vector<cv::Mat> set1, set2;
-  set1 = motion_field(1);
-  set2 = motion_field(10);
-  makeVideo(set1, set2, "task3.avi");
-
+  std::vector<cv::Mat> vid1, vid2;
+  vid1 = motion_field(1);
+  vid2 = motion_field(10);
+  record_video(vid1, vid2, "multiframe_task3.avi");
   return 0;
+}
+
+void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename)
+{
+  Size size(1920, 1080);
+  VideoWriter vid_out(filename, VideoWriter::fourcc('M', 'P', 'E', 'G'), 20, size, true);
+
+  for (int i=0; i < vid1.size(); i++)
+    vid_out << vid1[i];
+  for (int i=0; i < vid2.size(); i++)
+    vid_out << vid2[i];
+  vid_out.release();
 }
 
 vector<Mat> motion_field(int m)
@@ -113,25 +124,13 @@ vector<Mat> motion_field(int m)
     }
     vid.push_back(frame);
     cv::imshow("Multi-Frame Tracking", frame);
-    char c = (char)waitKey(30);
+    char c = (char)waitKey(1);
     if ( c == 'q' )
       break;
   }
 
   cap.release();
   return vid;
-}
-
-void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename)
-{
-  Size size(1920, 1080);
-  VideoWriter vid_out(filename, VideoWriter::fourcc('M', 'P', 'E', 'G'), 20, size, true);
-
-  for(int i(0); i < vid1.size(); i++)
-    vid_out << vid1[i];
-  for(int i(0); i < vid2.size(); i++)
-    vid_out << vid2[i];
-  vid_out.release();
 }
 
 Point2f point_corrected(Point2f pt, int w, Mat img)
