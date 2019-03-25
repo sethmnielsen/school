@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/5/build/optical_flow",
+            "program": "${workspaceFolder}/5/build/multiframe_tracking",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

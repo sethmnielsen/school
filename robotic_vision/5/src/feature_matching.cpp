@@ -21,6 +21,7 @@ int main(int argc, char **argv)
   int w(5);
   int ws = w*10;
   Size winSize(21, 21), templateSize(w,w), searchSize(ws,ws);
+  int match_method = cv::TM_SQDIFF_NORMED;
 
   TermCriteria crit{TermCriteria::COUNT + TermCriteria::EPS, 40, 0.001};
   int MAX_CORNERS(500), PYRAMID_LEVEL(2);
@@ -53,10 +54,7 @@ int main(int argc, char **argv)
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, QUALITY, MIN_DIST);
 
-    vector<uchar> status;
-    vector<float> err;
-
-    int counter(0);
+    // int counter(0);
     for (int i=0; i < prev_corners.size(); i++)
     {
       Point2f pt = point_corrected(prev_corners[i], w, frame);
@@ -66,14 +64,26 @@ int main(int argc, char **argv)
       Rect search_roi(search_pt, searchSize);
       Mat search_box = gray(search_roi);
 
+      int res_cols = search_box.cols - templ.cols + 1;
+      int res_rows = search_box.rows - templ.rows + 1;
+      Mat result;
+      result.create(res_rows, res_cols, CV_32FC1);
+      matchTemplate(search_box, templ, result, match_method);
+      normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, Mat());
+
+      double minVal; double maxVal;
+      cv::Point matchLoc, minLoc, maxLoc;
+      cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
+      matchLoc.x = pt.x - res_cols/2.0 + minLoc.x;
+      matchLoc.y = pt.y - res_rows/2.0 + minLoc.y;
       
       circle(frame, prev_corners[i], 3, Scalar(0,255,0), -1);
-      line(frame, prev_corners[i], corners[i], Scalar(0,0,255), 1);
-      counter++;
+      line(frame, prev_corners[i], matchLoc, Scalar(0,0,255), 1);
+      // counter++;
     }
-    cout << "circles: " << counter << endl;
+    // cout << "circles: " << counter << endl;
     
-    cv::imshow("Optical Flow", frame);
+    cv::imshow("Feature Matching", frame);
     char c = (char)waitKey(40);
     if ( c == 'q' )
       break;

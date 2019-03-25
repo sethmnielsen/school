@@ -29,7 +29,7 @@
         {
             "label": "make_hw",
             "type": "shell",
-            "command": "make && ./optical_flow",
+            "command": "make && ./multiframe_tracking",
             "options": {
                 "cwd": "${workspaceRoot}/5/build"
             },

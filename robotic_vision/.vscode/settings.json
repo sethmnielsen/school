@@ -54,7 +54,12 @@
         "typeinfo": "cpp",
         "utility": "cpp",
         "algorithm": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp",
+        "numeric": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp"
     },
     "python.terminal.executeInFileDir": true
 }

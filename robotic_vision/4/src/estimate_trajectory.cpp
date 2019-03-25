@@ -58,7 +58,7 @@ py::array TrajectoryEstimator::run(int i)
     bool ballR = find_ball(camR, i);
     if (ballL && ballR) 
     {   
-        t = 10;
+        t = 100;
         track_ball(camL, i);
         track_ball(camR, i);
         pt3 = calc_3dpoints(i);
@@ -160,6 +160,10 @@ void TrajectoryEstimator::track_ball(CamData &cam, int i)
     cv::drawKeypoints(cam.imgs[i], cam.keypoints[i], img_kps, 
         cv::Scalar(0,0,255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     
+    cv::Point2f center;
+    center.x = cam.points[i][0].x-cam.roi.x;
+    center.y = cam.points[i][0].y-cam.roi.y;
+    cv::circle(img_kps, center, 10, cv::Scalar(255,0,0));
 
     display_img(cam, img_kps, cam.name);
 }

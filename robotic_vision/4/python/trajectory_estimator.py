@@ -8,7 +8,7 @@ from IPython.core.debugger import Pdb
 
 if __name__ == '__main__':
     trj = TrajectoryEstimator()
-    DISPLAY = False
+    DISPLAY = True
     PLOT = True
     trj.init(DISPLAY)
     
