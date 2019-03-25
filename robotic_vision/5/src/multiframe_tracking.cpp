@@ -46,19 +46,18 @@ vector<Mat> motion_field(int m)
 
   int MAX_CORNERS(500);
   double QUALITY(0.01), MIN_DIST(25.0);
-
+  
   vector<Point2f> new_corners, prev_corners, orig_corners, temp;
   vector<uchar> mask;
 
-  Mat gray, prev_gray, frame;
+  int count = 0;
+
   cout << "-- Beginning launch sequence..." << endl;
   for (int k=0; k < frame_count; k++)
   {
-    if ( frame.empty() )
-    {
-      cap >> frame;
-      cvtColor(frame, prev_gray, COLOR_BGR2GRAY);
-    }
+    Mat frame, gray, prev_gray;
+    cap >> frame;
+    cvtColor(frame, prev_gray, COLOR_BGR2GRAY);
       
     if ( !gray.empty() )
       gray.copyTo(prev_gray);
@@ -66,7 +65,7 @@ vector<Mat> motion_field(int m)
     goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, QUALITY, MIN_DIST);
     orig_corners = prev_corners;
 
-    for (int j=0; j < m; j++)
+    for (int j=1; j < m; j++)
     {
       cap >> frame;
       if (frame.empty())
@@ -114,6 +113,8 @@ vector<Mat> motion_field(int m)
         }
       }
       orig_corners = temp;
+      gray.copyTo(prev_gray);
+      count++;
     }
 
     if (frame.empty())
@@ -126,21 +127,22 @@ vector<Mat> motion_field(int m)
     }
     vid[k] = frame;
     // cv::imshow("Multi-Frame Tracking", frame);
-    // char c = (char)waitKey(1);
+    // char c = (char)waitKey(0);
     // if ( c == 'q' )
       // break;
+    count++;
   }
   cap.release();
-
-  for (int i=0; i < vid.size(); i++)
-  {
-    cv::imshow("Multi-Frame Tracking", vid[i]);
-    char c = (char)waitKey(1);
-    if ( c == 'q' )
-      break;
-  }
+  cout << "Frames processed: " << count << endl;
+  cout << "vid size: " << vid.size() << endl;
+  // for (int i=0; i < vid.size(); i++)
+  // {
+  //   cv::imshow("Multi-Frame Tracking", vid[i]);
+  //   char c = (char)waitKey(30);
+  //   if ( c == 'q' )
+  //     break;
+  // }
   
-  exit(0);
   return vid;
 }
 
