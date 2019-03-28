@@ -11,11 +11,11 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(optical_flow src/optical_flow.cpp)
-target_link_libraries(optical_flow ${OpenCV_LIBS})
+add_executable(task1 src/task1.cpp)
+target_link_libraries(task1 ${OpenCV_LIBS})
 
-add_executable(feature_matching src/feature_matching.cpp)
-target_link_libraries(feature_matching ${OpenCV_LIBS})
+add_executable(task2 src/task2.cpp)
+target_link_libraries(task2 ${OpenCV_LIBS})
 
-add_executable(multiframe_tracking src/multiframe_tracking.cpp)
-target_link_libraries(multiframe_tracking ${OpenCV_LIBS})
+add_executable(task3 src/task3.cpp)
+target_link_libraries(task3 ${OpenCV_LIBS})

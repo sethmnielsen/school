@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/5/build/multiframe_tracking",
+            "program": "${workspaceFolder}/6/build/task1",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
