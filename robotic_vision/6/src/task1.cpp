@@ -32,7 +32,7 @@ void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename)
 
 vector<Mat> motion_field(int m)
 {
-  VideoCapture cap("/home/seth/school/robotic_vision/6/media/ParallelCube1%0d.jpg");
+  VideoCapture cap("/home/seth/school/robotic_vision/6/imgs/ParallelCube1%0d.jpg");
   int frame_count = int(cap.get(cv::CAP_PROP_FRAME_COUNT)) / m;
   cout << "Frame count: " << frame_count << endl;
   vector<Mat> vid(frame_count);
