@@ -4,34 +4,11 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "make_plinko",
-            "type": "shell",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceRoot}/group1/plinko/basic"
-            },
-            "group": "build",
-            "problemMatcher": {
-                "owner": "cpp",
-                "fileLocation": [
-                    "absolute"
-                ],
-                "pattern": {
-                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "message": 5
-                }
-            }
-        },
-        {
             "label": "make_hw",
             "type": "shell",
-            "command": "make && ./multiframe_tracking",
+            "command": "make && ./task1",
             "options": {
-                "cwd": "${workspaceRoot}/5/build"
+                "cwd": "${workspaceRoot}/6/build"
             },
             "presentation": {
                 "echo": true,
