@@ -8,7 +8,7 @@ using namespace cv;
 
 Point2f point_corrected(Point2f pt, int w, Mat img);
 void motion_field();
-void display_img(Mat img);
+void display_img(Mat img, string title = "Image");
 
 int main()
 {
@@ -49,8 +49,6 @@ void motion_field()
   {
     circle(frame, orig_corners[i], 3, Scalar(0,255,0), -1);
   }
-
-  display_img(frame);
 
   for (int j=1; j < m; j++)
   {
@@ -134,7 +132,16 @@ void motion_field()
   initUndistortRectifyMap(M, dist, R2, M, sz, 5, map2_1, map2_2);
   remap(imgs.back(), rect2, map2_1, map2_2, cv::INTER_LINEAR);
 
-  
+  for (int i{1}; i < 21; i++)
+  {
+    cv::Point left_pt{0, 25*i};
+    cv::Point right_pt{800, 25*i};
+    cv::line(rect1,left_pt,right_pt,cv::Scalar(0,0,255),1);
+    cv::line(rect2,left_pt,right_pt,cv::Scalar(0,0,255),1);
+  }
+
+  display_img(rect1, "Rectified First Frame");
+  display_img(rect2, "Rectified Last Frame");
 }
 
 Point2f point_corrected(Point2f pt, int w, Mat img)
@@ -157,7 +164,7 @@ Point2f point_corrected(Point2f pt, int w, Mat img)
   return Point2f(x, y);
 }
 
-void display_img(Mat img)
+void display_img(Mat img, string title)
 {
   if (img.empty())
   {
@@ -165,9 +172,11 @@ void display_img(Mat img)
     return;
   }
   
-  cv::imshow("Multi-Frame Tracking", img);
+  cv::imshow(title, img);
   char c = (char)waitKey(0);
   if ( c == 'q' )
+  {
     destroyAllWindows();
     exit(0);
+  }
 }
