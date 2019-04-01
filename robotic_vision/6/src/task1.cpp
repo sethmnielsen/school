@@ -84,9 +84,6 @@ void motion_field()
       new_corners.push_back(matchLoc);
     }
 
-    F = findFundamentalMat(prev_corners, new_corners, cv::FM_RANSAC, 
-                              3, 0.99, mask);
-
     prev_corners.clear();
     temp.clear();
     for (int i=0; i < mask.size(); i++)
@@ -106,11 +103,23 @@ void motion_field()
       line(frame, orig_corners[i], prev_corners[i], Scalar(0,0,255), 1);
     }
 
-    display_img(frame);
+    // display_img(frame);
 
-    stereoRectifyUncalibrated(orig_corners, prev_corners, F, 
-                              Size(frame.cols, frame.rows), H1, H2);
   }
+  
+  F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC, 
+                          3, 0.99, mask);
+
+  stereoRectifyUncalibrated(orig_corners, new_corners, F, 
+                            Size(frame.cols, frame.rows), H1, H2);
+
+  cv::FileStorage fin("../cam_mat.yaml", cv::FileStorage::READ);
+  Mat mtx, dist;
+  fin["mtx"] >> mtx;
+  fin["dist"] >> dist;
+  fin.release();
+
+  
 
   cap.release();
 }
