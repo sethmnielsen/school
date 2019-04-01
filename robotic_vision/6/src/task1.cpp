@@ -20,6 +20,7 @@ void motion_field()
 {
   VideoCapture cap("/home/seth/school/robotic_vision/6/imgs/TurnCube1%0d.jpg");
   int m = cv::CAP_PROP_FRAME_COUNT;
+  vector<Mat> imgs(m);
   
   int w(5);
   int ws = w*11;
@@ -38,6 +39,7 @@ void motion_field()
   Mat frame, gray, prev_gray;
   cap >> frame;
   cvtColor(frame, gray, COLOR_BGR2GRAY);
+  imgs.push_back(frame);
     
   gray.copyTo(prev_gray);
   goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, QUALITY, MIN_DIST);
@@ -53,6 +55,7 @@ void motion_field()
   for (int j=1; j < m; j++)
   {
     cap >> frame;
+    imgs.push_back(frame);
     if (frame.empty())
       break;
 
@@ -106,6 +109,7 @@ void motion_field()
     // display_img(frame);
 
   }
+  cap.release();
   
   F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC, 
                           3, 0.99, mask);
@@ -114,14 +118,23 @@ void motion_field()
                             Size(frame.cols, frame.rows), H1, H2);
 
   cv::FileStorage fin("../cam_mat.yaml", cv::FileStorage::READ);
-  Mat mtx, dist;
-  fin["mtx"] >> mtx;
+  Mat M, dist;
+  fin["mtx"] >> M;
   fin["dist"] >> dist;
   fin.release();
 
-  
+  Mat R1, R2;
+  R1 = M.inv()*H1*M;
+  R2 = M.inv()*H2*M;
 
-  cap.release();
+  Size sz(640,480);
+  Mat map1_1, map1_2, map2_1, map2_2, rect1, rect2;
+  initUndistortRectifyMap(M, dist, R1, M, sz, 5, map1_1, map1_2);
+  remap(imgs[0], rect1, map1_1, map1_2, cv::INTER_LINEAR);
+  initUndistortRectifyMap(M, dist, R2, M, sz, 5, map2_1, map2_2);
+  remap(imgs.back(), rect2, map2_1, map2_2, cv::INTER_LINEAR);
+
+  
 }
 
 Point2f point_corrected(Point2f pt, int w, Mat img)
