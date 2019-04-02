@@ -1,12 +1,12 @@
 %YAML:1.0
 ---
-mtx: !!opencv-matrix
+Cam_Mat: !!opencv-matrix
    rows: 3
    cols: 3
    dt: d
    data: [ 1.721137e+03, 0., 3.20e+02, 0.,
        1.725138e+03, 2.40e+02, 0., 0., 1. ]
-dist: !!opencv-matrix
+Distortion: !!opencv-matrix
    rows: 1
    cols: 5
    dt: d

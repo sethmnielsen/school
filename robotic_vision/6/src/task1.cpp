@@ -20,8 +20,9 @@ void motion_field()
 {
   VideoCapture cap("/home/seth/school/robotic_vision/6/imgs/TurnCube1%0d.jpg");
   int m = cv::CAP_PROP_FRAME_COUNT;
-  vector<Mat> imgs(m);
+  vector<Mat> imgs;
   
+  cout << "Size of imgs vector: " << imgs.size() << endl;
   int w(5);
   int ws = w*11;
   Size templateSize(w,w), searchSize(ws,ws);
@@ -50,7 +51,7 @@ void motion_field()
     circle(frame, orig_corners[i], 3, Scalar(0,255,0), -1);
   }
 
-  for (int j=1; j < m; j++)
+  for (int j=1; j < m-1; j++)
   {
     cap >> frame;
     imgs.push_back(frame);
@@ -85,6 +86,9 @@ void motion_field()
       new_corners.push_back(matchLoc);
     }
 
+    F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC, 
+                              3, 0.99, mask);
+
     prev_corners.clear();
     temp.clear();
     for (int i=0; i < mask.size(); i++)
@@ -109,13 +113,10 @@ void motion_field()
   }
   cap.release();
   
-  F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC, 
-                          3, 0.99, mask);
-
-  stereoRectifyUncalibrated(orig_corners, new_corners, F, 
+  stereoRectifyUncalibrated(orig_corners, prev_corners, F, 
                             Size(frame.cols, frame.rows), H1, H2);
 
-  cv::FileStorage fin("../cam_mat.yaml", cv::FileStorage::READ);
+  cv::FileStorage fin("/home/seth/school/robotic_vision/6/cam_mat.yaml", cv::FileStorage::READ);
   Mat M, dist;
   fin["mtx"] >> M;
   fin["dist"] >> dist;

@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/6/build/task1",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/6/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
