@@ -24,6 +24,25 @@
             ]
         },
         {
+            "name": "(gdb) mat_task1",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/6/build/mat_task1",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/6/build",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "cppdbg python3",
             "type": "cppdbg",
             "request": "launch",

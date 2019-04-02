@@ -5,7 +5,7 @@
 #include <glob.h>
 #include <vector>
 
-#define SHOW
+// #define SHOW
 
 cv::Point2d getPoint(cv::Point2d pt, int size, const cv::Mat& img)
 {
@@ -55,7 +55,7 @@ void featureMatch(const std::vector<cv::Point2d>& prev_corners, const cv::Mat& p
         double min_val, max_val;
         cv::Point match_loc, min_loc, max_loc;
         cv::minMaxLoc(result, &min_val, &max_val, &min_loc, &max_loc, cv::Mat());
-        match_loc.x = int(pt.x - result.cols/2.0 + min_loc.x);
+        match_loc.x = int(pt.x - result_cols/2.0 + min_loc.x);
         match_loc.y = int(pt.y - result_rows/2.0 + min_loc.y);
 
         new_corners.push_back(match_loc);
@@ -135,6 +135,8 @@ void rectify(std::string dir)
 
     cv::Mat H1, H2;
     cv::stereoRectifyUncalibrated(original_pts, final_pts, F, first_img.size(), H1, H2);
+    std::cout << "original_pts size: " << original_pts.size() << std::endl;
+    std::cout << "final_pts size: " << final_pts.size() << std::endl;
     std::cout << "H1: " << H1 << std::endl;
 
     cv::FileStorage in{"../guess_params.yaml", cv::FileStorage::READ};

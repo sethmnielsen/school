@@ -7,40 +7,42 @@ using namespace std;
 using namespace cv;
 
 Point2f point_corrected(Point2f pt, int w, Mat img);
-void motion_field();
-void display_img(Mat img, string title = "Image");
+void sfm(string sequence);
+void display_img(Mat img, string title = "Image", int t = 0);
 
 int main()
 {
-  motion_field();
+  sfm("ParallelCube");
+  sfm("ParallelReal");
+  sfm("TurnCube");
+  sfm("TurnReal");
   return 0;
 }
 
-void motion_field()
+void sfm(string sequence)
 {
-  VideoCapture cap("/home/seth/school/robotic_vision/6/imgs/TurnCube1%0d.jpg");
-  int m = cv::CAP_PROP_FRAME_COUNT;
-  vector<Mat> imgs;
+  string dir = "/home/seth/school/robotic_vision/6/imgs/";
+  VideoCapture cap(dir + sequence + "1%0d.jpg");
+  int m = cv::CAP_PROP_FRAME_COUNT - 1;
+  vector<Mat> imgs(6);
   
-  cout << "Size of imgs vector: " << imgs.size() << endl;
   int w(5);
-  int ws = w*11;
+  int ws = w*12;
   Size templateSize(w,w), searchSize(ws,ws);
   int match_method = cv::TM_SQDIFF_NORMED;
 
   int MAX_CORNERS(500);
-  double QUALITY(0.01), MIN_DIST(25.0);
+  double QUALITY(0.01), MIN_DIST(23.0);
   
   vector<Point2f> new_corners, prev_corners, orig_corners, temp;
   vector<uchar> mask;
 
   Mat F, H1, H2; // fundamental matrix, homography matrices
 
-  cout << "-- Auto sequence start..." << endl;
   Mat frame, gray, prev_gray;
   cap >> frame;
   cvtColor(frame, gray, COLOR_BGR2GRAY);
-  imgs.push_back(frame);
+  frame.copyTo(imgs[0]);
     
   gray.copyTo(prev_gray);
   goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, QUALITY, MIN_DIST);
@@ -50,23 +52,25 @@ void motion_field()
   {
     circle(frame, orig_corners[i], 3, Scalar(0,255,0), -1);
   }
+  // imshow("Features", frame);
 
-  for (int j=1; j < m-1; j++)
+  for (int j=1; j < m; j++)
   {
     cap >> frame;
-    imgs.push_back(frame);
+    frame.copyTo(imgs[j]);
     if (frame.empty())
       break;
 
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     
     new_corners.clear();
-    for (int i=0; i < prev_corners.size(); i++)
+    // for (int i=0; i < prev_corners.size(); i++)
+    for (Point2d pt : prev_corners)
     {
-      Point2f pt = point_corrected(prev_corners[i], w, frame);
-      Rect templ_roi(pt, templateSize);
+      Point2f templ_pt = point_corrected(pt, w, frame);
+      Rect templ_roi(templ_pt, templateSize);
       Mat templ = prev_gray(templ_roi);
-      Point2f search_pt = point_corrected(prev_corners[i], ws, frame);
+      Point2f search_pt = point_corrected(pt, ws, frame);
       Rect search_roi(search_pt, searchSize);
       Mat search_box = gray(search_roi);
 
@@ -80,8 +84,8 @@ void motion_field()
       double minVal; double maxVal;
       cv::Point matchLoc, minLoc, maxLoc;
       cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
-      matchLoc.x = prev_corners[i].x - res_cols/2.0 + minLoc.x;
-      matchLoc.y = prev_corners[i].y - res_rows/2.0 + minLoc.y;
+      matchLoc.x = int(pt.x - res_cols/2.0 + minLoc.x);
+      matchLoc.y = int(pt.y - res_rows/2.0 + minLoc.y);
 
       new_corners.push_back(matchLoc);
     }
@@ -108,13 +112,14 @@ void motion_field()
       line(frame, orig_corners[i], prev_corners[i], Scalar(0,0,255), 1);
     }
 
-    // display_img(frame);
+    display_img(frame);
 
   }
   cap.release();
   
   stereoRectifyUncalibrated(orig_corners, prev_corners, F, 
                             Size(frame.cols, frame.rows), H1, H2);
+
 
   cv::FileStorage fin("/home/seth/school/robotic_vision/6/cam_mat.yaml", cv::FileStorage::READ);
   Mat M, dist;
@@ -141,7 +146,7 @@ void motion_field()
     cv::line(rect2,left_pt,right_pt,cv::Scalar(0,0,255),1);
   }
 
-  display_img(rect1, "Rectified First Frame");
+  display_img(rect1, "Rectified First Frame", 1);
   display_img(rect2, "Rectified Last Frame");
 }
 
@@ -165,7 +170,7 @@ Point2f point_corrected(Point2f pt, int w, Mat img)
   return Point2f(x, y);
 }
 
-void display_img(Mat img, string title)
+void display_img(Mat img, string title, int t)
 {
   if (img.empty())
   {
@@ -174,7 +179,7 @@ void display_img(Mat img, string title)
   }
   
   cv::imshow(title, img);
-  char c = (char)waitKey(0);
+  char c = (char)waitKey(t);
   if ( c == 'q' )
   {
     destroyAllWindows();
