@@ -1,4 +1,9 @@
 #include <opencv2/opencv.hpp>
+#include <opencv2/cvv/debug_mode.hpp>
+#include <opencv2/cvv/show_image.hpp>
+#include <opencv2/cvv/filter.hpp>
+#include <opencv2/cvv/dmatch.hpp>
+#include <opencv2/cvv/final_show.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -14,8 +19,8 @@ int main()
 {
   sfm("ParallelCube");
   sfm("ParallelReal");
-  sfm("TurnCube");
-  sfm("TurnReal");
+  // sfm("TurnCube");
+  // sfm("TurnReal");
   return 0;
 }
 
@@ -49,11 +54,9 @@ void sfm(string sequence)
   orig_corners = prev_corners;
 
   for (int i=0; i < orig_corners.size(); i++)
-  {
     circle(frame, orig_corners[i], 3, Scalar(0,255,0), -1);
-  }
-  // imshow("Features", frame);
-
+  // display_img(frame);
+  
   for (int j=1; j < m; j++)
   {
     cap >> frame;
@@ -64,7 +67,6 @@ void sfm(string sequence)
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     
     new_corners.clear();
-    // for (int i=0; i < prev_corners.size(); i++)
     for (Point2d pt : prev_corners)
     {
       Point2f templ_pt = point_corrected(pt, w, frame);
@@ -112,7 +114,7 @@ void sfm(string sequence)
       line(frame, orig_corners[i], prev_corners[i], Scalar(0,0,255), 1);
     }
 
-    display_img(frame);
+    // display_img(frame);
 
   }
   cap.release();
@@ -133,10 +135,12 @@ void sfm(string sequence)
 
   Size sz(640,480);
   Mat map1_1, map1_2, map2_1, map2_2, rect1, rect2;
+
   initUndistortRectifyMap(M, dist, R1, M, sz, 5, map1_1, map1_2);
   remap(imgs[0], rect1, map1_1, map1_2, cv::INTER_LINEAR);
   initUndistortRectifyMap(M, dist, R2, M, sz, 5, map2_1, map2_2);
   remap(imgs.back(), rect2, map2_1, map2_2, cv::INTER_LINEAR);
+    // cvv::showImage(rect1, CVVISUAL_LOCATION, "rect1");
 
   for (int i{1}; i < 21; i++)
   {
