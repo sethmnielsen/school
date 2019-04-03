@@ -1,9 +1,4 @@
 #include <opencv2/opencv.hpp>
-#include <opencv2/cvv/debug_mode.hpp>
-#include <opencv2/cvv/show_image.hpp>
-#include <opencv2/cvv/filter.hpp>
-#include <opencv2/cvv/dmatch.hpp>
-#include <opencv2/cvv/final_show.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,10 +12,10 @@ void display_img(Mat img, string title = "Image", int t = 0);
 
 int main()
 {
-  sfm("ParallelCube");
   sfm("ParallelReal");
-  // sfm("TurnCube");
-  // sfm("TurnReal");
+  sfm("ParallelCube");
+  sfm("TurnCube");
+  sfm("TurnReal");
   return 0;
 }
 
@@ -92,7 +87,7 @@ void sfm(string sequence)
       new_corners.push_back(matchLoc);
     }
 
-    F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC, 
+    F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC,
                               3, 0.99, mask);
 
     prev_corners.clear();
@@ -140,7 +135,6 @@ void sfm(string sequence)
   remap(imgs[0], rect1, map1_1, map1_2, cv::INTER_LINEAR);
   initUndistortRectifyMap(M, dist, R2, M, sz, 5, map2_1, map2_2);
   remap(imgs.back(), rect2, map2_1, map2_2, cv::INTER_LINEAR);
-    // cvv::showImage(rect1, CVVISUAL_LOCATION, "rect1");
 
   for (int i{1}; i < 21; i++)
   {
@@ -150,8 +144,11 @@ void sfm(string sequence)
     cv::line(rect2,left_pt,right_pt,cv::Scalar(0,0,255),1);
   }
 
-  display_img(rect1, "Rectified First Frame", 1);
-  display_img(rect2, "Rectified Last Frame");
+  // imwrite(dir + "../results/" + sequence + "_first.jpg", rect1);
+  // imwrite(dir + "../results/" + sequence + "_last.jpg", rect2);
+
+  display_img(rect1, "Rectified First Frame", 0);
+  display_img(rect2, "Rectified Last Frame", 0);
 }
 
 Point2f point_corrected(Point2f pt, int w, Mat img)

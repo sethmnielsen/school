@@ -6,19 +6,13 @@ set(CMAKE_BUILD_TYPE "Debug")
 set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -lstdc++fs -std=c++17")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -lstdc++fs -O0")
 
-# (un)set: cmake -DCVV_DEBUG_MODE=OFF ..
-OPTION(CVV_DEBUG_MODE "cvvisual-debug-mode" OFF)
-if(CVV_DEBUG_MODE MATCHES ON)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCVVISUAL_DEBUGMODE")
-endif()
-
 find_package(OpenCV REQUIRED)
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
 )
 
 add_executable(task1 src/task1.cpp)
-target_link_libraries(task1 opencv_cvv ${OpenCV_LIBS})
+target_link_libraries(task1 ${OpenCV_LIBS})
 
 add_executable(task2 src/task2.cpp)
 target_link_libraries(task2 ${OpenCV_LIBS})
