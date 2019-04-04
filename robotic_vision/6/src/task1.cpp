@@ -118,7 +118,7 @@ void sfm(string sequence)
                             Size(frame.cols, frame.rows), H1, H2);
 
 
-  cv::FileStorage fin("/home/seth/school/robotic_vision/6/cam_mat.yaml", cv::FileStorage::READ);
+  cv::FileStorage fin("/home/seth/school/robotic_vision/6/guess_params.yaml", cv::FileStorage::READ);
   Mat M, dist;
   fin["mtx"] >> M;
   fin["dist"] >> dist;
