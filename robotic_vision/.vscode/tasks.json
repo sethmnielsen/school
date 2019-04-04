@@ -6,7 +6,7 @@
         {
             "label": "make_hw",
             "type": "shell",
-            "command": "make && ./task1",
+            "command": "make && ./task2",
             "options": {
                 "cwd": "${workspaceRoot}/6/build"
             },

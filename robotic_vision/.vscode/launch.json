@@ -27,7 +27,7 @@
             "name": "(gdb) mat_task2",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/6/build/mat_task1",
+            "program": "${workspaceFolder}/6/build/mat_task2",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/6/build",

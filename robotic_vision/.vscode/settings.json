@@ -59,7 +59,9 @@
         "filesystem": "cpp",
         "numeric": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "atomic": "cpp",
+        "bitset": "cpp"
     },
     "python.terminal.executeInFileDir": true
 }

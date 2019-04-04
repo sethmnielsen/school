@@ -24,10 +24,9 @@ void sfm(string sequence)
     int match_method = cv::TM_SQDIFF_NORMED;
 
     int MAX_CORNERS(500);
-    double QUALITY(0.01), MIN_DIST(23.0);
+    double QUALITY(0.01), MIN_DIST(25.0);
 
     vector<Point2f> new_corners, prev_corners, orig_corners, temp;
-    vector<uchar> mask;
 
     cv::FileStorage fin("/home/seth/school/robotic_vision/6/cam_mat.yaml", cv::FileStorage::READ);
     Mat M, dist;
@@ -37,7 +36,7 @@ void sfm(string sequence)
 
     Mat F, H1, H2; // fundamental matrix, homography matrices
 
-    Mat frame, gray, prev_gray;
+    Mat frame, gray, prev_gray, mask, img;
     cap >> frame;
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     frame.copyTo(imgs[0]);
@@ -46,10 +45,12 @@ void sfm(string sequence)
     goodFeaturesToTrack(prev_gray, prev_corners, MAX_CORNERS, QUALITY, MIN_DIST);
     undistortConvert2Pixels(prev_corners, M, dist);
     orig_corners = prev_corners;
+    mask = Mat::ones(prev_corners.size(), 1, CV_8U);
+    undistort(frame, img, M, dist);
 
     for (int i = 0; i < orig_corners.size(); i++)
-        circle(frame, orig_corners[i], 3, Scalar(0, 255, 0), -1);
-    // display_img(frame);
+        circle(img, orig_corners[i], 3, Scalar(0, 255, 0), -1);
+    display_img(img);
 
     for (int j = 1; j < m; j++)
     {
@@ -89,11 +90,13 @@ void sfm(string sequence)
 
         undistortConvert2Pixels(new_corners, M, dist);
 
+        F = findFundamentalMat(prev_corners, new_corners, cv::FM_RANSAC,
+                           3, 0.99, mask);
         prev_corners.clear();
         temp.clear();
-        for (int i = 0; i < mask.size(); i++)
+        for (int i = 0; i < mask.rows; i++)
         {
-            if (mask[i])
+            if (mask.at<uchar>(i,0))
             {
                 prev_corners.push_back(new_corners[i]);
                 temp.push_back(orig_corners[i]);
@@ -102,44 +105,54 @@ void sfm(string sequence)
         orig_corners = temp;
         gray.copyTo(prev_gray);
 
+
+        undistort(frame, img, M, dist);
+        
         for (int i = 0; i < prev_corners.size(); i++)
         {
-            circle(frame, orig_corners[i], 3, Scalar(0, 255, 0), -1);
-            line(frame, orig_corners[i], prev_corners[i], Scalar(0, 0, 255), 1);
+            circle(img, orig_corners[i], 3, Scalar(0, 255, 0), -1);
+            line(img, orig_corners[i], prev_corners[i], Scalar(0, 0, 255), 1);
         }
 
-        display_img(frame);
+        display_img(img);
     }
     cap.release();
 
-    F = findFundamentalMat(orig_corners, new_corners, cv::FM_RANSAC,
-                           3, 0.99, mask);
+    F = findFundamentalMat(orig_corners, prev_corners, cv::FM_RANSAC,
+                            3, 0.99, mask);
+
+    cout << "\nRESULTS FOR SEQUENCE " << sequence << ":\n";
 
     Mat E, R1, R2, t;
     E = M.t() * F * M;
-    decomposeEssentialMat(E, R1, R2, t);
-
+    cv::decomposeEssentialMat(E, R1, R2, t);
     double error1 = 3 - cv::trace(R1).val[0];
     double error2 = 3 - cv::trace(R2).val[0];
 
-    if (sequence.substr(0,8) == "Parallel")
-    {
-        if (error1 < error2)
-            cout << "R == R1:\n" << R1 << endl;
-        else
-            cout << "R == R2:\n" << R2 << endl;
-    }
-    else
-    {
-        if (R1.at<double>(1,1) > 0)
-            cout << "R == R1: \n" << R1 << endl;
-        else
-            cout << "R == R2: \n" << R2 << endl;
-    }
-    if (t.at<double>(0) > 0)
-        cout << "t: \n" << t << endl;
-    else
-        cout << "t == -t: \n" << -t << endl;
+    std::cout << "F:\n" << F << std::endl;
+    std::cout << "E:\n" << E << std::endl;
+    std::cout << "\nt:\n" << t << std::endl;
+    std::cout << "R1:\n" << R1 << std::endl;
+    std::cout << "R2:\n" << R2 << std::endl;
+
+    // if (sequence.substr(0,8) == "Parallel")
+    // {
+    //     if (error1 < error2)
+    //         cout << "R == R1:\n" << R1 << endl;
+    //     else
+    //         cout << "R == R2:\n" << R2 << endl;
+    // }
+    // else
+    // {
+    //     if (R1.at<double>(1,1) > 0)
+    //         cout << "R == R1: \n" << R1 << endl;
+    //     else
+    //         cout << "R == R2: \n" << R2 << endl;
+    // }
+    // if (t.at<double>(0) > 0)
+    //     cout << "t: \n" << t << endl;
+    // else
+    //     cout << "t == -t: \n" << -t << endl;
 }
 
 // Functions
