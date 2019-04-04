@@ -6,10 +6,10 @@
 using namespace std;
 using namespace cv;
 
-// void undistortConvert2Pixels(vector<Point2f> &corners, Mat M, Mat dist);
-// Point2f point_corrected(Point2f pt, int w, Mat img);
-// void sfm(string sequence);
-// void display_img(Mat img, string title = "Image", int t = 0);
+void undistortConvert2Pixels(vector<Point2f> &corners, Mat M, Mat dist);
+Point2f point_corrected(Point2f pt, int w, Mat img);
+void sfm(string sequence);
+void display_img(Mat img, string title = "Image", int t = 0);
 
 void sfm(string sequence)
 {
@@ -118,6 +118,28 @@ void sfm(string sequence)
     Mat E, R1, R2, t;
     E = M.t() * F * M;
     decomposeEssentialMat(E, R1, R2, t);
+
+    double error1 = 3 - cv::trace(R1).val[0];
+    double error2 = 3 - cv::trace(R2).val[0];
+
+    if (sequence.substr(0,8) == "Parallel")
+    {
+        if (error1 < error2)
+            cout << "R == R1:\n" << R1 << endl;
+        else
+            cout << "R == R2:\n" << R2 << endl;
+    }
+    else
+    {
+        if (R1.at<double>(1,1) > 0)
+            cout << "R == R1: \n" << R1 << endl;
+        else
+            cout << "R == R2: \n" << R2 << endl;
+    }
+    if (t.at<double>(0) > 0)
+        cout << "t: \n" << t << endl;
+    else
+        cout << "t == -t: \n" << -t << endl;
 }
 
 // Functions
@@ -158,7 +180,7 @@ Point2f point_corrected(Point2f pt, int w, Mat img)
     return Point2f(x, y);
 }
 
-void display_img(Mat img, string title = "Image", int t = 0)
+void display_img(Mat img, string title, int t)
 {
     if (img.empty())
     {
@@ -177,8 +199,8 @@ void display_img(Mat img, string title = "Image", int t = 0)
 
 int main()
 {
-    sfm("ParallelReal");
     sfm("ParallelCube");
+    sfm("ParallelReal");
     sfm("TurnCube");
     sfm("TurnReal");
     return 0;
