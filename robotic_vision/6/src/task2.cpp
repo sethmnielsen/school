@@ -1,6 +1,8 @@
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include <string>
+#include <glob.h>
 #include <vector>
 
 using namespace std;
@@ -15,8 +17,17 @@ void sfm(string sequence)
 {
     string dir = "/home/seth/school/robotic_vision/6/imgs/";
     VideoCapture cap(dir + sequence + "1%0d.jpg");
+    // std::string path{dir + sequence +"/*.jpg"};
     int m = cv::CAP_PROP_FRAME_COUNT - 1;
     vector<Mat> imgs(6);
+
+    // glob_t result;
+    // glob(path.c_str(), GLOB_TILDE, NULL,&result);
+    std::vector<std::string> filenames;
+    // for (size_t i{0}; i < result.gl_pathc; i++)
+    // {
+        // filenames.push_back(std::string(result.gl_pathv[i]));
+    // }
 
     int w(5);
     int ws = w * 12;
@@ -38,6 +49,7 @@ void sfm(string sequence)
 
     Mat frame, gray, prev_gray, mask, img;
     cap >> frame;
+    // frame = cv::imread(filenames[0]);
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     frame.copyTo(imgs[0]);
 
@@ -50,11 +62,14 @@ void sfm(string sequence)
 
     for (int i = 0; i < orig_corners.size(); i++)
         circle(img, orig_corners[i], 3, Scalar(0, 255, 0), -1);
-    display_img(img);
+    // display_img(img);
 
+    // int j = 0;
     for (int j = 1; j < m; j++)
+    // for (string filename : filenames)
     {
         cap >> frame;
+        // frame = cv::imread(filename);
         frame.copyTo(imgs[j]);
         if (frame.empty())
             break;
@@ -62,7 +77,7 @@ void sfm(string sequence)
         cvtColor(frame, gray, COLOR_BGR2GRAY);
 
         new_corners.clear();
-        for (Point2d pt : prev_corners)
+        for (Point2f pt : prev_corners)
         {
             Point2f templ_pt = point_corrected(pt, w, frame);
             Rect templ_roi(templ_pt, templateSize);
@@ -106,7 +121,7 @@ void sfm(string sequence)
         gray.copyTo(prev_gray);
 
 
-        undistort(frame, img, M, dist);
+        cv::undistort(frame, img, M, dist);
         
         for (int i = 0; i < prev_corners.size(); i++)
         {
@@ -114,7 +129,8 @@ void sfm(string sequence)
             line(img, orig_corners[i], prev_corners[i], Scalar(0, 0, 255), 1);
         }
 
-        display_img(img);
+        // display_img(img);
+        // j++;
     }
     cap.release();
 
@@ -212,6 +228,11 @@ void display_img(Mat img, string title, int t)
 
 int main()
 {
+    // sfm("Parallel_Cube");
+    // sfm("Parallel_Real");
+    // sfm("Turned_Cube");
+    // sfm("Turned_Real");
+
     sfm("ParallelCube");
     sfm("ParallelReal");
     sfm("TurnCube");

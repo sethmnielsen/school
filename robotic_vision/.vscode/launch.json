@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "(gdb) task2",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/6/build/task2",
