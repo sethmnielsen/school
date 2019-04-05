@@ -159,8 +159,6 @@ void rectify(std::string dir)
     std::vector<cv::Point2d> original_pts, final_pts;
     cv::Mat F, first_img, last_img;
     getF(path, original_pts, final_pts, F, first_img, last_img);
-    std::cout << "Current image set: " << dir << std::endl;
-    // std::cout << "F: \n" << F << std::endl;
 
     cv::FileStorage in{"../Camera_Parameters.yaml", cv::FileStorage::READ};
     cv::Mat M, dist;
@@ -172,15 +170,10 @@ void rectify(std::string dir)
     E = M.t() * F * M;
     cv::decomposeEssentialMat(E,R1, R2, t);
 
-    std::cout << "F:\n" << F << std::endl;
-    std::cout << "E:\n" << E << std::endl;
-    std::cout << "\nt:\n" << t << std::endl;
-    std::cout << "R1:\n" << R1 << std::endl;
-    std::cout << "R2:\n" << R2 << std::endl;
-
     double e1{3 - mag(R1.at<double>(0,0)) - mag(R1.at<double>(1,1)) - mag(R1.at<double>(2,2))};
     double e2{3 - mag(R2.at<double>(0,0)) - mag(R2.at<double>(1,1)) - mag(R2.at<double>(2,2))};
 
+    std::cout << "Current image set: " << dir << std::endl;
     // if (dir.substr(0,8) == "Parallel")
     // {
     //     if (e1 < e2)

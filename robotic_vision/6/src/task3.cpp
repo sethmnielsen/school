@@ -123,36 +123,89 @@ void sfm(string sequence)
 
     cout << "\nRESULTS FOR SEQUENCE " << sequence << ":\n";
 
-    Mat E, R1, R2, t;
+    Mat E, R1, R2, t, R;
     E = M.t() * F * M;
     cv::decomposeEssentialMat(E, R1, R2, t);
     double error1 = 3 - cv::trace(R1).val[0];
     double error2 = 3 - cv::trace(R2).val[0];
 
-    std::cout << "F:\n" << F << std::endl;
-    std::cout << "E:\n" << E << std::endl;
-    std::cout << "\nt:\n" << t << std::endl;
-    std::cout << "R1:\n" << R1 << std::endl;
-    std::cout << "R2:\n" << R2 << std::endl;
+    // std::cout << "F:\n" << F << std::endl;
+    // std::cout << "E:\n" << E << std::endl;
+    // std::cout << "\nt:\n" << t << std::endl;
+    // std::cout << "R1:\n" << R1 << std::endl;
+    // std::cout << "R2:\n" << R2 << std::endl;
 
-    // if (sequence.substr(0,8) == "Parallel")
-    // {
-    //     if (error1 < error2)
-    //         cout << "R == R1:\n" << R1 << endl;
-    //     else
-    //         cout << "R == R2:\n" << R2 << endl;
-    // }
-    // else
-    // {
-    //     if (R1.at<double>(1,1) > 0)
-    //         cout << "R == R1: \n" << R1 << endl;
-    //     else
-    //         cout << "R == R2: \n" << R2 << endl;
-    // }
-    // if (t.at<double>(0) > 0)
-    //     cout << "t: \n" << t << endl;
-    // else
-    //     cout << "t == -t: \n" << -t << endl;
+    if (sequence.substr(0,8) == "Parallel")
+    {
+        if (error1 < error2)
+        {   
+            R = R1;
+            cout << "R == R1:\n" << R1 << endl;
+        }
+        else
+        {   
+            R = R2;
+            cout << "R == R2:\n" << R2 << endl;
+        }
+        // t *= 2.7;
+    }
+    else
+    {
+        if (R1.at<double>(1,1) > 0)
+        {   
+            R = R1;
+            cout << "R == R1: \n" << R1 << endl;
+        }
+        else
+        {   
+            R = R2;
+            cout << "R == R2: \n" << R2 << endl;
+        }
+        t *= 2.45;
+    }
+    if (t.at<double>(0) > 0)
+        cout << "t: \n" << t << endl;
+    else
+    {
+        t = -t;
+        cout << "t == -t: \n" << t << endl;
+    }
+
+    Size img_size{640,480};
+    Mat P1, P2, Q;
+    cv::stereoRectify(M,dist,M,dist,img_size, R, t, R1, R2, P1, P2, Q);
+
+    vector<Point3d> first_points, last_points;
+    vector<int> inds{0, 2, 5, 7};
+    for (int i=0; i < 4; i++)
+    {
+        Point2f oc = orig_corners[inds[i]];
+        Point2f pc = prev_corners[inds[i]];
+        Point3d pt_first(oc.x, oc.y, pc.x-oc.x);
+        first_points.push_back(pt_first);
+        Point3d pt_last(pc.x, pc.y, 0);
+        last_points.push_back(pt_last);
+
+        circle(imgs[0], oc, 4, Scalar(0,0,255), -1);
+        circle(imgs.back(), pc, 4, Scalar(0,0,255), -1);
+    }
+
+    vector<Point3d> obj_points;
+    perspectiveTransform(first_points, obj_points, Q);
+
+    cout << "Q: " << Q << endl;
+    cout << "first_points: " << first_points[0] << endl;
+    cout << "\n3D point estimates:" << endl;
+    for (cv::Point3d obj_pt : obj_points)
+        std::cout << obj_pt << std::endl;
+    imshow("original", imgs[0]);
+    imshow("last", imgs.back());
+    char c = (char)waitKey(0);
+    if (c == 'q')
+    {
+        destroyAllWindows();
+        exit(0);
+    }
 }
 
 // Functions

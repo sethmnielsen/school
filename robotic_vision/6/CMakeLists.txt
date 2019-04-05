@@ -26,3 +26,6 @@ target_link_libraries(mat_task1 ${OpenCV_LIBS})
 add_executable(mat_task2 src/mat_task2.cpp)
 target_link_libraries(mat_task2 ${OpenCV_LIBS})
 
+add_executable(mat_task3 src/mat_task3.cpp)
+target_link_libraries(mat_task3 ${OpenCV_LIBS})
+

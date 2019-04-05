@@ -5,29 +5,7 @@
 #include <glob.h>
 #include <vector>
 
-#define SHOW
-
-int mouseX, mouseY;
-
-void firstCallback(int event, int x, int y, int flags, void* userdata)
-{
-    if (event == cv::EVENT_LBUTTONDOWN)
-    {
-        mouseX = x;
-        mouseY = y;
-        std::cout << "x: " << x << std::endl << "y: " << y << std::endl;
-    }
-}
-
-void lastCallback(int event, int x, int y, int flags, void* userdata)
-{
-    if (event == cv::EVENT_LBUTTONDOWN)
-    {
-        mouseX = x;
-        mouseY = y;
-        std::cout << "x: " << x << std::endl << "y: " << y << std::endl;
-    }
-}
+// #define SHOW
 
 double mag(double in)
 {
@@ -255,6 +233,8 @@ void rectify(std::string dir)
     std::vector<cv::Point3d> obj_points;
     cv::perspectiveTransform(first_points, obj_points, Q);
 
+    std::cout << "Q: " << Q << std::endl;
+    std::cout << "first_points: " << first_points[0] << std::endl;
     std::cout << "3D point estimates:" << std::endl;
     for (cv::Point3d obj_pt : obj_points)
         std::cout << obj_pt << std::endl;
@@ -262,43 +242,6 @@ void rectify(std::string dir)
     cv::imshow("Original 4 Points", first_img);
     cv::imshow("Final 4 Points", last_img);
     cv::waitKey(0);
-
-    // parallel points on closest edge
-//    cv::Point3d pt4_R{408.0, 423.0, 0.0};
-//    cv::Point3d pt3_R{408.0, 313.0, 0.0};
-//    cv::Point3d pt2_R{407.0, 201.0, 0.0};
-//    cv::Point3d pt1_R{405.0, 92.0, 0.0};
-
-//    cv::Point3d pt4_L{297.5, 424.0, -297.5+pt4_R.x};
-//    cv::Point3d pt3_L{297.0, 313.0, -297.0+pt3_R.x};
-//    cv::Point3d pt2_L{296.0, 202.0, -296.0+pt2_R.x};
-//    cv::Point3d pt1_L{295.0, 92.0, -295.0+pt1_R.x};
-    // turned points on closest edge
-//    cv::Point3d pt4_R{336.0, 408.0, 0.0};
-//    cv::Point3d pt3_R{336.0, 306.0, 0.0};
-//    cv::Point3d pt2_R{334.0, 202.0, 0.0};
-//    cv::Point3d pt1_R{333.0, 99.0, 0.0};
-
-//    cv::Point3d pt4_L{235.0, 414.0, -235.0+pt4_R.x};
-//    cv::Point3d pt3_L{234.0, 306.0, -234.0+pt3_R.x};
-//    cv::Point3d pt2_L{234.0, 200.0, -234.0+pt2_R.x};
-//    cv::Point3d pt1_L{233.0, 94.0, -233.0+pt1_R.x};
-
-//    std::vector<cv::Point3d> points{pt1_L, pt2_L, pt3_L, pt4_L};
-
-//    std::vector<cv::Point3d> obj_points;
-//    cv::perspectiveTransform(points, obj_points, Q);
-
-//    for (int i{0}; i < obj_points.size(); i++)
-//    {
-//        std::cout << i << std::endl << obj_points[i] << std::endl;
-//    }
-
-//    cv::imshow("first", first_img);
-//    cv::imshow("last", last_img);
-//    cv::setMouseCallback("first", firstCallback);
-//    cv::setMouseCallback("last", lastCallback);
-//    cv::waitKey(0);
 }
 
 int main()

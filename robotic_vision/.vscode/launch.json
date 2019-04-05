@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) task2",
+            "name": "(gdb) task3",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/6/build/task2",
+            "program": "${workspaceFolder}/6/build/task3",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/6/build",
@@ -24,10 +24,10 @@
             ]
         },
         {
-            "name": "(gdb) mat_task2",
+            "name": "(gdb) mat_task3",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/6/build/mat_task2",
+            "program": "${workspaceFolder}/6/build/mat_task3",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/6/build",
