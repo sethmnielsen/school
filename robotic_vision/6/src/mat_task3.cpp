@@ -56,7 +56,9 @@ void featureMatch(const std::vector<cv::Point2d>& prev_corners, const cv::Mat& p
         cv::Mat result;
         result.create(result_rows, result_cols, CV_32FC1);
         cv::matchTemplate(search_img, template_img, result, method);
+        std::cout << "result: " << result << std::endl;
         cv::normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+        std::cout << "result_normed: " << result << std::endl;
 
         double min_val, max_val;
         cv::Point match_loc, min_loc, max_loc;
@@ -173,7 +175,7 @@ void rectify(std::string dir)
     double e1{3 - mag(R1.at<double>(0,0)) - mag(R1.at<double>(1,1)) - mag(R1.at<double>(2,2))};
     double e2{3 - mag(R2.at<double>(0,0)) - mag(R2.at<double>(1,1)) - mag(R2.at<double>(2,2))};
 
-    std::cout << "Current image set: " << dir << std::endl;
+    std::cout << "\n\n********** Current image set: " << dir << " *********\n" << std::endl;
     if (dir.substr(0,8) == "Parallel")
     {
         if (e1 < e2)
@@ -233,23 +235,32 @@ void rectify(std::string dir)
     std::vector<cv::Point3d> obj_points;
     cv::perspectiveTransform(first_points, obj_points, Q);
 
-    std::cout << "Q: " << Q << std::endl;
+    std::cout << "orig_corners size: " << original_pts.size() << std::endl;
+    std::cout << "final_corners size: " << final_pts.size() << std::endl;
+    std::cout << "e1: " << e1 << std::endl;
+    std::cout << "e2: " << e2 << std::endl;
+    std::cout << "F:\n" << F << std::endl;
+    std::cout << "E:\n" << E << std::endl;
+    std::cout << "t:\n" << t << std::endl;
+    std::cout << "R1:\n" << R1 << std::endl;
+    std::cout << "R2:\n" << R2 << std::endl;
+    std::cout << "Q:\n" << Q << std::endl;
     std::cout << "first_points: " << first_points[0] << std::endl;
-    std::cout << "3D point estimates:" << std::endl;
+    std::cout << "\n3D point estimates:" << std::endl;
     for (cv::Point3d obj_pt : obj_points)
         std::cout << obj_pt << std::endl;
 
-    cv::imshow("Original 4 Points", first_img);
-    cv::imshow("Final 4 Points", last_img);
-    cv::waitKey(0);
+    // cv::imshow("Original 4 Points", first_img);
+    // cv::imshow("Final 4 Points", last_img);
+    // cv::waitKey(0);
 }
 
 int main()
 {
     rectify("Parallel_Cube");
-    rectify("Parallel_Real");
-    rectify("Turned_Cube");
-    rectify("Turned_Real");
+    // rectify("Parallel_Real");
+    // rectify("Turned_Cube");
+    // rectify("Turned_Real");
 
     return 0;
 }
