@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "/usr/include/x86_64-linux-gnu/c++/8",
                 "/usr/include/python3.6m",
-                "/usr/local/include/opencv4/**"
+                "/usr/local/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++-8",

@@ -56,9 +56,9 @@ void featureMatch(const std::vector<cv::Point2d>& prev_corners, const cv::Mat& p
         cv::Mat result;
         result.create(result_rows, result_cols, CV_32FC1);
         cv::matchTemplate(search_img, template_img, result, method);
-        std::cout << "result: " << result << std::endl;
+        // std::cout << "result: " << result << std::endl;
         cv::normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
-        std::cout << "result_normed: " << result << std::endl;
+        // std::cout << "result_normed: " << result << std::endl;
 
         double min_val, max_val;
         cv::Point match_loc, min_loc, max_loc;
@@ -85,6 +85,9 @@ void getF(std::string glob_path, std::vector<cv::Point2d>& original_pts,
     // grab the first image
     cv::Mat prev_img, prev_img_g, img, img_g;
     prev_img = cv::imread(filenames[0]);
+    cv::FileStorage fout{"gray_img.yaml", cv::FileStorage::WRITE};
+    fout.write("gray_mat", prev_img);
+    fout.release();
     cv::cvtColor(prev_img,prev_img_g,cv::COLOR_BGR2GRAY);
     prev_img.copyTo(first_img);
 
@@ -181,12 +184,12 @@ void rectify(std::string dir)
         if (e1 < e2)
         {
             R = R1;
-            std::cout << "R" << R1 << std::endl;
+            std::cout << "R == R1" << std::endl;
         }
         else
         {
             R = R2;
-            std::cout << "R" << R2 << std::endl;
+            std::cout << "R == R2" << std::endl;
         }
         t = t * 2.7;
     }
@@ -195,21 +198,21 @@ void rectify(std::string dir)
         if (R1.at<double>(1,1) > 0)
         {
             R = R1;
-            std::cout << "R" << R1 << std::endl;
+            std::cout << "R == R1" << std::endl;
         }
         else
         {
             R = R2;
-            std::cout << "R" << R2 << std::endl;
+            std::cout << "R == R2" << std::endl;
         }
         t = t * 2.45;
     }
     if (t.at<double>(0) > 0)
-        std::cout << "t" << t << std::endl;
+        std::cout << "t == t" << std::endl;
     else
     {
         t = -t;
-        std::cout << "t" << -t << std::endl;
+        std::cout << "t == -t" << std::endl;
     }
 
     cv::Size img_size{640,480};
@@ -219,7 +222,7 @@ void rectify(std::string dir)
     std::vector<cv::Point3d> last_points, first_points;
     for (int i{0}; i < 4; i++)
     {
-        int s{1};
+        int s{3};
         int a{0};
         double fx, fy, ox, oy;
         fx = final_pts[s*i+a].x;
@@ -245,22 +248,65 @@ void rectify(std::string dir)
     std::cout << "R1:\n" << R1 << std::endl;
     std::cout << "R2:\n" << R2 << std::endl;
     std::cout << "Q:\n" << Q << std::endl;
-    std::cout << "first_points: " << first_points[0] << std::endl;
+    std::cout << "first_points: \n\t" 
+              << first_points[0] << "\n\t"
+              << first_points[1] << "\n\t"
+              << first_points[2] << "\n\t"
+              << first_points[3] << "\n\n";
     std::cout << "\n3D point estimates:" << std::endl;
     for (cv::Point3d obj_pt : obj_points)
         std::cout << obj_pt << std::endl;
 
-    // cv::imshow("Original 4 Points", first_img);
-    // cv::imshow("Final 4 Points", last_img);
-    // cv::waitKey(0);
+    cv::imshow("Original 4 Points", first_img);
+    cv::imshow("Final 4 Points", last_img);
+    cv::waitKey(0);
+
+    // parallel points on closest edge
+    //    cv::Point3d pt4_R{408.0, 423.0, 0.0};
+    //    cv::Point3d pt3_R{408.0, 313.0, 0.0};
+    //    cv::Point3d pt2_R{407.0, 201.0, 0.0};
+    //    cv::Point3d pt1_R{405.0, 92.0, 0.0};
+
+    //    cv::Point3d pt4_L{297.5, 424.0, -297.5+pt4_R.x};
+    //    cv::Point3d pt3_L{297.0, 313.0, -297.0+pt3_R.x};
+    //    cv::Point3d pt2_L{296.0, 202.0, -296.0+pt2_R.x};
+    //    cv::Point3d pt1_L{295.0, 92.0, -295.0+pt1_R.x};
+        // turned points on closest edge
+    //    cv::Point3d pt4_R{336.0, 408.0, 0.0};
+    //    cv::Point3d pt3_R{336.0, 306.0, 0.0};
+    //    cv::Point3d pt2_R{334.0, 202.0, 0.0};
+    //    cv::Point3d pt1_R{333.0, 99.0, 0.0};
+
+    //    cv::Point3d pt4_L{235.0, 414.0, -235.0+pt4_R.x};
+    //    cv::Point3d pt3_L{234.0, 306.0, -234.0+pt3_R.x};
+    //    cv::Point3d pt2_L{234.0, 200.0, -234.0+pt2_R.x};
+    //    cv::Point3d pt1_L{233.0, 94.0, -233.0+pt1_R.x};
+
+    //    std::vector<cv::Point3d> points{pt1_L, pt2_L, pt3_L, pt4_L};
+
+    //    std::vector<cv::Point3d> obj_points;
+    //    cv::perspectiveTransform(points, obj_points, Q);
+
+    //    for (int i{0}; i < obj_points.size(); i++)
+    //    {
+    //        std::cout << i << std::endl << obj_points[i] << std::endl;
+    //    }
+
+    //    cv::imshow("first", first_img);
+    //    cv::imshow("last", last_img);
+    //    cv::setMouseCallback("first", firstCallback);
+    //    cv::setMouseCallback("last", lastCallback);
+    //    cv::waitKey(0);
+
+    
 }
 
 int main()
 {
-    rectify("Parallel_Cube");
+    // rectify("Parallel_Cube");
     // rectify("Parallel_Real");
     // rectify("Turned_Cube");
-    // rectify("Turned_Real");
+    rectify("Turned_Real");
 
     return 0;
 }
