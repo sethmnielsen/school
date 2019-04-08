@@ -45,6 +45,7 @@ void calc_3dpoints(CamData &cam, CamData cam2, cv::Mat Q)
         camL = cam2;
         camR = cam;
     }
+    
     for(int i=0; i < cam.output_pts.size(); i++)
     {
         cv::Point3f pt(cam.output_pts[i].x, cam.output_pts[i].y, 
