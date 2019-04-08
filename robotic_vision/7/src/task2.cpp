@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-int main() 
+using namespace std;
+
+int main()
 {
-    
-    
     return 0;
 }
