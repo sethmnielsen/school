@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "make",
             "options": {
-                "cwd": "${workspaceRoot}/6/build"
+                "cwd": "${workspaceRoot}/7/build"
             },
             "presentation": {
                 "echo": true,

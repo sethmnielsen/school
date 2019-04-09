@@ -14,12 +14,10 @@ vector<cv::Point2d> find_features(const cv::Mat &img)
     cv::Mat gray;
     int max_corners(100);
     double quality(0.01), min_dist(10.0);
+    cv::Rect roi(cv::Point2d(294, 172), cv::Point2f(369, 362));
 
     cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
-    cv::goodFeaturesToTrack(gray, features, max_corners, quality, min_dist);
-    cout << "\n\n *** Made it *** \n\n"; 
-
-    // POSSIBLY CROP TO ROI HERE //
+    cv::goodFeaturesToTrack(gray(roi), features, max_corners, quality, min_dist);
 
     return features;
 }
@@ -153,6 +151,15 @@ int main()
         cout << ", " << t_vec[i]; 
     }
     cout << "]\n";
+
+    for (cv::Point2d pt : feats)
+        cv::circle(img, pt, 3, cv::Scalar(0,0,255), -1);
+    for (cv::Point2d pt : prev_feats)
+        cv::circle(prev_img, pt, 3, cv::Scalar(0,255,0), -1);
+
+    cv::imshow("Image", img);
+    cv::imshow("Prev", prev_img);
+    cv::waitKey(0);
     
     return 0;
 }

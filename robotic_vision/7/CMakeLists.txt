@@ -11,8 +11,8 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
 )
 
-add_executable(task1_opt src/task1_opt.cpp)
-target_link_libraries(task1_opt ${OpenCV_LIBS})
+add_executable(task1 src/task1.cpp)
+target_link_libraries(task1 ${OpenCV_LIBS})
 
 add_executable(task2 src/task2.cpp)
 target_link_libraries(task2 ${OpenCV_LIBS})

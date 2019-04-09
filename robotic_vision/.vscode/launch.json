@@ -8,7 +8,7 @@
             "name": "(gdb) hw7 task1",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/7/build/task1_opt",
+            "program": "${workspaceFolder}/7/build/task1",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/7/build",
