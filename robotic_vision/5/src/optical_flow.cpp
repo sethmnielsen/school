@@ -74,7 +74,12 @@ vector<Mat> process_frames(int skip_frames, int pyramid_level)
     vector<float> err;
     calcOpticalFlowPyrLK(prev_gray, gray, prev_corners, corners, status, err, winSize,
                          pyramid_level, crit, 0, MIN_EIG);
-
+    cout << "prev_gray channels: " << prev_gray.channels() << endl;
+    cout << "     gray channels: " << gray.channels() << endl;
+    cout << "prev_gray type: " << prev_gray.type() << endl;
+    cout << "     gray type: " << gray.type() << endl;
+    cout << "prev_gray size: " << prev_gray.size() << endl;
+    cout << "     gray size: " << gray.size() << endl;
     int counter(0);
     for (int i=0; i < prev_corners.size(); i++)
     {

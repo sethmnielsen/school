@@ -24,13 +24,13 @@
             ]
         },
         {
-            "name": "(gdb) mat_task3",
+            "name": "(gdb) optical_flow",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/6/build/mat_task3",
+            "program": "${workspaceFolder}/5/build/optical_flow",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/6/build",
+            "cwd": "${workspaceFolder}/5/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
