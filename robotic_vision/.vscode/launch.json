@@ -5,13 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) task3",
+            "name": "(gdb) hw7 task1",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/6/build/task3",
+            "program": "${workspaceFolder}/7/build/task1_opt",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/6/build",
+            "cwd": "${workspaceFolder}/7/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

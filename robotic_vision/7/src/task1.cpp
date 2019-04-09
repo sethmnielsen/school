@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 #include <cmath>
+// #include <pybind11/pybind11.h>
 
+// namespace py = pybind11;
 using namespace std;
 
 vector<cv::Point2d> find_features(const cv::Mat &img) 
@@ -14,7 +16,8 @@ vector<cv::Point2d> find_features(const cv::Mat &img)
     double quality(0.01), min_dist(10.0);
 
     cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
-    cv::goodFeaturesToTrack(img, features, max_corners, quality, min_dist);
+    cv::goodFeaturesToTrack(gray, features, max_corners, quality, min_dist);
+    cout << "\n\n *** Made it *** \n\n"; 
 
     // POSSIBLY CROP TO ROI HERE //
 
@@ -94,6 +97,29 @@ void track_features(vector<cv::Point2d> &feats, vector<cv::Point2d> &prev_feats,
     prev_feats = temp_prev;
 }
 
+void calc_time2impact(vector<cv::Point2d> feats, vector<cv::Point2d> prev_feats,
+                      vector<double> &t_vec)
+{
+    int counter(0);
+    double sum(0), mean(0), y(0), y_prev(0), a(0), t(0);
+    for (int i=0; i < feats.size(); i++)
+    {
+        y = feats[i].y;
+        y_prev = prev_feats[i].y;
+
+        a = y / y_prev; 
+        t = a / (a-1); // seconds to impact
+
+        if (t < 0 || isinf(t) || isnan(t) )
+            continue;
+        
+        sum += t;
+        counter++;
+    }
+    mean = sum / counter;
+    t_vec.push_back(mean);
+}
+
 int main() 
 {
     cv::FileStorage fin("../params/cam_params.yaml", cv::FileStorage::READ);
@@ -102,6 +128,7 @@ int main()
     fin["dist"] >> dist;
     fin.release();
 
+
     vector<cv::Point2d> feats, prev_feats, orig_feats;
     string path("../imgs/T");
     cv::Mat img, prev_img;
@@ -109,14 +136,23 @@ int main()
     img.copyTo(prev_img);
     
     orig_feats = find_features(img);
+    prev_feats = orig_feats;
 
     int end = 19;
+    vector<double> t_vec;
+
     for (int i=2; i < end; i++)
     {
-        prev_feats = orig_feats;
         track_features(feats, prev_feats, img, prev_img);
-        calc_time2impact(feats, prev_feats, );
+        calc_time2impact(feats, prev_feats, t_vec);
     }
+    
+    cout << "t: [" << t_vec[0];
+    for (int i=1; i < t_vec.size(); i++)
+    {
+        cout << ", " << t_vec[i]; 
+    }
+    cout << "]\n";
     
     return 0;
 }

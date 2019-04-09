@@ -12,12 +12,12 @@ void record_video(vector<Mat> vid1, vector<Mat> vid2, string filename);
 int main()
 {
   std::vector<cv::Mat> vid1, vid2, vid3, vid4;
-  vid1 = process_frames(1, 0);
-  vid2 = process_frames(10, 0);
+  // vid1 = process_frames(1, 0);
+  // vid2 = process_frames(10, 0);
   vid3 = process_frames(1, 3);
   vid4 = process_frames(10, 3);
-  record_video(vid1, vid2, "../videos/task1_0pyrlevel.avi");
-  record_video(vid3, vid4, "../videos/task1_3pyrlevel.avi");
+  // record_video(vid1, vid2, "../videos/task1_0pyrlevel.avi");
+  // record_video(vid3, vid4, "../videos/task1_3pyrlevel.avi");
   return 0;
 }
 
@@ -88,10 +88,10 @@ vector<Mat> process_frames(int skip_frames, int pyramid_level)
     if (frame_num % 5 == 0)
       cout << "Corners: " << counter << "; percentage: " << (double)counter / prev_corners.size() * 100.0 << endl;
     
-    // cv::imshow("Optical Flow", frame);
-    // char c = (char)waitKey(40);
-    // if ( c == 'q' )
-    //   break;
+    cv::imshow("Optical Flow", frame);
+    char c = (char)waitKey(10);
+    if ( c == 'q' )
+      break;
     
     frame_num++;
     vid.push_back(frame);

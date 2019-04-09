@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 import pickle as pkl
-from IPython.core.debugger import Pdb
 
 np.set_printoptions(suppress=True)
+np.array()
 
 def findCorners(img):
     size = (10,7)

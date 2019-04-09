@@ -94,15 +94,15 @@ void acceptMatches(std::vector<cv::Point2f> &corners, std::vector<cv::Point2f> &
 
 int main()
 {
-  std::string path{"../images/T"};
+  std::string path{"../imgs/T"};
   std::string filetype{".jpg"};
 
   std::ofstream fout{"task1data.txt"};
 
   cv::Mat M, dst;
-  cv::FileStorage fin("../camera_params.yaml", cv::FileStorage::READ);
-  fin["Camera_Matrix"] >> M;
-  fin["Distortion_Params"] >> dst;
+  cv::FileStorage fin("../params/cam_params.yaml", cv::FileStorage::READ);
+  fin["mtx"] >> M;
+  fin["dist"] >> dst;
   fin.release();
 
   cv::Mat img, g_img, img_prev, g_prev;
