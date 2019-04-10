@@ -23,6 +23,9 @@ include_directories(
 # add_executable(task3 src/task3.cpp)
 # target_link_libraries(task3 ${OpenCV_LIBS})
 
+add_executable(b_task3 src/b_task3.cpp)
+target_link_libraries(b_task3 ${OpenCV_LIBS})
+
 pybind11_add_module(task1_py 
     src/task1.cpp 
 )
