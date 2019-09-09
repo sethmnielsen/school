@@ -4,3 +4,6 @@
 [submodule "robotic_vision/group1"]
 	path = robotic_vision/group1
 	url = git@github.com:thanedowning/ECEn_631_Group_1.git
+[submodule "deep_learning/cs474_labs_f2019"]
+	path = deep_learning/cs474_labs_f2019
+	url = git@github.com:sethmnielsen/cs474_labs_f2019.git
