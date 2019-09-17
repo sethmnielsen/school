@@ -2,7 +2,7 @@
 *.m~
 *.pptx
 *.bak
-*.ipynb_checkpoints
+*.ipynb_checkpoints/
 .DS_Store
 *.bmp
 *.jpg
