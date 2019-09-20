@@ -37,6 +37,12 @@ x_eps = 0  # noisy x
 vhat = 0
 xhat = 0
 
+# State space matrices
+A = np.array([[0, 1],
+              [0, -b/m]])
+
+B = np.array([0, 1/m])
+
 # Simulation loop
 for i in range(N-1):
     # Dynamics
@@ -46,6 +52,8 @@ for i in range(N-1):
     x_eps = x_eps + np.sqrt(R)
 
     # Prediction
+    # xbar = np.array([x, vdot])
+    xbar = A @ np.array([x, v]) + B*F[i]
     vhat = vhat + vhat* + B*u
     
     # Correction
