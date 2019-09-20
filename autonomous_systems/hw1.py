@@ -7,21 +7,32 @@ m = 100
 b = 20
 Ts = 0.05
 t_end = 50
-delta = 0.001 # measurement noise covariance of position
-eps_x = 0.0001 # process noise covariance of position
-eps_v = 0.01 # process noise covariance of velocity
 x0 = 0  # initial position guess
 v0 = 0  # initial velocity guess
 N = int(t_end / Ts) # number of samples
-R_0 = np.eye(2)
+
+# Noise 
+delta = 0.001 # measurement noise covariance of position
+R = 0.001
+eps_x = 0.0001 # process noise covariance of position
+eps_v = 0.01 # process noise covariance of velocity
+Q = np.array([eps_x, eps_v])
+P = np.eye(2)
 
 F = np.zeros(N)
 F[:100] = 50
 F[500:600] = -50
-t = np.arange(0, t_end, Ts)
+t_arr = np.arange(0, t_end, Ts)
+
+# Plotting
+v_arr = np.zeros(N)
+x_arr = np.zeros(N)
+
 # True states
-v_t = np.zeros(N)
-x_t = np.zeros(N)
+x = 0
+v = 0
+x_eps = 0  # noisy x
+
 # Estiamted states
 vhat = 0
 xhat = 0
@@ -29,15 +40,20 @@ xhat = 0
 # Simulation loop
 for i in range(N-1):
     # Dynamics
-    vdot = (F[i] - b*v_t[i]) / m
-    v_t[i+1] = v_t[i] + vdot*Ts
-    x_t[i+1] = x_t[i] + v_t[i]*Ts + np.sign(vdot)*0.5*vdot**2
+    vdot = (F[i] - b*v) / m
+    v += vdot*Ts
+    x += v*Ts + np.sign(vdot)*0.5*vdot**2
+    x_eps = x_eps + np.sqrt(R)
 
     # Prediction
     vhat = vhat + vhat* + B*u
     
     # Correction
-    xhat = xhat + L*(y_t - C*xhat)
+    # xhat = xhat + L*(y_t - C*xhat)
+
+    # Add to plots
+    x_arr[i] = x_eps 
+    v_arr[i] = v_eps
 
 fig, axs = plt.subplots(3, 1, sharex=True)
 axs[0].plot(t, F)
