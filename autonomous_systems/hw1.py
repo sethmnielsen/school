@@ -44,16 +44,21 @@ B = np.array([0, 1/m])
 
 # Simulation loop
 for i in range(N-1):
-    # Dynamics
+    ### Dynamics
+    # noise
+    mean = [0,0]
+    cov = [[1,0], 
+           [0,1]]
+    # equations for truth propagation
     vdot = (F[i] - b*v) / m
     v = v + vdot*dt
+    xhat_eps = np.sqrt(Q)*np.random.multivariate_normal(mean, cov)
     x = x + v*dt + np.sign(vdot)*0.5*vdot**2
-    x_eps = x + np.sqrt(Q)*np.random.multivariate_normal(0, 1)
 
     # Prediction
     # xbar = np.array([x, vdot])
     xhat_dot = A @ xhat + B*F[i]
-    P = A @ P @ A.T + Q
+    P = A @ P @ A.T  +  Q *dt**2
     
     # Correction
     # xhat = xhat + L*(y_t - C*xhat)
