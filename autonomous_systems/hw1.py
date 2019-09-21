@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 # Initialize variables
 m = 100
 b = 20
-Ts = 0.05
+dt = 0.05
 t_end = 50
 x0 = 0  # initial position guess
 v0 = 0  # initial velocity guess
-N = int(t_end / Ts) # number of samples
+N = int(t_end / dt) # number of samples
 
 # Noise 
 delta = 0.001 # measurement noise covariance of position
@@ -22,7 +22,7 @@ P = np.eye(2)
 F = np.zeros(N)
 F[:100] = 50
 F[500:600] = -50
-t_arr = np.arange(0, t_end, Ts)
+t_arr = np.arange(0, t_end, dt)
 
 # Plotting
 v_arr = np.zeros(N)
@@ -33,9 +33,8 @@ x = 0
 v = 0
 x_eps = 0  # noisy x
 
-# Estiamted states
-vhat = 0
-xhat = 0
+# Estimated states
+xhat = np.array([x, v])
 
 # State space matrices
 A = np.array([[0, 1],
@@ -47,13 +46,13 @@ B = np.array([0, 1/m])
 for i in range(N-1):
     # Dynamics
     vdot = (F[i] - b*v) / m
-    v += vdot*Ts
-    x += v*Ts + np.sign(vdot)*0.5*vdot**2
-    x_eps = x_eps + np.sqrt(R)
+    v = v + vdot*dt
+    x = x + v*dt + np.sign(vdot)*0.5*vdot**2
+    x_eps = x + np.sqrt(Q)
 
     # Prediction
     # xbar = np.array([x, vdot])
-    xbar = A @ np.array([x, v]) + B*F[i]
+    xhat_dot = A @ np.array([x, v]) + B*F[i]
     vhat = vhat + vhat* + B*u
     
     # Correction
