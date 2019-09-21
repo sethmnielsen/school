@@ -48,12 +48,12 @@ for i in range(N-1):
     vdot = (F[i] - b*v) / m
     v = v + vdot*dt
     x = x + v*dt + np.sign(vdot)*0.5*vdot**2
-    x_eps = x + np.sqrt(Q)
+    x_eps = x + np.sqrt(Q)*np.random.multivariate_normal(0, 1)
 
     # Prediction
     # xbar = np.array([x, vdot])
-    xhat_dot = A @ np.array([x, v]) + B*F[i]
-    vhat = vhat + vhat* + B*u
+    xhat_dot = A @ xhat + B*F[i]
+    P = A @ P @ A.T + Q
     
     # Correction
     # xhat = xhat + L*(y_t - C*xhat)
