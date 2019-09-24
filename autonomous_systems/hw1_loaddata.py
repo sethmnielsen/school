@@ -1,14 +1,27 @@
 import numpy as np
 import scipy.signal as ss
+import scipy.io as sio
 import matplotlib
 import matplotlib.pyplot as plt
+
+data = sio.loadmat('data_hw1.mat')
+
+# Estimated state
+xhat = data['mu0'].flatten()
+P = data['Sig0'] # error covariance 
+# Force and time arrays
+F = data['u'].flatten()
+t_arr = data['t'].flatten()
+x_true = data['xtr'].flatten()
+v_true = data['vtr'].flatten()
+z = data['z'].flatten()
 
 # Initialize variables
 m = 100
 b = 20
 dt = 0.05
 t_end = 50
-N = int(t_end / dt) # number of samples
+N = int(t_end / dt)+1 # number of samples
 K = np.zeros(2)  # Kalman gains
 
 # Noise 
@@ -17,27 +30,10 @@ R = delta  # covariance of the observation noise
 eps_x = 0.0001 # process noise covariance of position
 eps_v = 0.01 # process noise covariance of velocity
 Q = np.diag([eps_x, eps_v]) # covariance of the process noise 
-P = np.eye(2)  # error covariance (x_state - xhat)
-Pbar = np.eye(2) # prediction error covariance (x_state - xbar)
-
-# Force and time arrays
-F = np.zeros(N)
-F[:100] = 50
-F[500:600] = -50
-t_arr = np.arange(0, t_end, dt)
-
-# True state
-x = 0
-v = 0
-x_state = np.array([x, v])  # true state, with noise added
+Pbar = np.eye(2) # prediction error covariance 
 
 # Predicted state
 xbar = np.array([0, 0])
-
-# Estimated state
-x0 = 0  # initial position guess
-v0 = 0  # initial velocity guess
-xhat = np.array([x0, v0])
 
 # State space matrices
 A = np.array([[0, 1],
@@ -59,41 +55,20 @@ error_cov_arr = np.zeros((2,N))
 K_arr = np.zeros((2,N))
 
 
-# Plot 1
-x_state_arr[:,0] = x_state
-xhat_arr[:, 0] = xhat
-
-# Plot 2
-estimate_error_arr[:,0] = np.copy(xhat)
-error_cov_arr[:,0] = P.diagonal()
-
-# Plot 3
-K_arr[:,0] = K
-
 # noise
 mean = [0,0]
 cov = [[1,0], 
        [0,1]]
 # Simulation loop
-for i in range(1,N-1):
-    ### Dynamics
-
-    # truth propagation
-    vdot = (F[i] - b*v) / m
-    # v = v + vdot*dt
-    # eps_x, eps_v = np.sqrt(Q)@np.random.multivariate_normal(mean, cov)
-    # x = (x + eps_x) + (v + eps_v)*dt + np.sign(vdot)*0.5*vdot**2
-    # x_state = np.array([x, v])
-    x_state = A @ x_state + B * F[i] + np.sqrt(Q)@np.random.multivariate_normal(mean, cov)
-
-    # Prediction
+for i in range(N-1):
+    x_state = np.array([x_true[i], v_true[i]])
+    
     xbar = A @ xhat + B*F[i]
     Pbar = A @ P @ A.T  +  Q 
     
     # Measurement Correction
     K = Pbar @ C.T * (C @ Pbar @ C.T + R)**(-1)  # Kalman gain
-    z = x_state[0] + np.sqrt(R) * np.random.randn()
-    xhat = xbar + K * (z - C @ xbar)
+    xhat = xbar + K * (z[i] - C @ xbar)
     P = (np.eye(2) - np.outer(K, C)) @ Pbar
 
     # Error
@@ -137,23 +112,24 @@ labels = [l.get_label() for l in lns]
 ax_pos.legend(lns, labels)
 
 ##### subplot 2
-ax_pos = axs[1]
-ax_pos.plot(t_arr, estimate_error_arr[0], color='orange', linestyle='solid', 
+ax_err = axs[1]
+lns = ax_err.plot(t_arr, estimate_error_arr[0], color='orange', linestyle='solid', 
             label='x error estimate')
-ax_pos.plot(t_arr, 2*np.sqrt(error_cov_arr[0]), color='red', linestyle='dashed', 
-            label='x error cov')
-ax_pos.plot(t_arr, -2*np.sqrt(error_cov_arr[0]), color='red', linestyle='dashed')
-ax_pos.set_ylabel('position (m)')
-ax_pos.legend()
-
-ax_vel = axs[2]
-ax_vel.plot(t_arr, estimate_error_arr[1], color='yellow', linestyle='solid', 
+lns += ax_err.plot(t_arr, estimate_error_arr[1], color='yellow', linestyle='solid', 
             label='v error estimate')
-ax_vel.plot(t_arr, 2*np.sqrt(error_cov_arr[1]), color='black', linestyle='dashed', 
+ax_err.set_ylabel('error x: (m), v: (m/s))')
+labels = [l.get_label() for l in lns]
+ax_err.legend(lns, labels)
+
+#### subplot 3
+ax_cov = axs[2]
+lns = ax_cov.plot(t_arr, error_cov_arr[0], color='red', linestyle='dashed', 
+            label='x error cov')
+lns += ax_cov.plot(t_arr, error_cov_arr[1], color='black', linestyle='dashed', 
             label='v error cov')
-ax_vel.plot(t_arr, -2*np.sqrt(error_cov_arr[1]), color='black', linestyle='dashed')
-ax_vel.set_ylabel('velocity (m/s)')
-ax_vel.legend()
+ax_cov.set_ylabel('covariance')
+labels = [l.get_label() for l in lns]
+ax_cov.legend(lns, labels)
 
 #### subplot 4
 axs[3].plot(t_arr, K_arr[0], color='brown', linestyle='solid', label='K_x')
