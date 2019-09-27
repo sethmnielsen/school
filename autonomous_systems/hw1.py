@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.signal as ss
-import matplotlib
 import matplotlib.pyplot as plt
 
 # Initialize variables
