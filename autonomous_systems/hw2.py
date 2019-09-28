@@ -55,15 +55,17 @@ class EKF():
         x = state[0]
         y = state[1]
         th = state[2]
-        x -= vo*np.sin(th) + vo*np.sin(th + omghat*self.dt)
-        y += vo*np.cos(th) + vo*np.cos(th + omghat*self.dt)
-        th += omghat*self.dt 
+        th_plus = self.wrap(th + omghat*self.dt)
+        x -= vo*np.sin(th) + vo*np.sin(th_plus)
+        y += vo*np.cos(th) + vo*np.cos(th_plus)
+        th = th_plus
         state = np.array([x, y, th])
 
         mdx = self.marks[0] - x
         mdy = self.marks[1] - y
         r = np.srqt((mdx, mdy)**2) * np.random.randn(3)
-        phi = np.array(np.arctan2(mdx, mdy) - th) * np.random.randn(3)
+        phi_raw = self.wrap()
+        phi = np.array(phi_raw) * np.random.randn(3)
 
         self.z = np.array([r, phi])
 
@@ -74,7 +76,7 @@ class EKF():
 
         # convenience terms
         th = xhat[2]
-        th_plus = th + omg*dt
+        th_plus = self.wrap(th + omg*dt)
         vo = v/omg
         c = np.cos(th) - np.cos(th_plus)
         s = np.sin(th) - np.sin(th_plus)
@@ -94,7 +96,7 @@ class EKF():
                       [  0, self.dt]])
 
         # M matrix
-        al, a2, a3, a4 = self.alpha
+        a1, a2, a3, a4 = self.alpha
         M = np.diag(a1*v**2 + a2*omg**2, a3*v**2 + a4*omg**2)
 
         # Prediction state and covariance
@@ -108,13 +110,19 @@ class EKF():
             th = self.xbar[2]
             q = mdx**2 + mdy**2
             r = np.sqrt(q)
-            
-            zhat = np.array(r, np.arctan2(mdy, mdx) - th)
+            phi = self.wrap(np.arctan2(mdy, mdx) - th)
+            zhat = np.array(r, phi)
             H = np.array([[-mdx/r, -mdy/r,  0],
                           [ mdy/q, -mdx/q, -1]])
             S = multi_dot(H, self.Pbar, H.T) + self.R
             K = multi_dot(self.Pbar, H.T, npl.inv(S))
             self.xbar += K@(self.z - zhat)
             self.Pbar = (np.eye(3) - K @ H) @ self.Pbar
+            
+
+    def wrap(self, angle):
+        """wrap an angle in rads, -pi <= theta < pi"""
+        angle -= 2*np.pi * np.floor((angle + np.pi) * (0.5/np.pi))
+        return angle
         
         
