@@ -45,6 +45,8 @@ class EKF():
             self.prediction_step(self.v_c[i], self.omg_c[i], self.xhat)
             self.measurement_correction()
 
+    def __add__(self):
+
     def propagate_truth(self, v, omg, state):
         sample_v = self.alpha[0] * v**2 + self.alpha[1] * omg**2
         sample_omg = self.alpha[2] * v**2 + self.alpha[3] * omg**2
