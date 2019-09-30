@@ -68,24 +68,31 @@ class Angle():
 
     @check_type
     def __sub__(self, angle2):
-        return self.__add__(-angle2)
+        if isinstance(angle2, self.__class__):
+            newang = self.angle - angle2.angle
+        elif isinstance(angle2, np.ndarray):
+            newang = self.__array_ufunc__(np.subtract, '__call__', self, angle2)
+        else:
+            newang = self.angle - angle2
+        return self.wrap(newang)
     @check_type
     def __mul__(self, angle2):
         if isinstance(angle2, self.__class__):
             newang = self.angle * angle2.angle
+        elif isinstance(angle2, np.ndarray):
+            newang = self.__array_ufunc__(np.multiply, '__call__', self, angle2)
         else:
             newang = self.angle * angle2
-        # newang = self.__array_ufunc__(np.multiply, '__call__', self, value2)
         return self.wrap(newang)
     @check_type
     def __truediv__(self, angle2):
         if isinstance(angle2, self.__class__):
             newang = self.angle / angle2.angle
+        elif isinstance(angle2, np.ndarray):
+            newang = self.__array_ufunc__(np.truedivide, '__call__', self, angle2)
         else:
             newang = self.angle / angle2
-        # newang = self.__array_ufunc__(np.true_divide, '__call__', self, value2)
         return self.wrap(newang)
-
     # Reverse operators
     @check_type
     def __radd__(self, angle2):
@@ -101,3 +108,6 @@ class Angle():
     def __rtruediv__(self, angle2):
         Angle2 = self.__class__(angle2)
         return Angle2.__truediv__(self.angle)
+
+    def __neg__(self):
+        return self.__class__(-self.angle)

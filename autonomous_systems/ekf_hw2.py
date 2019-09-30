@@ -8,13 +8,13 @@ from angle import Angle
 class EKF():
     
     def __init__(self):
-        self.l = 20
+        self.sz = 20
         x = -5
         y = -3
         th = Angle(np.pi/2)
         self.x_state = np.array([x, y, th], dtype=object) # x, y, theta
         self.xhat = np.array([x, y, th], dtype=object)
-        self.xbar = np.zeros(3)
+        self.xbar = np.zeros(3, dtype=object)
 
         # time
         self.dt = 0.1
@@ -29,31 +29,34 @@ class EKF():
                             [-7, 8],
                             [6, -4]]).T
 
-        self.z = np.zeros((3,2))
+        self.z = np.zeros((3,2), dtype=object)
         
         # Noise
         self.alpha = np.array([0.1, 0.01, 0.01, 0.1])
         std_r = 0.1     # std dev of range
         std_phi = 0.05  # std dev of bearing
 
-        self.K = np.zeros(3)
+        self.K = np.zeros(3, dtype=object)
         self.R = np.diag([std_r**2, std_phi**2])
         self.P = np.eye(3)
         self.Pbar = np.eye(3)
 
         # create history arrays
-        state_history = np.zeros((self.N, 3))
         # rotation b2i
-        xhat_history = np.zeros((self.N, 3))
-        # error of estimated state
-        estimation_error = np.zeros((self.N, 3))
-        # sqrt cov of error state
+        self.state_hist = np.zeros((self.N, 3), dtype=object)
+        self.xhat_hist = np.zeros((self.N, 3), dtype=object)
+        self.est_error_hist = np.zeros((self.N, 3), dtype=object)
+        self.error_cov_hist = np.zeros((self.N, 3), dtype=object)
+
+        self.write_history(0)
 
     def run(self):
         for i in range(1, self.N-1):
             self.propagate_truth(self.v_c[i], self.omg_c[i], self.x_state)
             self.prediction_step(self.v_c[i], self.omg_c[i], self.xhat)
             self.measurement_correction()
+
+            self.write_history(i)
 
     def propagate_truth(self, v, omg, state):
         sample_v = self.alpha[0] * v**2 + self.alpha[1] * omg**2
@@ -134,3 +137,9 @@ class EKF():
 
         self.xhat = np.copy(self.xbar)
         self.P = np.copy(self.Pbar)
+
+    def write_history(self, i):
+        self.state_hist[i] = np.copy(self.x_state)
+        self.xhat_hist[i] = np.copy(self.xhat)
+        self.est_error_hist[i] = self.xhat - self.x_state
+        self.error_cov_hist[i] = self.P.diagonal()

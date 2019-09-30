@@ -16,7 +16,15 @@
             "name": "Python: HW",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/hw2.py",
+            "program": "${workspaceFolder}/plot_hw2.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: HW bb",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/bb/hw2.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
