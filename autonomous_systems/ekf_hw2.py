@@ -42,7 +42,7 @@ class EKF():
         self.Pbar = np.eye(3)
 
         # history
-        
+        pos_history = np.zeros((self.N, 3))
 
     def run(self):
         for i in range(1, self.N-1):
