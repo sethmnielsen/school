@@ -7,8 +7,8 @@ def heading2Rotation(psi):
     c_psi = np.cos(psi)
     s_psi = np.sin(psi)
 
-    R_yaw = np.array([[c_psi.angle, s_psi.angle],
-                     [-s_psi.angle, c_psi.angle]])
+    R_yaw = np.array([[c_psi, s_psi],
+                     [-s_psi, c_psi]])
 
     return R_yaw.T  # transpose to return body to inertial
 
@@ -20,6 +20,7 @@ if __name__ == '__main__':
     xhats = ekf.state_hist
     est_errors = ekf.est_error_hist
     error_covs = ekf.error_cov_hist
+    t_span = ekf.t_arr
 
     # Constants    
     bot_radius = 0.5
@@ -51,7 +52,7 @@ if __name__ == '__main__':
 
     ax1.set_xlim(-ekf.sz, ekf.sz)
     ax1.set_ylim(-ekf.sz, ekf.sz)
-    f1.canvas
+    f1.canvas.draw()
     f1.show()
 
     for i in range(ekf.N-1):
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
         ax1.redraw_in_frame()
         # time.sleep(0.1)
-        plt.pause(0.005)
+        plt.pause(0.05)
     #
 
 
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     pl2a = plt.plot(t_span, xhats[:,0], label='Est: x')
 
     ax2.legend()
-    f2.show()
+    # f2.show()
 
 
     # ======================================
@@ -100,7 +101,7 @@ if __name__ == '__main__':
     pl3a = plt.plot(t_span,  xhats[:,1], label='Est: y')
 
     ax3.legend()
-    f3.show()
+    # f3.show()
 
 
     # ======================================
@@ -113,7 +114,7 @@ if __name__ == '__main__':
     pl4a = plt.plot(t_span, xhats[:,2], label='Est: psi')
 
     ax4.legend()
-    f4.show()
+    # f4.show()
 
     # ======================================
     # ======================================
@@ -127,7 +128,7 @@ if __name__ == '__main__':
     pl5a = plt.plot(t_span,-2*np.sqrt(error_covs[:,0]), label='Cov: x')
 
     ax5.legend()
-    f5.show()
+    # f5.show()
 
 
     # ======================================
@@ -141,7 +142,7 @@ if __name__ == '__main__':
     pl6a = plt.plot(t_span,-2*np.sqrt(error_covs[:,1]), label='Cov: y')
 
     ax6.legend()
-    f6.show()
+    # f6.show()
 
 
     # ======================================
@@ -155,4 +156,8 @@ if __name__ == '__main__':
     pl7a = plt.plot(t_span,-2*np.sqrt(error_covs[:,2]), label='Cov: psi')
 
     ax7.legend()
-    f7.show()
+    # f7.show()
+
+    plt.show()
+
+    print("Finished everything")
