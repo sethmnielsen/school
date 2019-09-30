@@ -10,7 +10,15 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": true
+        },
+        {
+            "name": "Python: HW",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/hw2.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

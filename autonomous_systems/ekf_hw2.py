@@ -1,25 +1,26 @@
 import numpy as np
-from numpy.linalg import multi_dot
-from numpy import linalg as npl
+from numpy.linalg import multi_dot, inv, det
 import scipy.signal as ss
 import matplotlib.pyplot as plt
+from angle import Angle
 
 
 class EKF():
+    
     def __init__(self):
         self.l = 20
         x = -5
         y = -3
-        th = np.pi/2
-        self.x_state = np.zeros([x, y, th]) # x, y, theta
-        self.xhat = np.zeros([x, y, th])
+        th = Angle(np.pi/2)
+        self.x_state = np.array([x, y, th], dtype=object) # x, y, theta
+        self.xhat = np.array([x, y, th], dtype=object)
         self.xbar = np.zeros(3)
 
         # time
         self.dt = 0.1
-        self.t_end = 20
-        self.t_arr = np.arange(0, t_end, dt)
-        self.N = int(t_end / dt)
+        t_end = 20
+        self.t_arr = np.arange(0, t_end, self.dt)
+        self.N = int(t_end / self.dt)
 
         self.v_c = 1 + 0.5*np.cos(2*np.pi*(0.2)*self.t_arr)
         self.omg_c = -0.2 + 2*np.cos(2*np.pi*(0.6)*self.t_arr)
@@ -28,7 +29,7 @@ class EKF():
                             [-7, 8],
                             [6, -4]]).T
 
-        self.z = np.zeros((2,3))
+        self.z = np.zeros((3,2))
         
         # Noise
         self.alpha = np.array([0.1, 0.01, 0.01, 0.1])
@@ -40,12 +41,14 @@ class EKF():
         self.P = np.eye(3)
         self.Pbar = np.eye(3)
 
-        for i in range(1, N-1):
+        # history
+        
+
+    def run(self):
+        for i in range(1, self.N-1):
             self.propagate_truth(self.v_c[i], self.omg_c[i], self.x_state)
             self.prediction_step(self.v_c[i], self.omg_c[i], self.xhat)
             self.measurement_correction()
-
-    def __add__(self):
 
     def propagate_truth(self, v, omg, state):
         sample_v = self.alpha[0] * v**2 + self.alpha[1] * omg**2
@@ -57,19 +60,19 @@ class EKF():
         x = state[0]
         y = state[1]
         th = state[2]
-        th_plus = self.wrap(th + omghat*self.dt)
-        x -= vo*np.sin(th) + vo*np.sin(th_plus)
-        y += vo*np.cos(th) + vo*np.cos(th_plus)
-        th = th_plus
+        th_plus = th + omghat*self.dt
+        x -= vo*np.sin(th.angle) + vo*np.sin(th_plus.angle)
+        y += vo*np.cos(th.angle) + vo*np.cos(th_plus.angle)
+        th = Angle(th_plus)
         state = np.array([x, y, th])
 
         mdx = self.marks[0] - x
         mdy = self.marks[1] - y
-        r = np.srqt((mdx, mdy)**2) * np.random.randn(3)
-        phi_raw = self.wrap()
+        r = np.sqrt(np.add(mdx**2,mdy**2)) * np.random.randn(3)
+        phi_raw = np.arctan2(mdy, mdx) - th
         phi = np.array(phi_raw) * np.random.randn(3)
 
-        self.z = np.array([r, phi])
+        self.z = np.array([r, phi]).T
 
     def prediction_step(self, v, omg, xhat):
         G = np.eye(3)        # Jacobian of g(u_t, x_t-1) wrt state
@@ -78,10 +81,10 @@ class EKF():
 
         # convenience terms
         th = xhat[2]
-        th_plus = self.wrap(th + omg*dt)
+        th_plus = th + omg*self.dt
         vo = v/omg
-        c = np.cos(th) - np.cos(th_plus)
-        s = np.sin(th) - np.sin(th_plus)
+        c = np.cos(th.angle) - np.cos(th_plus.angle)
+        s = np.sin(th.angle) - np.sin(th_plus.angle)
 
         # G matrix
         g02 = -vo * c
@@ -91,19 +94,19 @@ class EKF():
         # V matrix
         v00 = -s / omg
         v10 =  c / omg  
-        v01 =  v*s / omg**2  +  v*np.cos(th_plus)*dt / omg
-        v11 = -v*c / omg**2  +  v*np.sin(th_plus)*dt / omg
+        v01 =  v*s / omg**2  +  v*np.cos(th_plus.angle)*self.dt / omg
+        v11 = -v*c / omg**2  +  v*np.sin(th_plus.angle)*self.dt / omg
         V = np.array([[v00, v01],
                       [v10, v11],
                       [  0, self.dt]])
 
         # M matrix
         a1, a2, a3, a4 = self.alpha
-        M = np.diag(a1*v**2 + a2*omg**2, a3*v**2 + a4*omg**2)
+        M = np.diag([a1*v**2 + a2*omg**2, a3*v**2 + a4*omg**2])
 
         # Prediction state and covariance
-        self.xbar = xhat + [-vo*s, vo*c, omg*dt]
-        self.Pbar = multi_dot(G, self.P, G.T) + multi_dot(V, M, V.T)
+        self.xbar = xhat + [-vo*s, vo*c, omg*self.dt]
+        self.Pbar = multi_dot([G, self.P, G.T]) + multi_dot([V, M, V.T])
 
     def measurement_correction(self):
         for i in range(3):
@@ -112,19 +115,17 @@ class EKF():
             th = self.xbar[2]
             q = mdx**2 + mdy**2
             r = np.sqrt(q)
-            phi = self.wrap(np.arctan2(mdy, mdx) - th)
-            zhat = np.array(r, phi)
+            phi = np.arctan2(mdy, mdx) - th
+            zhat = np.array([r, phi.angle])
             H = np.array([[-mdx/r, -mdy/r,  0],
                           [ mdy/q, -mdx/q, -1]])
-            S = multi_dot(H, self.Pbar, H.T) + self.R
-            K = multi_dot(self.Pbar, H.T, npl.inv(S))
-            self.xbar += K@(self.z - zhat)
+            S = multi_dot([H, self.Pbar, H.T]) + self.R
+            K = multi_dot([self.Pbar, H.T, inv(S)])
+            zdiff = self.z[0] - zhat
+            self.xbar += K@(zdiff)
             self.Pbar = (np.eye(3) - K @ H) @ self.Pbar
-            
 
-    def wrap(self, angle):
-        """wrap an angle in rads, -pi <= theta < pi"""
-        angle -= 2*np.pi * np.floor((angle + np.pi) * (0.5/np.pi))
-        return angle
-        
-        
+            # pzt *= det(2*np.pi*S)**(-0.5) * np.exp(-0.5 * multi_dot([zdiff.T, inv(S), zdiff]))
+
+        self.xhat = np.copy(self.xbar)
+        self.P = np.copy(self.Pbar)
