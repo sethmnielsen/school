@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
     ax1.add_patch(pl1a)
 
-    ax1.set_xlim(-tbot.field_sz,tbot.field_sz)
-    ax1.set_ylim(-tbot.field_sz,tbot.field_sz)
+    ax1.set_xlim(-tbot.field_sz, tbot.field_sz)
+    ax1.set_ylim(-tbot.field_sz, tbot.field_sz)
     # ax1.legend()
     f1.show()
 

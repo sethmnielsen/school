@@ -41,8 +41,13 @@ class EKF():
         self.P = np.eye(3)
         self.Pbar = np.eye(3)
 
-        # history
-        pos_history = np.zeros((self.N, 3))
+        # create history arrays
+        state_history = np.zeros((self.N, 3))
+        # rotation b2i
+        xhat_history = np.zeros((self.N, 3))
+        # error of estimated state
+        estimation_error = np.zeros((self.N, 3))
+        # sqrt cov of error state
 
     def run(self):
         for i in range(1, self.N-1):
