@@ -7,3 +7,6 @@
 [submodule "deep_learning"]
 	path = deep_learning
 	url = git@github.com:sethmnielsen/cs474_labs_f2019.git
+[submodule "autonomous_systems/bb"]
+	path = autonomous_systems/bb
+	url = https://magiccvs.byu.edu/gitlab/bradyka/me595_autsys.git
