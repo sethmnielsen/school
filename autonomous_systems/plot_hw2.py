@@ -43,7 +43,11 @@ if __name__ == '__main__':
     head_x = np.array([0,curr_head[0]]) + curr_x
     head_y = np.array([0,curr_head[1]]) + curr_y
 
-    # set_trace()
+
+    pl0a = ptc.CirclePolygon((ekf.marks[0,0],ekf.marks[0,1]), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='g')
+    pl0b = ptc.CirclePolygon((ekf.marks[1,0],ekf.marks[1,1]), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='g')
+    pl0c = ptc.CirclePolygon((ekf.marks[2,0],ekf.marks[2,1]), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='g')
+
     pl1a = ptc.CirclePolygon((curr_x, curr_y), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='b')
     pl1b = plt.plot(head_x, head_y, 'r')
     pl1c = plt.plot(head_x, head_y)
@@ -75,7 +79,6 @@ if __name__ == '__main__':
         ax1.redraw_in_frame()
         # time.sleep(0.1)
         plt.pause(0.05)
-    #
 
 
     # ======================================
