@@ -14,7 +14,9 @@
 *.tex
 
 *__pycache__
+*.mypy_cache
 old
+
 
 *build/
 *bin/
