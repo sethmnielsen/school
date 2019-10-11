@@ -16,7 +16,7 @@
             "name": "Python: HW",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/plot_hw2.py",
+            "program": "${workspaceFolder}/hw3/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },

@@ -61,8 +61,8 @@ class EKF():
     def propagate_truth(self, v, omg, state):
         sample_v = self.alpha[0] * v**2 + self.alpha[1] * omg**2
         sample_omg = self.alpha[2] * v**2 + self.alpha[3] * omg**2
-        vhat = v + np.sqrt(sample_v) #* np.random.randn()
-        omghat = omg + np.sqrt(sample_omg) #* np.random.randn()
+        vhat = v + np.sqrt(sample_v) * np.random.randn()
+        omghat = omg + np.sqrt(sample_omg) * np.random.randn()
 
         vo = vhat/omghat
         x = state[0]
@@ -76,9 +76,9 @@ class EKF():
 
         mdx = self.marks[0] - x
         mdy = self.marks[1] - y
-        r = np.sqrt(np.add(mdx**2,mdy**2)) #* np.random.randn(3)
+        r = np.sqrt(np.add(mdx**2,mdy**2)) * np.random.randn(3)
         phi_raw = self.wrap(np.arctan2(mdy, mdx) - th)
-        phi = self.wrap(np.array(phi_raw)) #* np.random.randn(3))
+        phi = self.wrap(np.array(phi_raw)) * np.random.randn(3) 
 
         self.z = np.array([r, phi]).T
         self.x_state = state

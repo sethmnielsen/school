@@ -71,7 +71,7 @@
                 "PYTHONPATH": "${workspaceRoot}"
             },
             "console": "integratedTerminal",
-            "debugStdLib": false
+            "justMyCode": true
         },
         {
             "name": "Python: Remote Attach",
