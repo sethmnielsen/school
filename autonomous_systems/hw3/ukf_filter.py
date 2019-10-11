@@ -36,7 +36,7 @@ class UKF():
         xhat_a, Sig_a = self.augment_state(xhat, Sigma, v, omg)
 
         # generate Sigma points
-        L = sp.linalg.cholesky(Sig_a, lower=True)  
+        L = sp.linalg.cholesky(Sig_a).T  
         Chi_a = self.generate_sigma_pts(xhat_a, L)
 
         # propagation - pass sig pts thru motion model and compute Gaussian statistics
@@ -49,7 +49,7 @@ class UKF():
         Sigma_bar = np.sum( self.wc.reshape(2*self.n + 1, 1, 1) * sum_ein_xx, axis=0)
 
         # it's measurement update time!
-        for i in range(z.shape[1]):
+        for i in range(num_lms):
             Zbar = self.gen_obs_sigmas(Chix_bar, Chi_a[5:], lmarks[:,i])
             # mean of predicted meas
             zhat = np.sum(self.wm * Zbar, axis=1)  
@@ -74,9 +74,9 @@ class UKF():
             Sigma = Sigma_bar - K @ S @ K.T  # update location cov estimate
 
             # redraw sigma points (unless last landmark)
-            if not i == (z.shape[1] - 1):
+            if not i == (num_lms - 1):
                 xbar_a, Sigbar_a = self.augment_state(xbar, Sigma_bar, v, omg)
-                L = sp.linalg.cholesky(Sigbar_a, lower=True)
+                L = sp.linalg.cholesky(Sigbar_a).T
                 Chi_a = self.generate_sigma_pts(xbar_a, L)
                 Chix_bar = Chi_a[:3]
                 diff_x = Chix_bar - xbar.reshape(3,1)

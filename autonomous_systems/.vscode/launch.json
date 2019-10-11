@@ -24,7 +24,7 @@
             "name": "Python: HW bb",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/bb/hw2.py",
+            "program": "${workspaceFolder}/bb/hw3.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }

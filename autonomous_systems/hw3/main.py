@@ -32,8 +32,6 @@ if __name__ == '__main__':
         del data
         # turtle.pass_matlab_data()
 
-    else:
-        raise Exception('dude, WTF. Do you even execute')   
 
     # Histories
     N = turtle.N
@@ -42,7 +40,7 @@ if __name__ == '__main__':
     # est_err_hist = np.zeros((N, 3))
     # err_cov_hist = np.zeros((N, 3))
     
-    for i in range(N):
+    for i in range(1, N):
         turtle.propagate_truth(i)
 
         zt = turtle.get_measurements()
@@ -50,7 +48,7 @@ if __name__ == '__main__':
 
         # plotty plotty plot plot
         # update plot animation
-        plotter.update(turtle.state, ukf.xhat, ukf.Sigma.diagonal())
+        plotter.update(turtle.state, ukf.xhat, ukf.Sigma.diagonal(), i)
 
         # append to plotting variable histories
         # state, xhat, err, x_cov, y_cov, th_cov, K
@@ -59,4 +57,5 @@ if __name__ == '__main__':
         # est_err_hist[i] = ukf.xhat - turtle.state
         # err_cov_hist[i] = ukf.Sigma.diagonal()
 
+    plotter.make_plots()
 

@@ -1,152 +1,150 @@
 #!usr/env python3
 
 import numpy as np
+from params import *
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
-from params import *
 
 class Plotter():
     def __init__(self):
-        self.states = []
-        self.xhats = []
-        self.est_errors = []
-        self.error_covs = []
         self.t_arr = t_arr
+        N = len(self.t_arr)
+        self.states = np.zeros((N, 3))
+        self.xhats = np.zeros((N, 3))
+        self.est_errors = np.zeros((N, 3))
+        self.error_covs = np.zeros((N, 3))
 
-        plt.ion()
+        self.states[0] = [x0, y0, th0]
+        self.xhats[0] = [x0, y0, th0]
+
+        # Robot physical constants    
+        bot_radius = 0.5
+        poly_res = 12
+        bot_body_alpha = 0.4
+        self.bot_body_heading = np.array([bot_radius, 0])
+
+        # plt.ion()
         
         f1 = plt.figure(1)
         f1.clf()
         self.ax1 = plt.axes()
 
-        head_x = np.array([0,curr_head[0]]) + x
-        head_y = np.array([0,curr_head[1]]) + curr_y
+        # Draw turtlebot
+        curr_head = self.heading2Rotation(th0) @ self.bot_body_heading
+        head_x = np.array([0,curr_head[0]]) + x0    
+        head_y = np.array([0,curr_head[1]]) + y0
+        self.bot_body = ptc.CirclePolygon( (x0, y0), 
+                                           radius=bot_radius, 
+                                           resolution=poly_res, 
+                                           alpha=bot_body_alpha, 
+                                           color='b' )
+        self.heading = plt.plot(head_x, head_y, 'r') # current heading
+        self.trail = plt.plot(x0, y0, linewidth=8.0)  # trail
+        self.est_trail = plt.plot(self.xhats[:,0], self.xhats[:,1],'.', color=(1,0.65,0))
 
+        # Draw landmarks
+        self.lmarks_line = []
+        for i in range(num_lms):
+            patch = ptc.CirclePolygon( (lmarks[0,i], lmarks[1,i]),
+                                        bot_radius, 
+                                        poly_res, 
+                                        alpha=bot_body_alpha, 
+                                        color='g' )
+            self.ax1.add_patch(patch)
 
-        self.lmark0_pt = ptc.CirclePolygon((lmarks[0,0],lmarks[0,1]), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='g')
-        self.lmark1_pt = ptc.CirclePolygon((lmarks[1,0],lmarks[1,1]), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='g')
-        self.lmark2_pt = ptc.CirclePolygon((lmarks[2,0],lmarks[2,1]), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='g')
-
-        self.bot_body = ptc.CirclePolygon((curr_x, curr_y), radius=bot_radius, resolution=poly_res, alpha=bot_body_alpha, color='b')
-        self.head0 = plt.plot(head_x, head_y, 'r')
-        self.head1 = plt.plot(head_x, head_y)
+            line = plt.plot([x0, lmarks[0,i]], [y0, lmarks[1,i]], 'c')
+            self.lmarks_line.append(line[0])
 
         self.ax1.add_patch(self.bot_body)
 
+        sz = 10
         self.ax1.set_xlim(-sz, sz)
         self.ax1.set_ylim(-sz, sz)
         f1.canvas.draw()
         f1.show()
 
-    def update(self, state, xhat, error_cov):
+    def update(self, state, xhat, error_cov, i):
+        self.states[i] = state
+        self.xhats[i] = xhat
+        self.est_errors[i] = xhat - state
+        self.error_covs[i] = error_cov
+
         x = state[0]
         y = state[1]
         theta = state[2]
 
-        curr_head = heading2Rotation(theta) @ bot_body_heading
+        curr_head = self.heading2Rotation(theta) @ self.bot_body_heading
 
         head_x = np.array([0,curr_head[0]]) + x
         head_y = np.array([0,curr_head[1]]) + y
 
+        # turtlebot patch and heading
         self.bot_body.xy = (x, y)
-        self.head0[0].set_xdata(head_x)
-        self.head0[0].set_ydata(head_y)
+        self.heading[0].set_xdata(head_x)
+        self.heading[0].set_ydata(head_y)
+        # trails
+        self.trail[0].set_xdata(self.states[:i,0])
+        self.trail[0].set_ydata(self.states[:i,1])
+        self.est_trail[0].set_xdata(self.xhats[:i,0])
+        self.est_trail[0].set_ydata(self.xhats[:i,1])
 
-        self.head1[0].set_xdata(states[:i,0])
-        self.head1[0].set_ydata(states[:i,1])
+        # measurement vectors
+        for k in range(num_lms):
+            self.lmarks_line[k].set_xdata([x, lmarks[0,k]])
+            self.lmarks_line[k].set_ydata([y, lmarks[1,k]])
 
         self.ax1.redraw_in_frame()
         # time.sleep(0.1)
-        plt.pause(0.05)
+        plt.pause(0.005)
         
-        self.states.append(state)
-        self.xhats.append(xhat)
-        self.est_errors.append(xhat - state)
-        self.error_covs.append(error_cov)
-
+        
     def make_plots(self):
 
-        f2 = plt.figure(2)
-        f2.clf()
-        ax2 = plt.axes()
+        f2, axes2 = plt.subplots(3, 1, sharex=True)
+        f2.suptitle('Three Landmarks UKF Localization - Estimation')
+        axes2[0].plot(self.t_arr, self.states[:,0], label='true')
+        axes2[1].plot(self.t_arr, self.states[:,1], label='true')
+        axes2[2].plot(self.t_arr, np.degrees(self.states[:,2]), label='true')
 
-        pl2a = plt.plot(t_span, states[:,0], label='True: x')
-        pl2a = plt.plot(t_span, xhats[:,0], label='Est: x')
+        axes2[0].plot(self.t_arr, self.xhats[:,0], label='estimated')
+        axes2[1].plot(self.t_arr, self.xhats[:,1], label='estimated')
+        axes2[2].plot(self.t_arr, np.degrees(self.xhats[:,2]), label='estimated')
 
-        ax2.legend()
-        # f2.show()
-
-
-        # ======================================
-
-        f3 = plt.figure(3)
-        f3.clf()
-        ax3 = plt.axes()
-
-        pl3a = plt.plot(t_span, states[:,1], label='True: y')
-        pl3a = plt.plot(t_span,  xhats[:,1], label='Est: y')
-
-        ax3.legend()
-        # f3.show()
-
+        axes2[0].set_ylabel('x position (m)')
+        axes2[1].set_ylabel('y position (m)')
+        axes2[2].set_ylabel('heading (deg)')
+        axes2[2].set_xlabel('time (s)')
+        
+        axes2[0].legend()
 
         # ======================================
 
-        f4 = plt.figure(4)
-        f4.clf()
-        ax4 = plt.axes()
+        f3, axes3 = plt.subplots(3, 1, sharex=True)
+        f3.suptitle('Three Landmarks UKF Localization - Error')
+        axes3[0].plot(self.t_arr, self.est_errors[:,0], label='error')
+        axes3[1].plot(self.t_arr, self.est_errors[:,1])
+        axes3[2].plot(self.t_arr, self.est_errors[:,2])
 
-        pl4a = plt.plot(t_span,states[:,2], label='True: psi')
-        pl4a = plt.plot(t_span, xhats[:,2], label='Est: psi')
+        # Covariance plots (+/- 2 sigma)
+        axes3[0].plot(self.t_arr[1:], 2*np.sqrt(self.error_covs[1:,0]), linestyle='dashed', label='covariance', color='orange')
+        axes3[1].plot(self.t_arr[1:], 2*np.sqrt(self.error_covs[1:,1]), linestyle='dashed', color='orange')
+        axes3[2].plot(self.t_arr[1:], 2*np.sqrt(self.error_covs[1:,2]), linestyle='dashed', color='orange')
 
-        ax4.legend()
-        # f4.show()
+        axes3[0].plot(self.t_arr[1:], -2*np.sqrt(self.error_covs[1:,0]), linestyle='dashed', color='orange')
+        axes3[1].plot(self.t_arr[1:], -2*np.sqrt(self.error_covs[1:,1]), linestyle='dashed', color='orange')
+        axes3[2].plot(self.t_arr[1:], -2*np.sqrt(self.error_covs[1:,2]), linestyle='dashed', color='orange')
 
-        # ======================================
-        # ======================================
-
-        f5 = plt.figure(5)
-        f5.clf()
-        ax5 = plt.axes()
-
-        pl5a = plt.plot(t_span,est_errors[:,0], label='Err: x')
-        pl5a = plt.plot(t_span,2*np.sqrt(error_covs[:,0]), label='Cov: x')
-        pl5a = plt.plot(t_span,-2*np.sqrt(error_covs[:,0]), label='Cov: x')
-
-        ax5.legend()
-        # f5.show()
-
-
-        # ======================================
-
-        f6 = plt.figure(6)
-        f6.clf()
-        ax6 = plt.axes()
-
-        pl6a = plt.plot(t_span,est_errors[:,1], label='Err: y')
-        pl6a = plt.plot(t_span,2*np.sqrt(error_covs[:,1]), label='Cov: y')
-        pl6a = plt.plot(t_span,-2*np.sqrt(error_covs[:,1]), label='Cov: y')
-
-        ax6.legend()
-        # f6.show()
-
-
-        # ======================================
-
-        f7 = plt.figure(7)
-        f7.clf()
-        ax7 = plt.axes()
-
-        pl7a = plt.plot(t_span,est_errors[:,2], label='Err: psi')
-        pl7a = plt.plot(t_span,2*np.sqrt(error_covs[:,2]), label='Cov: psi')
-        pl7a = plt.plot(t_span,-2*np.sqrt(error_covs[:,2]), label='Cov: psi')
-
-        ax7.legend()
-        # f7.show()
+        axes3[0].set_ylabel('x error (m)')
+        axes3[1].set_ylabel('y error (m)')
+        axes3[2].set_ylabel('heading error (deg)')
+        axes3[2].set_xlabel('time (s)')
+        
+        axes3[0].legend()
 
         plt.show()
 
         print("Finished everything")
+
 
     def heading2Rotation(self, psi):
         c_psi = np.cos(psi)
