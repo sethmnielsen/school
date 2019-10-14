@@ -6,6 +6,7 @@ sz = 20
 x0 = -5
 y0 = -3
 th0 = np.pi/2
+state0 = [x0, y0, th0]
 
 t_arr = np.arange(0, 20, dt)
 

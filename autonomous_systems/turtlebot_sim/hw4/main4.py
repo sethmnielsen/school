@@ -11,7 +11,8 @@ from turtlebot import Turtlebot
 from utils import wrap
 import params as pm
 
-# if __name__ == '__main__':
+
+
 turtle = Turtlebot()
 mcl = MCL()
 plotter = Plotter()
@@ -36,13 +37,13 @@ elif len(args) == 1 and args[0] in [1, 4, 5]:
 
 N = turtle.N
 for i in range(1, N):
-    state = turtle.sample_motion_model(turtle.vc[i], turtle.omgc[i], turtle.state_t)
+    state = turtle.sample_motion_model(turtle.vc[i], turtle.omgc[i], turtle.states[i])
 
-    zt = turtle.get_measurements()
-    mcl.update(turtle.vc[i], turtle.omgc[i], zt)
+    z = turtle.get_measurements(state)
+    mcl.update(turtle.vc[i], turtle.omgc[i], z)
 
     # update plot animation
-    plotter.update(turtle.state, mcl.xhat, mcl.Sigma.diagonal(), i)
+    plotter.update(state, mcl.xhat, mcl.Sigma.diagonal(), i)
 
     # append to plotting variable histories
 

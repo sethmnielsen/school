@@ -1,7 +1,7 @@
 #!usr/env python3
 
 import numpy as np
-from params import *
+import params as pm
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
 
@@ -9,13 +9,13 @@ class Plotter():
     """ For animating turtlebot trajectory and estimation, and plotting the results"""
 
     def __init__(self):
-        self.t_arr = t_arr
-        N = len(self.t_arr)
+        N = len(pm.t_arr)
         self.states = np.zeros((N, 3))
         self.xhats = np.zeros((N, 3))
         self.est_errors = np.zeros((N, 3))
         self.error_covs = np.zeros((N, 3))
 
+        x0, y0, th0 = pm.state0
         self.states[0] = [x0, y0, th0]
         self.xhats[0] = [x0, y0, th0]
 
@@ -46,15 +46,15 @@ class Plotter():
 
         # Draw landmarks
         self.lmarks_line = []
-        for i in range(num_lms):
-            patch = ptc.CirclePolygon( (lmarks[0,i], lmarks[1,i]),
+        for i in range(pm.num_lms):
+            patch = ptc.CirclePolygon( (pm.lmarks[0,i], pm.lmarks[1,i]),
                                         bot_radius, 
                                         poly_res, 
                                         alpha=bot_body_alpha, 
                                         color='g' )
             self.ax1.add_patch(patch)
 
-            line = plt.plot([x0, lmarks[0,i]], [y0, lmarks[1,i]], 'c')
+            line = plt.plot([x0, pm.lmarks[0,i]], [y0, pm.lmarks[1,i]], 'c')
             self.lmarks_line.append(line[0])
 
         self.ax1.add_patch(self.bot_body)
@@ -91,9 +91,9 @@ class Plotter():
         self.est_trail[0].set_ydata(self.xhats[:i,1])
 
         # measurement vectors
-        for k in range(num_lms):
-            self.lmarks_line[k].set_xdata([x, lmarks[0,k]])
-            self.lmarks_line[k].set_ydata([y, lmarks[1,k]])
+        for k in range(pm.num_lms):
+            self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
+            self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
 
         self.ax1.redraw_in_frame()
         # time.sleep(0.1)
@@ -104,13 +104,13 @@ class Plotter():
 
         f2, axes2 = plt.subplots(3, 1, sharex=True)
         f2.suptitle('Three Landmarks UKF Localization - Estimation')
-        axes2[0].plot(self.t_arr, self.states[:,0], label='true')
-        axes2[1].plot(self.t_arr, self.states[:,1], label='true')
-        axes2[2].plot(self.t_arr, np.degrees(self.states[:,2]), label='true')
+        axes2[0].plot(pm.t_arr, self.states[:,0], label='true')
+        axes2[1].plot(pm.t_arr, self.states[:,1], label='true')
+        axes2[2].plot(pm.t_arr, np.degrees(self.states[:,2]), label='true')
 
-        axes2[0].plot(self.t_arr, self.xhats[:,0], label='estimated')
-        axes2[1].plot(self.t_arr, self.xhats[:,1], label='estimated')
-        axes2[2].plot(self.t_arr, np.degrees(self.xhats[:,2]), label='estimated')
+        axes2[0].plot(pm.t_arr, self.xhats[:,0], label='estimated')
+        axes2[1].plot(pm.t_arr, self.xhats[:,1], label='estimated')
+        axes2[2].plot(pm.t_arr, np.degrees(self.xhats[:,2]), label='estimated')
 
         axes2[0].set_ylabel('x position (m)')
         axes2[1].set_ylabel('y position (m)')
@@ -123,18 +123,18 @@ class Plotter():
 
         f3, axes3 = plt.subplots(3, 1, sharex=True)
         f3.suptitle('Three Landmarks UKF Localization - Error')
-        axes3[0].plot(self.t_arr, self.est_errors[:,0], label='error')
-        axes3[1].plot(self.t_arr, self.est_errors[:,1])
-        axes3[2].plot(self.t_arr, self.est_errors[:,2])
+        axes3[0].plot(pm.t_arr, self.est_errors[:,0], label='error')
+        axes3[1].plot(pm.t_arr, self.est_errors[:,1])
+        axes3[2].plot(pm.t_arr, self.est_errors[:,2])
 
         # Covariance plots (+/- 2 sigma)
-        axes3[0].plot(self.t_arr[1:], 2*np.sqrt(self.error_covs[1:,0]), linestyle='dashed', label='covariance', color='orange')
-        axes3[1].plot(self.t_arr[1:], 2*np.sqrt(self.error_covs[1:,1]), linestyle='dashed', color='orange')
-        axes3[2].plot(self.t_arr[1:], 2*np.sqrt(self.error_covs[1:,2]), linestyle='dashed', color='orange')
+        axes3[0].plot(pm.t_arr[1:], 2*np.sqrt(self.error_covs[1:,0]), linestyle='dashed', label='covariance', color='orange')
+        axes3[1].plot(pm.t_arr[1:], 2*np.sqrt(self.error_covs[1:,1]), linestyle='dashed', color='orange')
+        axes3[2].plot(pm.t_arr[1:], 2*np.sqrt(self.error_covs[1:,2]), linestyle='dashed', color='orange')
 
-        axes3[0].plot(self.t_arr[1:], -2*np.sqrt(self.error_covs[1:,0]), linestyle='dashed', color='orange')
-        axes3[1].plot(self.t_arr[1:], -2*np.sqrt(self.error_covs[1:,1]), linestyle='dashed', color='orange')
-        axes3[2].plot(self.t_arr[1:], -2*np.sqrt(self.error_covs[1:,2]), linestyle='dashed', color='orange')
+        axes3[0].plot(pm.t_arr[1:], -2*np.sqrt(self.error_covs[1:,0]), linestyle='dashed', color='orange')
+        axes3[1].plot(pm.t_arr[1:], -2*np.sqrt(self.error_covs[1:,1]), linestyle='dashed', color='orange')
+        axes3[2].plot(pm.t_arr[1:], -2*np.sqrt(self.error_covs[1:,2]), linestyle='dashed', color='orange')
 
         axes3[0].set_ylabel('x error (m)')
         axes3[1].set_ylabel('y error (m)')

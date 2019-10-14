@@ -8,7 +8,7 @@ from utils import wrap
 
 class UKF():
     def __init__(self):
-        self.xhat = np.array([pm.x0, pm.y0, pm.th0])
+        self.xhat = np.array(state0)
         self.Sigma = np.eye(3)
         
         self.dt = dt
