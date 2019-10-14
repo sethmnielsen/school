@@ -8,7 +8,7 @@ from utils import wrap
 
 class MCL():
     def __init__(self):
-        self.Chi = np.zeros(np.M)
+        self.Chi = np.zeros(pm.M)
         
 
 

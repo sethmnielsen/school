@@ -18,6 +18,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/hw4/main4.py",
+            "cwd": "${workspaceFolder}/hw4/main4.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },

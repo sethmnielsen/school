@@ -8,15 +8,14 @@ from utils import wrap
 class Turtlebot():
     def __init__(self):
         # time
-        self.dt = dt
         self.t_end = 20
-        self.t_arr = np.arange(0, self.t_end, self.dt)
+        self.t_arr = np.arange(0, self.t_end, pm.dt)
         self.N = len(self.t_arr)
 
         # Current state, state history array
-        self.state0 = np.array([pm.x0, pm.y0, pm.th0]) # x, y, theta
+        self.state_t = np.array([pm.x0, pm.y0, pm.th0]) # x, y, theta
         self.states = np.zeros((3, self.N))
-        self.states[:, 0] = self.state0
+        self.states[:, 0] = np.copy(self.state_t)
 
         # velocities
         self.v = np.zeros(self.N)
@@ -32,7 +31,7 @@ class Turtlebot():
         self.omgc = -0.2 + 2 * np.cos(2 * np.pi * 1.0 * self.t_arr) # 0.6 on HW3 pdf
         
         # v/omg real outputs (noise added)
-        self.states = self.sample_motion_model(self.v, self.omg, self.states)
+        self.states = self.sample_motion_model(self.vc, self.omgc, self.states)
 
     # Accepts either number or array of numbers for v, omg, state
     def sample_motion_model(self, v, omg, state):
@@ -60,7 +59,7 @@ class Turtlebot():
         # calculate x, y, th
         x, y, th = state
         vo = v/omg
-        th_plus = wrap(th + omg*self.dt)
+        th_plus = wrap(th + omg*pm.dt)
 
         x = x - vo*np.sin(th) + vo*np.sin(th_plus)
         y = y + vo*np.cos(th) - vo*np.cos(th_plus)
