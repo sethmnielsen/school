@@ -28,7 +28,7 @@ class Turtlebot():
         self.vc = 1 + .5 * np.cos(2 * np.pi * 0.3 * self.t) # 0.2 on HW3 pdf
         self.omgc = -0.2 + 2 * np.cos(2 * np.pi * 1.0 * self.t) # 0.6 on HW3 pdf
         
-        # v/omg real outputs (noise added)
+        # v/omg real outputs (noise added)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            dddddddddddddddddddddddd
         v_noise_arr = np.random.randn(self.N)
         omg_noise_arr = np.random.randn(self.N)
         sample_v = alphas[0] * self.vc**2 + alphas[1] * self.omgc**2
@@ -48,7 +48,7 @@ class Turtlebot():
         th = th_plus
         self.state = np.array([x, y, th])
 
-    def get_measurements(self):
+    def get_measurements(self) -> np.ndarray:
         x, y, th = self.state
         mdx = lmarks[0] - x
         mdy = lmarks[1] - y

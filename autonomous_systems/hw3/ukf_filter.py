@@ -3,12 +3,12 @@
 import numpy as np
 import scipy as sp
 
-from params import *
+import params as pm
 from utils import wrap
 
 class UKF():
     def __init__(self):
-        self.xhat = np.array([x0, y0, th0])
+        self.xhat = np.array([pm.x0, pm.y0, pm.th0])
         self.Sigma = np.eye(3)
         
         self.dt = dt
@@ -28,9 +28,7 @@ class UKF():
         self.wm[1:] = 1.0 / (2 * (self.n + self.lamb))
         self.wc[1:] = 1.0 / (2 * (self.n + self.lamb))
     
-    def update(self, z, v, omg):
-        # b passed in xhat, Sigma, zt, vc[i] and omgc[i]
-        # returned xhat, Sigma, K
+    def update(self, z: np.ndarray, v: float, omg: float):
         xhat, Sigma = self.xhat, self.Sigma
 
         xhat_a, Sig_a = self.augment_state(xhat, Sigma, v, omg)
@@ -49,8 +47,8 @@ class UKF():
         Sigma_bar = np.sum( self.wc.reshape(2*self.n + 1, 1, 1) * sum_ein_xx, axis=0)
 
         # it's measurement update time!
-        for i in range(num_lms):
-            Zbar = self.gen_obs_sigmas(Chix_bar, Chi_a[5:], lmarks[:,i])
+        for i in range(pm.num_lms):
+            Zbar = self.gen_obs_sigmas(Chix_bar, Chi_a[5:], pm.lmarks[:,i])
             # mean of predicted meas
             zhat = np.sum(self.wm * Zbar, axis=1)  
 
@@ -74,7 +72,7 @@ class UKF():
             Sigma = Sigma_bar - K @ S @ K.T  # update location cov estimate
 
             # redraw sigma points (unless last landmark)
-            if not i == (num_lms - 1):
+            if not i == (pm.num_lms - 1):
                 xbar_a, Sigbar_a = self.augment_state(xbar, Sigma_bar, v, omg)
                 L = sp.linalg.cholesky(Sigbar_a).T
                 Chi_a = self.generate_sigma_pts(xbar_a, L)
@@ -104,9 +102,9 @@ class UKF():
         return Chix_bar
 
     def augment_state(self, xhat, Sigma, v, w):
-        M = np.diag([vm_alphas[0] * v**2 + vm_alphas[1] * w**2, 
-                    vm_alphas[2] * v**2 + vm_alphas[3] * w**2])
-        Q = np.diag([sig_r**2, sig_phi**2])
+        M = np.diag([pm.vm_alphas[0] * v**2 + pm.vm_alphas[1] * w**2, 
+                    pm.vm_alphas[2] * v**2 + pm.vm_alphas[3] * w**2])
+        Q = np.diag([pm.sig_r**2, pm.sig_phi**2])
 
         xhat_a = np.concatenate((xhat, np.zeros(4)))
         Sig_a = sp.linalg.block_diag(Sigma, M, Q)

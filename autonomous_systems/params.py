@@ -25,4 +25,8 @@ lmarks = np.array([[6, 4],
                 #    [4]])
 num_lms = lmarks.shape[1]
 
+# UKF
 ndim = 7
+
+# Particle Filter
+M = 1000

@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
 
 class Plotter():
+    """ For animating turtlebot trajectory and estimation, and plotting the results"""
+
     def __init__(self):
         self.t_arr = t_arr
         N = len(self.t_arr)
