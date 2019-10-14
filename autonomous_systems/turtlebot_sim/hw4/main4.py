@@ -4,11 +4,11 @@ import sys
 import numpy as np
 from scipy.io import loadmat
 
-from plotter import Plotter
-from turtlebot import Turtlebot
-from mcl_filter import MCL
-from utils import wrap
-import params as pm
+from ..plotter import Plotter
+from ..turtlebot import Turtlebot
+from .mcl_filter import MCL
+from ..utils import wrap
+from .. import params as pm
 
 if __name__ == '__main__':
     turtle = Turtlebot()
@@ -33,12 +33,12 @@ if __name__ == '__main__':
         # turtle.pass_matlab_data()
 
 
-    M = pm.M
-    for i in range(1, M):
-        turtle.propagate_truth(i)
+    N = turtle.N
+    for i in range(1, N):
+        state = turtle.sample_motion_model(turtle.vc[i], turtle.omgc[i], turtle.state_t)
 
         zt = turtle.get_measurements()
-        mcl.update(v, omg, zt)
+        mcl.update(turtle.vc[i], turtle.omgc[i], zt)
 
         # update plot animation
         plotter.update(turtle.state, mcl.xhat, mcl.Sigma.diagonal(), i)

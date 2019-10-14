@@ -102,8 +102,8 @@ class UKF():
         return Chix_bar
 
     def augment_state(self, xhat, Sigma, v, w):
-        M = np.diag([pm.vm_alphas[0] * v**2 + pm.vm_alphas[1] * w**2, 
-                    pm.vm_alphas[2] * v**2 + pm.vm_alphas[3] * w**2])
+        M = np.diag([pm.alphas[0] * v**2 + pm.alphas[1] * w**2, 
+                    pm.alphas[2] * v**2 + pm.alphas[3] * w**2])
         Q = np.diag([pm.sig_r**2, pm.sig_phi**2])
 
         xhat_a = np.concatenate((xhat, np.zeros(4)))

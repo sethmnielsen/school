@@ -16,7 +16,7 @@ sigs = np.array([sig_r, sig_phi])
 Q = np.diag(sigs)**2
 
 # velocity motion model noise params
-vm_alphas = np.array([0.1, 0.01, 0.01, 0.1])
+alphas = np.array([0.1, 0.01, 0.01, 0.1])
 
 lmarks = np.array([[6, 4],
                    [-7, 8],
