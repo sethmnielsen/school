@@ -16,7 +16,10 @@ class MCL():
 
     def update(self, v, omg, z):
         for i in range(pm.M):
+            # self.Chi[:
+            # i] = sample_motion_model
+            # 
             state = self.xhat
-            
+
 
     # def 
