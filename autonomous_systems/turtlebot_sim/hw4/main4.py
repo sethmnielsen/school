@@ -36,16 +36,20 @@ elif len(args) == 1 and args[0] in [1, 4, 5]:
 
 
 N = turtle.N
+state_hist = np.zeros((N, 3))
+state_hist[0] = pm.state0
+Chi = np.zeros((pm.M, 3))
 for i in range(1, N):
     state = turtle.sample_motion_model(turtle.vc[i], turtle.omgc[i], turtle.states[i])
-
     z = turtle.get_measurements(state)
-    mcl.update(turtle.vc[i], turtle.omgc[i], z)
-
-    # update plot animation
-    plotter.update(state, mcl.xhat, mcl.Sigma.diagonal(), i)
+    
+    Chi = mcl.update(turtle.vc[i], turtle.omgc[i], z)
 
     # append to plotting variable histories
+    state_hist[i] = state
+
+    # update plot animation
+    plotter.update_particle(state_hist[:i], Chi)
 
 plotter.make_plots()
 

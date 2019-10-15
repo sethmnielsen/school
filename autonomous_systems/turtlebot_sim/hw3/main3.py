@@ -1,14 +1,17 @@
 #!/usr/env python3
 
 import sys
+sys.path.append('..')
 import numpy as np
 from scipy.io import loadmat
 
 from plotter import Plotter
 from turtlebot import Turtlebot
-from ukf_filter import UKF
+from hw3.ukf_filter import UKF
 from utils import wrap
+import params as pm
 
+np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
 if __name__ == '__main__':
     turtle = Turtlebot()
@@ -41,14 +44,12 @@ if __name__ == '__main__':
     # err_cov_hist = np.zeros((N, 3))
     
     for i in range(1, N):
-        turtle.propagate_truth(i)
-
-        zt = turtle.get_measurements()
+        zt = turtle.get_measurements(turtle.states[i])
         K = ukf.update(zt, turtle.vc[i], turtle.omgc[i])
 
         # plotty plotty plot plot
         # update plot animation
-        plotter.update(turtle.state, ukf.xhat, ukf.Sigma.diagonal(), i)
+        plotter.update_kalman(turtle.states[i], ukf.xhat, ukf.Sigma.diagonal(), i)
 
         # append to plotting variable histories
         # state, xhat, err, x_cov, y_cov, th_cov, K

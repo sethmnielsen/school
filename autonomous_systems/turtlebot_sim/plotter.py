@@ -14,10 +14,11 @@ class Plotter():
         self.xhats = np.zeros((N, 3))
         self.est_errors = np.zeros((N, 3))
         self.error_covs = np.zeros((N, 3))
+        self.particles = np.zeros((3,))
 
         x0, y0, th0 = pm.state0
-        self.states[0] = [x0, y0, th0]
-        self.xhats[0] = [x0, y0, th0]
+        self.states[0] = pm.state0
+        self.xhats[0] = pm.state0
 
         # Robot physical constants    
         bot_radius = 0.5
@@ -32,9 +33,9 @@ class Plotter():
         self.ax1 = plt.axes()
 
         # Draw turtlebot
-        curr_head = self.heading2Rotation(th0) @ self.bot_body_heading
-        head_x = np.array([0,curr_head[0]]) + x0    
-        head_y = np.array([0,curr_head[1]]) + y0
+        cur_head = self.heading2Rotation(th0) @ self.bot_body_heading
+        head_x = np.array([0,cur_head[0]]) + x0    
+        head_y = np.array([0,cur_head[1]]) + y0
         self.bot_body = ptc.CirclePolygon( (x0, y0), 
                                            radius=bot_radius, 
                                            resolution=poly_res, 
@@ -59,13 +60,44 @@ class Plotter():
 
         self.ax1.add_patch(self.bot_body)
 
-        sz = 10
+        sz = 15
         self.ax1.set_xlim(-sz, sz)
         self.ax1.set_ylim(-sz, sz)
         f1.canvas.draw()
         f1.show()
 
-    def update(self, state, xhat, error_cov, i):
+    def update_particle(self, state_hist, Chi):
+        cur_state = state_hist[-1]
+        x = cur_state[0]
+        y = cur_state[1]
+        theta = cur_state[2]
+
+        cur_head = self.heading2Rotation(theta) @ self.bot_body_heading
+
+        head_x = np.array([0,cur_head[0]]) + x
+        head_y = np.array([0,cur_head[1]]) + y
+
+        # turtlebot patch and heading
+        self.bot_body.xy = (x, y)
+        self.heading[0].set_xdata(head_x)
+        self.heading[0].set_ydata(head_y)
+        # trails
+        self.trail[0].set_xdata(self.states[:i,0])
+        self.trail[0].set_ydata(self.states[:i,1])
+        self.est_trail[0].set_xdata(self.xhats[:i,0])
+        self.est_trail[0].set_ydata(self.xhats[:i,1])
+
+        # measurement vectors
+        for k in range(pm.num_lms):
+            self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
+            self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
+
+        self.ax1.redraw_in_frame()
+        # time.sleep(0.1)
+        # plt.pause(0.05)
+        
+
+    def update_kalman(self, state, xhat, error_cov, i):
         self.states[i] = state
         self.xhats[i] = xhat
         self.est_errors[i] = xhat - state
@@ -75,10 +107,10 @@ class Plotter():
         y = state[1]
         theta = state[2]
 
-        curr_head = self.heading2Rotation(theta) @ self.bot_body_heading
+        cur_head = self.heading2Rotation(theta) @ self.bot_body_heading
 
-        head_x = np.array([0,curr_head[0]]) + x
-        head_y = np.array([0,curr_head[1]]) + y
+        head_x = np.array([0,cur_head[0]]) + x
+        head_y = np.array([0,cur_head[1]]) + y
 
         # turtlebot patch and heading
         self.bot_body.xy = (x, y)
@@ -143,7 +175,9 @@ class Plotter():
         
         axes3[0].legend()
 
-        plt.show()
+        plt.draw()
+        plt.waitforbuttonpress(0)
+        plt.close('all')
 
         print("Finished everything")
 

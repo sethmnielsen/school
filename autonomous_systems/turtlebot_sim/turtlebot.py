@@ -12,8 +12,8 @@ class Turtlebot():
         self.N = len(pm.t_arr)
 
         # Current state, state history array
-        self.states = np.zeros((3, self.N))
-        self.states[:, 0] = np.copy(pm.state0)
+        self.states = np.zeros((self.N, 3))
+        self.states[0] = pm.state0
 
         # velocities
         self.vc = np.zeros(self.N)
@@ -29,16 +29,16 @@ class Turtlebot():
         # v/omg real outputs (noise added)
         self.states = self.sample_motion_model(self.vc, self.omgc, self.states)
 
-    # Accepts either number or array of numbers for v, omg, state
-    def sample_motion_model(self, v, omg, state):
+    def sample_motion_model(self, vc, omgc, state):
+        # Accepts either number or array of numbers for vc, omgc, state
         alphas = pm.alphas
 
-        alpha_v = alphas[0]*v**2 + alphas[2]*omg
-        alpha_omg = alphas[2]*v**2 + alphas[3]*omg
+        alpha_v = alphas[0]*vc**2 + alphas[1]*omgc**2
+        alpha_omg = alphas[2]*vc**2 + alphas[3]*omgc**2
 
-        if isinstance(v, np.ndarray):
-            noise_v = np.random.randn( v.shape[0] )
-            noise_omg = np.random.randn( v.shape[0] )
+        if isinstance(vc, np.ndarray):
+            noise_v = np.random.randn( vc.shape[0] )
+            noise_omg = np.random.randn( vc.shape[0] )
         else:
             noise_v = np.random.randn()
             noise_omg = np.random.randn()
@@ -46,21 +46,23 @@ class Turtlebot():
         sample_v = np.sqrt(alpha_v) * noise_v
         sample_omg = np.sqrt(alpha_omg) * noise_omg
 
-        vhat = v + sample_v
-        omghat = omg + sample_omg
+        vhat = vc + sample_v
+        omghat = omgc + sample_omg
 
         return self.propagate_state(vhat, omghat, state)
        
     def propagate_state(self, v, omg, state):
-        # calculate x, y, th
-        x, y, th = state
+        # Accepts either number or array of numbers for vhat, omghat, state
+        x, y, th = state.T
         vo = v/omg
-        th_plus = wrap(th + omg*pm.dt)
-
-        x = x - vo*np.sin(th) + vo*np.sin(th_plus)
-        y = y + vo*np.cos(th) - vo*np.cos(th_plus)
-        th = th_plus
-        state = np.array([x, y, th])
+        n = 1 if isinstance(v, float) else v.shape[0]
+        
+        for k in range(1,n):
+            th_plus = th[k-1] + omg[k]*pm.dt
+            x[k] = x[k-1] - vo[k]*np.sin(th[k-1]) + vo[k]*np.sin(th_plus)
+            y[k] = y[k-1] + vo[k]*np.cos(th[k-1]) - vo[k]*np.cos(th_plus)
+            th[k] = th_plus
+        state = np.array([x, y, th]).T
         return state
 
     def get_measurements(self, state: np.ndarray) -> np.ndarray:

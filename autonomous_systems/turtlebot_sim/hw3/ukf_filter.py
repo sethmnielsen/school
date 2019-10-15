@@ -8,15 +8,16 @@ from utils import wrap
 
 class UKF():
     def __init__(self):
-        self.xhat = np.array(state0)
+        self.xhat = np.array(pm.state0)
         self.Sigma = np.eye(3)
         
-        self.dt = dt
         kappa = 4.0
         alpha = 0.4
         beta = 2
         self.n = 7 # augmented state dimension
         self.lamb = alpha**2 * (self.n + kappa) - self.n
+        self.Q = np.diag([pm.sig_r**2, pm.sig_phi**2])
+
 
         # weights
         self.wm = np.zeros(2 * self.n + 1)
@@ -29,12 +30,12 @@ class UKF():
         self.wc[1:] = 1.0 / (2 * (self.n + self.lamb))
     
     def update(self, z: np.ndarray, v: float, omg: float):
-        xhat, Sigma = self.xhat, self.Sigma
+        xhat, Sigma = np.copy(self.xhat), np.copy(self.Sigma)
 
         xhat_a, Sig_a = self.augment_state(xhat, Sigma, v, omg)
 
         # generate Sigma points
-        L = sp.linalg.cholesky(Sig_a).T  
+        L = sp.linalg.cholesky(Sig_a, lower=True)  
         Chi_a = self.generate_sigma_pts(xhat_a, L)
 
         # propagation - pass sig pts thru motion model and compute Gaussian statistics
@@ -88,7 +89,7 @@ class UKF():
         omg = omg + Chi_u[1]
         th = Chi_x[2]
 
-        th_plus = wrap(th + omg * self.dt)
+        th_plus = th + omg * pm.dt
         st = np.sin(th)
         s = np.sin(th_plus)
         ct = np.cos(th)
@@ -96,18 +97,17 @@ class UKF():
 
         A = np.array([-v/omg * st + v/omg * s,
                      v/omg * ct - v/omg * c,
-                     omg * self.dt])
+                     omg * pm.dt])
         Chix_bar = Chi_x + A
 
         return Chix_bar
 
-    def augment_state(self, xhat, Sigma, v, w):
-        M = np.diag([pm.alphas[0] * v**2 + pm.alphas[1] * w**2, 
-                    pm.alphas[2] * v**2 + pm.alphas[3] * w**2])
-        Q = np.diag([pm.sig_r**2, pm.sig_phi**2])
+    def augment_state(self, xhat, Sigma, v, omg):
+        M = np.diag([pm.alphas[0] * v**2 + pm.alphas[1] * omg**2, 
+                    pm.alphas[2] * v**2 + pm.alphas[3] * omg**2])
 
         xhat_a = np.concatenate((xhat, np.zeros(4)))
-        Sig_a = sp.linalg.block_diag(Sigma, M, Q)
+        Sig_a = sp.linalg.block_diag(Sigma, M, self.Q)
 
         return xhat_a, Sig_a
 
