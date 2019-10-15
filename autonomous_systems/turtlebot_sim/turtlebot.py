@@ -76,8 +76,8 @@ class Turtlebot():
         
         # compute simulated r and phi measurements
         r = np.sqrt(np.add(mdx**2,mdy**2)) + r_noise
-        phi_raw = wrap(np.arctan2(mdy, mdx) - th)
-        phi = wrap(np.array(phi_raw)) + phi_noise
+        phi_raw = np.arctan2(mdy, mdx) - th + phi_noise
+        phi = wrap( np.array(phi_raw) )
 
         z = np.vstack((r, phi))
         return z
