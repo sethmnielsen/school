@@ -29,21 +29,24 @@ class UKF():
         self.wm[1:] = 1.0 / (2 * (self.n + self.lamb))
         self.wc[1:] = 1.0 / (2 * (self.n + self.lamb))
     
-    def update(self, z: np.ndarray, v: float, omg: float):
+    def update(self, z: np.ndarray, vc: float, omgc: float):
         xhat, Sigma = np.copy(self.xhat), np.copy(self.Sigma)
 
-        xhat_a, Sig_a = self.augment_state(xhat, Sigma, v, omg)
+        xhat_a, Sig_a = self.augment_state(xhat, Sigma, vc, omgc)
 
         # generate Sigma points
         L = sp.linalg.cholesky(Sig_a, lower=True)  
         Chi_a = self.generate_sigma_pts(xhat_a, L)
 
         # propagation - pass sig pts thru motion model and compute Gaussian statistics
-        Chix_bar = self.propagate_sigma_pts(Chi_a[:3], Chi_a[3:5], v, omg)
-        xbar = wrap(np.sum(self.wm * Chix_bar, axis=1), 2)
+        Chix_bar = self.propagate_sigma_pts(Chi_a[:, :3], Chi_a[:, 3:5], vc, omgc)
+        # xbar = wrap(np.sum(self.wm * Chix_bar, axis=1), 2)
+        xbar = np.sum(self.wm * Chix_bar, axis=1)
 
-        diff_x = Chix_bar - xbar.reshape(3,1)
-        diff_x = wrap(diff_x, 2)
+        # diff_x = Chix_bar - xbar.reshape(3,1)
+        diff_x = Chix_bar - xbar
+        # diff_x = wrap(diff_x, 2)
+        diff_x = diff_x
         sum_ein_xx = np.einsum('ij, kj->jik', diff_x, diff_x)
         Sigma_bar = np.sum( self.wc.reshape(2*self.n + 1, 1, 1) * sum_ein_xx, axis=0)
 
@@ -54,7 +57,7 @@ class UKF():
             zhat = np.sum(self.wm * Zbar, axis=1)  
 
             diff_z = Zbar - zhat.reshape(2,1)
-            diff_z = wrap(diff_z, 1)
+            # diff_z = wrap(diff_z, 1)
             sum_ein_zz = np.einsum('ij, kj->jik', diff_z, diff_z)
             sum_ein_xz = np.einsum('ij, kj->jik', diff_x, diff_z)
             # cov of predicted meas
@@ -67,14 +70,15 @@ class UKF():
 
             # update mean and covariance
             innov = z[:,i] - zhat
-            innov = wrap(innov, 1)
+            # innov = wrap(innov, 1)
             xhat = xbar + K @ (innov) # update location estimate - measurement update ****** make sure this doesn't do inner product but outer
             xhat = wrap(xhat, 2)  
             Sigma = Sigma_bar - K @ S @ K.T  # update location cov estimate
 
+
             # redraw sigma points (unless last landmark)
             if not i == (pm.num_lms - 1):
-                xbar_a, Sigbar_a = self.augment_state(xbar, Sigma_bar, v, omg)
+                xbar_a, Sigbar_a = self.augment_state(xbar, Sigma_bar, vc, omgc)
                 L = sp.linalg.cholesky(Sigbar_a).T
                 Chi_a = self.generate_sigma_pts(xbar_a, L)
                 Chix_bar = Chi_a[:3]
@@ -84,10 +88,10 @@ class UKF():
 
         return K
 
-    def propagate_sigma_pts(self, Chi_x, Chi_u, v, omg):
-        v = v + Chi_u[0]
-        omg = omg + Chi_u[1]
-        th = Chi_x[2]
+    def propagate_sigma_pts(self, Chi_x, Chi_u, vc, omgc):
+        v = vc + Chi_u[:,0]
+        omg = omgc + Chi_u[:,1]
+        th = Chi_x[:,2]
 
         th_plus = th + omg * pm.dt
         st = np.sin(th)
@@ -102,9 +106,9 @@ class UKF():
 
         return Chix_bar
 
-    def augment_state(self, xhat, Sigma, v, omg):
-        M = np.diag([pm.alphas[0] * v**2 + pm.alphas[1] * omg**2, 
-                    pm.alphas[2] * v**2 + pm.alphas[3] * omg**2])
+    def augment_state(self, xhat, Sigma, vc, omgc):
+        M = np.diag([pm.alphas[0] * vc**2 + pm.alphas[1] * omgc**2, 
+                    pm.alphas[2] * vc**2 + pm.alphas[3] * omgc**2])
 
         xhat_a = np.concatenate((xhat, np.zeros(4)))
         Sig_a = sp.linalg.block_diag(Sigma, M, self.Q)
@@ -113,11 +117,11 @@ class UKF():
 
     def generate_sigma_pts(self, xhat_a, L):
         gamma = np.sqrt(self.n + self.lamb)
-        Chi_a = np.zeros((self.n, 2 * self.n + 1))
+        Chi_a = np.zeros((2 * self.n + 1, self.n))
 
-        Chi_a[:,0] = xhat_a
-        Chi_a[:,1:self.n+1] = xhat_a.reshape((self.n,1)) + gamma * L
-        Chi_a[:, self.n+1:] = xhat_a.reshape((self.n,1)) - gamma * L
+        Chi_a[0] = xhat_a
+        Chi_a[1:self.n+1] = xhat_a + gamma * L
+        Chi_a[self.n+1:] = xhat_a - gamma * L
 
         return Chi_a
 

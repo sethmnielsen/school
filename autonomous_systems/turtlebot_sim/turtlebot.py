@@ -19,6 +19,7 @@ class Turtlebot():
         self.vc = np.zeros(self.N)
         self.omgc = np.zeros(self.N)
 
+
     def build_vel_arrays(self):
         alphas = pm.alphas
         
