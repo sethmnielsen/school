@@ -73,7 +73,7 @@ class Turtlebot():
         
         # senor noise
         r_noise = np.random.normal(0, pm.sigs[0], pm.num_lms)
-        r_noise2 = np.sqrt((mdx-))
+        # r_noise2 = np.sqrt((mdx-))
         phi_noise = np.random.normal(0, pm.sigs[1], pm.num_lms)
         
         # compute simulated r and phi measurements
