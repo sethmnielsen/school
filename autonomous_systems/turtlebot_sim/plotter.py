@@ -2,6 +2,7 @@
 
 import numpy as np
 import params as pm
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
 
@@ -30,7 +31,8 @@ class Plotter():
         
         f1 = plt.figure(1)
         f1.clf()
-        self.ax1 = plt.axes()
+        self.ax1:matplotlib.axes._axes.Axes = plt.axes()
+                
 
         # Draw turtlebot
         cur_head = self.heading2Rotation(th0) @ self.bot_body_heading
@@ -46,7 +48,7 @@ class Plotter():
         self.est_trail = plt.plot(self.xhats[:,0], self.xhats[:,1],'.', color=(1,0.65,0))
 
         # Draw landmarks
-        self.lmarks_line = []
+        # self.lmarks_line = []
         for i in range(pm.num_lms):
             patch = ptc.CirclePolygon( (pm.lmarks[0,i], pm.lmarks[1,i]),
                                         bot_radius, 
@@ -54,6 +56,7 @@ class Plotter():
                                         alpha=bot_body_alpha, 
                                         color='g' )
             self.ax1.add_patch(patch)
+            
 
             # measurement vectors
             # line = plt.plot([x0, pm.lmarks[0,i]], [y0, pm.lmarks[1,i]], 'c')
@@ -92,7 +95,7 @@ class Plotter():
         self.trail[0].set_ydata(self.states[1,:i])
         self.est_trail[0].set_xdata(self.xhats[0,:i])
         self.est_trail[0].set_ydata(self.xhats[1,:i])
-
+        
         # measurement vectors
         # for k in range(pm.num_lms):
         #     self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])

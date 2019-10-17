@@ -36,17 +36,13 @@ elif len(args) == 1 and args[0] in [1, 4, 5]:
 
 
 N = tbot.N
-state_hist = np.zeros((3,N))
-state_hist[:,0] = pm.state0
-Chi = np.zeros((3, pm.M))
 for i in range(N):
     state = tbot.states[:,i]
-    plotter.update_particles(tbot.states[:, i], mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
-    # state = tbot.propagate_state(tbot.states[:,i], tbot.vc[i], tbot.omgc[i])
-    z = tbot.get_measurements(tbot.states[:, i], particles=False)
-    
-    mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
     # update plot animation
+    plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
+    z = tbot.get_measurements(state, particles=False)
+    
+    mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
 plotter.make_plots()
