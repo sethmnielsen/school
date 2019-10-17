@@ -41,7 +41,7 @@ class UKF():
         # propagation - pass sig pts thru motion model and compute Gaussian statistics
         Chix_bar = self.propagate_sigma_pts(Chi_a[:, :3], Chi_a[:, 3:5], vc, omgc)
         # xbar = wrap(np.sum(self.wm * Chix_bar, axis=1), 2)
-        xbar = np.sum(self.wm * Chix_bar, axis=1)
+        xbar = np.sum(self.wm.reshape(15,1) * Chix_bar, axis=0)
 
         # diff_x = Chix_bar - xbar.reshape(3,1)
         diff_x = Chix_bar - xbar
@@ -101,7 +101,7 @@ class UKF():
 
         A = np.array([-v/omg * st + v/omg * s,
                      v/omg * ct - v/omg * c,
-                     omg * pm.dt])
+                     omg * pm.dt]).T
         Chix_bar = Chi_x + A
 
         return Chix_bar

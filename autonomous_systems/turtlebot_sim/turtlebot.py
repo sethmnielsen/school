@@ -73,12 +73,13 @@ class Turtlebot():
         
         # senor noise
         r_noise = np.random.normal(0, pm.sigs[0], pm.num_lms)
+        r_noise2 = np.sqrt((mdx-))
         phi_noise = np.random.normal(0, pm.sigs[1], pm.num_lms)
         
         # compute simulated r and phi measurements
         r = np.sqrt(np.add(mdx**2,mdy**2)) + r_noise
-        phi_raw = wrap(np.arctan2(mdy, mdx) - th)
-        phi = wrap(np.array(phi_raw)) + phi_noise
+        phi_raw = np.arctan2(mdy, mdx) - th
+        phi = wrap(phi_raw + phi_noise)
 
-        z = np.vstack((r, phi))
+        z = np.vstack((r, phi))  # returns (2,3) array, combo of (r, phi) for each lmark
         return z

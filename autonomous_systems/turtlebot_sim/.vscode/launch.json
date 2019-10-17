@@ -17,8 +17,8 @@
             "name": "Python: HW",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/hw3/main3.py",
-            "cwd": "${workspaceFolder}/hw3",
+            "program": "${workspaceFolder}/hw4/main4.py",
+            "cwd": "${workspaceFolder}/hw4",
             "console": "integratedTerminal",
             "justMyCode": true
         },
