@@ -60,8 +60,8 @@ class Turtlebot():
             state = self.compute_curr_state(state, v, omg, gam)
         else:
             n = v.shape[0]
-            for k in range(1,n):
-                state[:,k] = self.compute_curr_state(state[:,k], v[k], omg[k], gam[k])
+            for k in range(n-1):
+                state[:,k+1] = self.compute_curr_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
 
         return state
 
@@ -76,10 +76,10 @@ class Turtlebot():
 
         return np.array([x, y, th])
 
-    def get_measurements(self, state:np.ndarray, particles=True) -> np.ndarray:
+    def get_measurements(self, state, lmark=pm.lmarks, particles=True) -> np.ndarray:
         x, y, th = state
-        mdx = pm.lmarks[0] - x
-        mdy = pm.lmarks[1] - y
+        mdx = lmark[0] - x
+        mdy = lmark[1] - y
 
         # senor noise
         if particles:

@@ -16,8 +16,8 @@ class MCL():
         self.tbot = tbot
 
         self.Chi = np.zeros((3,pm.M))
-        self.Chi[:2] = np.random.rand(2, pm.M) * 20 - 10
-        self.Chi[2] = np.random.rand(pm.M) * 2*np.pi - np.pi
+        self.Chi[:2] = np.random.uniform(-10, 10, (2, pm.M))
+        self.Chi[2] = np.random.uniform(-np.pi, np.pi, pm.M)
         
         self.xhat = np.mean(self.Chi, axis=1)
         x_errors = wrap(self.Chi - self.xhat[:,None], dim=2)
@@ -33,12 +33,10 @@ class MCL():
     def update(self, v, omg, z):
         w_lmarks = np.ones((pm.num_lms,pm.M))
         self.Chi = self.tbot.sample_motion_model(v, omg, self.Chi, particles=True)
-        for i in range(pm.M):
-            zhat = self.tbot.get_measurements(self.Chi[:,i], particles=True)
-            zdiff = z - zhat
-            zdiff = wrap( z - zhat, dim=1 )
-            for k in range(pm.num_lms):
-                w_lmarks[k,i] *= self.measurement_prob(zdiff[:,k], 2*pm.sigs)
+        for i in range(pm.num_lms):
+            zhat = self.tbot.get_measurements(self.Chi, pm.lmarks[:,i], particles=True)
+            zdiff = wrap( z[:,i,None] - zhat, dim=1 )
+            w_lmarks[i] *= self.measurement_prob(zdiff, 2*pm.sigs)
 
         w_lmarks = w_lmarks/np.sum(w_lmarks, axis=1)[:,np.newaxis]
         self.w = np.prod( w_lmarks, axis=0 )
@@ -53,9 +51,9 @@ class MCL():
 
 
     def measurement_prob(self, zdiff, sigs):
-        # zdiff.shape = (2,3), sigs.shape = (2,)
-        temp1 = 1/np.sqrt(2*np.pi*sigs**2)
-        temp2 = np.exp( -zdiff**2 / (2*sigs**2) )
+        # zdiff.shape is (2,3), sigs.shape is (2,)
+        temp1 = 1/np.sqrt(2*np.pi*sigs[:,None]**2)
+        temp2 = np.exp( -zdiff**2 / (2*sigs[:,None]**2) )
         prob = temp1*temp2
         return np.prod( prob, axis=0 )
     

@@ -40,15 +40,13 @@ state_hist = np.zeros((3,N))
 state_hist[:,0] = pm.state0
 Chi = np.zeros((3, pm.M))
 for i in range(N):
-    state = tbot.propagate_state(tbot.states[:,i], tbot.vc[i], tbot.omgc[i])
-    z = tbot.get_measurements(state, particles=False)
+    state = tbot.states[:,i]
+    plotter.update_particles(tbot.states[:, i], mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
+    # state = tbot.propagate_state(tbot.states[:,i], tbot.vc[i], tbot.omgc[i])
+    z = tbot.get_measurements(tbot.states[:, i], particles=False)
     
     mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
-    # append to plotting variable histories
-    state_hist[:,i] = state
-
     # update plot animation
-    plotter.update_particles(state_hist[:, i], mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
 
 plotter.make_plots()
