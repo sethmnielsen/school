@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy as sp
+import matplotlib.pyplot as plt
 
 # from turtlebot import Turtlebot
 import sys
@@ -15,7 +16,10 @@ class MCL():
         self.Chi = np.zeros((3,pm.M))
         self.Chi[:2] = np.random.rand(2, pm.M) * 20
         self.Chi[2] = np.random.rand(pm.M) * 2*np.pi - np.pi
-
+        
+        # plt.plot(self.Chi[0], self.Chi[1], '.', color='orange')
+        # plt.show()
+        
         m = pm.M
         self.w = np.zeros(pm.M)
         self.w.fill(1/pm.M)
@@ -25,10 +29,15 @@ class MCL():
     def update(self, v, omg, z):
         w_lmarks = np.ones((pm.num_lms,pm.M))
         for i in range(pm.M):
-            self.Chi[i] = self.tbot.sample_motion_model(v, omg, self.Chi[:,i])
-            zhat = self.tbot.get_measurements(self.Chi[:,i])
-            w_lmarks[:,i] = self.measurement_prob(z - zhat, pm.sigs)
-        self.w = w_lmarks/np.sum(w_lmarks, axis=1)[:,np.newaxis]
+            self.Chi[:,i] = self.tbot.sample_motion_model(v, omg, self.Chi[:,i])
+            zhat = self.tbot.get_measurements(self.Chi[:,i], particle=True)
+            zdiff = z - zhat
+            zdiff = wrap( z - zhat, dim=1 )
+            for k in range(pm.num_lms):
+                w_lmarks[k,i] *= self.measurement_prob(zdiff[:,k], 2*pm.sigs)
+
+        self.w = np.prod( w_lmarks, axis=0 )
+        # w_lmarks = w_lmarks/np.sum(w_lmarks, axis=1)[:,np.newaxis]
         if not np.all(np.isfinite(self.w)):
             print( 'WE GOT A NAN !')
         self.Chi = self.low_variance_sampler()
@@ -36,10 +45,10 @@ class MCL():
 
     def measurement_prob(self, zdiff, sigs):
         # zdiff.shape = (2,3), sigs.shape = (2,)
-        temp1 = 1/np.sqrt(2*np.pi*sigs.reshape(2,1)**2)
-        temp2 = np.exp( -zdiff**2 / (2*sigs.reshape(2,1)**2) )
+        temp1 = 1/np.sqrt(2*np.pi*sigs**2)
+        temp2 = np.exp( -zdiff**2 / (2*sigs**2) )
         prob = temp1*temp2
-        return np.prod(np.prod(prob), axis=0)
+        return np.prod( prob, axis=0 )
     
     def low_variance_sampler(self):
         Chi_bar = []
@@ -53,4 +62,4 @@ class MCL():
                 c = c + self.w[i]
             Chi_bar.append( self.Chi[i] )
         
-        return np.array(Chi_bar)
+        return np.array(Chi_bar)``

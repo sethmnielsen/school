@@ -36,17 +36,17 @@ elif len(args) == 1 and args[0] in [1, 4, 5]:
 
 
 N = tbot.N
-state_hist = np.zeros((N, 3))
-state_hist[0] = pm.state0
-Chi = np.zeros((pm.M, 3))
+state_hist = np.zeros((3,N))
+state_hist[:,0] = pm.state0
+Chi = np.zeros((3, pm.M))
 for i in range(1, N):
-    state = tbot.sample_motion_model(tbot.vc[i], tbot.omgc[i], tbot.states[i])
-    z = tbot.get_measurements(state)
+    state = tbot.sample_motion_model(tbot.vc[i], tbot.omgc[i], tbot.states[:,i])
+    z = tbot.get_measurements(state, particle=False)
     
     Chi = mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
     # append to plotting variable histories
-    state_hist[i] = state
+    state_hist[:,i] = state
 
     # update plot animation
     # plotter.update_particle(state_hist[:i], Chi)
