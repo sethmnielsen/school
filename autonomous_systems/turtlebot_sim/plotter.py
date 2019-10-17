@@ -61,7 +61,7 @@ class Plotter():
 
         self.ax1.add_patch(self.bot_body)
 
-        sz = 15
+        sz = 10
         self.ax1.set_xlim(-sz, sz)
         self.ax1.set_ylim(-sz, sz)
         f1.canvas.draw()
@@ -159,7 +159,7 @@ class Plotter():
 
         # ======================================
 
-        f3, axes3 = plt.subplots(3, 1, sharex=True, fig_kw={'num':3})
+        f3, axes3 = plt.subplots(3, 1, sharex=True, num=3)
         f3.suptitle('Three Landmarks UKF Localization - Error')
         axes3[0].plot(pm.t_arr, self.est_errors[0], label='error')
         axes3[1].plot(pm.t_arr, self.est_errors[1])
