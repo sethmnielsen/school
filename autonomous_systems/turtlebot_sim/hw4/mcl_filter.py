@@ -19,9 +19,9 @@ class MCL():
         self.Chi[:2] = np.random.rand(2, pm.M) * 20 - 10
         self.Chi[2] = np.random.rand(pm.M) * 2*np.pi - np.pi
         
-        self.xhat = np.mean(self.Chi, axis=1, keepdims=True)
-        x_error = wrap(self.Chi - self.xhat, dim=2)
-        self.sigma = np.cov(x_error)
+        self.xhat = np.mean(self.Chi, axis=1)
+        x_errors = wrap(self.Chi - self.xhat[:,None], dim=2)
+        self.sigma = np.cov(x_errors)
 
         # plt.plot(self.Chi[0], self.Chi[1], '.', color='orange')
         # plt.show()
@@ -47,9 +47,9 @@ class MCL():
             print( 'WE GOT A NAN !')
         self.Chi = self.low_variance_sampler()
 
-        self.xhat = wrap( np.mean(self.Chi, axis=1, keepdims=True), 2)
-        x_error = wrap( self.Chi - self.xhat, 2)
-        self.sigma = np.cov(x_error)
+        self.xhat = wrap( np.mean(self.Chi, axis=1), 2)
+        x_errors = wrap( self.Chi - self.xhat[:,None], 2)
+        self.sigma = np.cov(x_errors)
 
 
     def measurement_prob(self, zdiff, sigs):

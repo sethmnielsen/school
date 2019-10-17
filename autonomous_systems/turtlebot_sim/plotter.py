@@ -73,7 +73,7 @@ class Plotter():
         self.est_errors[:, i] = xhat - state
         self.error_covs[:, i] = covar
         
-        cur_state = state_hist[:, -1]
+        cur_state = state
         x = cur_state[0]
         y = cur_state[1]
         theta = cur_state[2]
@@ -100,7 +100,7 @@ class Plotter():
 
         self.ax1.redraw_in_frame()
         # time.sleep(0.1)
-        # plt.pause(0.05)
+        plt.pause(0.0001)
         
 
     def update_kalman(self, state, xhat, error_cov, i):
