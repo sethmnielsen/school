@@ -10,15 +10,15 @@ class Plotter():
 
     def __init__(self):
         N = len(pm.t_arr)
-        self.states = np.zeros((N, 3))
-        self.xhats = np.zeros((N, 3))
-        self.est_errors = np.zeros((N, 3))
-        self.error_covs = np.zeros((N, 3))
-        self.particles = np.zeros((3,))
+        self.states = np.zeros((3, N))
+        self.xhats = np.zeros((3, N))
+        self.est_errors = np.zeros((3, N))
+        self.error_covs = np.zeros((3, N))
+        self.Chi = np.zeros((3,N))
 
         x0, y0, th0 = pm.state0
-        self.states[0] = pm.state0
-        self.xhats[0] = pm.state0
+        self.states[:,0] = pm.state0
+        self.xhats[:,0] = pm.state0
 
         # Robot physical constants    
         bot_radius = 0.5
@@ -55,8 +55,9 @@ class Plotter():
                                         color='g' )
             self.ax1.add_patch(patch)
 
-            line = plt.plot([x0, pm.lmarks[0,i]], [y0, pm.lmarks[1,i]], 'c')
-            self.lmarks_line.append(line[0])
+            # measurement vectors
+            # line = plt.plot([x0, pm.lmarks[0,i]], [y0, pm.lmarks[1,i]], 'c')
+            # self.lmarks_line.append(line[0])
 
         self.ax1.add_patch(self.bot_body)
 
@@ -66,8 +67,13 @@ class Plotter():
         f1.canvas.draw()
         f1.show()
 
-    def update_particle(self, state_hist, Chi):
-        cur_state = state_hist[-1]
+    def update_particles(self, state, xhat, Chi, covar, i):
+        self.states[:, i] = state
+        self.xhats[:, i] = xhat
+        self.est_errors[:, i] = xhat - state
+        self.error_covs[:, i] = covar
+        
+        cur_state = state_hist[:, -1]
         x = cur_state[0]
         y = cur_state[1]
         theta = cur_state[2]
@@ -82,15 +88,15 @@ class Plotter():
         self.heading[0].set_xdata(head_x)
         self.heading[0].set_ydata(head_y)
         # trails
-        self.trail[0].set_xdata(self.states[:i,0])
-        self.trail[0].set_ydata(self.states[:i,1])
-        self.est_trail[0].set_xdata(self.xhats[:i,0])
-        self.est_trail[0].set_ydata(self.xhats[:i,1])
+        self.trail[0].set_xdata(self.states[0,:i])
+        self.trail[0].set_ydata(self.states[1,:i])
+        self.est_trail[0].set_xdata(self.xhats[0,:i])
+        self.est_trail[0].set_ydata(self.xhats[1,:i])
 
         # measurement vectors
-        for k in range(pm.num_lms):
-            self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
-            self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
+        # for k in range(pm.num_lms):
+        #     self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
+        #     self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
 
         self.ax1.redraw_in_frame()
         # time.sleep(0.1)

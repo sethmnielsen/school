@@ -43,12 +43,12 @@ for i in range(N):
     state = tbot.propagate_state(tbot.states[:,i], tbot.vc[i], tbot.omgc[i])
     z = tbot.get_measurements(state, particles=False)
     
-    Chi = mcl.update(tbot.vc[i], tbot.omgc[i], z)
+    mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
     # append to plotting variable histories
     state_hist[:,i] = state
 
     # update plot animation
-    # plotter.update_particle(state_hist[:i], Chi)
+    plotter.update_particles(state_hist[:, i], mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
 
 plotter.make_plots()
