@@ -24,13 +24,13 @@ class Turtlebot():
         alphas = pm.alphas
         
         # v/omg commands
-        self.vc = 1 + .5 * np.cos(2 * np.pi * 0.3 * pm.t_arr) # 0.2 on HW3 pdf
-        self.omgc = -0.2 + 2 * np.cos(2 * np.pi * 1.0 * pm.t_arr) # 0.6 on HW3 pdf
+        self.vc = 1 + .5 * np.cos(2 * np.pi * 0.2 * pm.t_arr) # 0.2 on HW3 pdf
+        self.omgc = -0.2 + 2 * np.cos(2 * np.pi * 0.6 * pm.t_arr) # 0.6 on HW3 pdf
         
         # v/omg real outputs (noise added)
         self.states = self.sample_motion_model(self.vc, self.omgc, self.states)
 
-    def sample_motion_model(self, vc, omgc, state):
+    def sample_motion_model(self, vc, omgc, state, particles=False):
         # Accepts either number or array of numbers for vc, omgc, state
         alphas = pm.alphas
 
@@ -38,14 +38,15 @@ class Turtlebot():
         sd_omg = np.sqrt(alphas[2]*vc**2 + alphas[3]*omgc**2)
         sd_gam = np.sqrt(alphas[4]*vc**2 + alphas[5]*omgc**2)
 
-        if isinstance(vc, np.ndarray):
+        # if isinstance(vc, np.ndarray):
+        if particles:
+            noise_v = np.random.randn( pm.M )
+            noise_omg = np.random.randn( pm.M )
+            noise_gam = np.random.randn( pm.M )
+        else:
             noise_v = np.random.randn( vc.shape[0] )
             noise_omg = np.random.randn( vc.shape[0] )
             noise_gam = 0
-        else:
-            noise_v = np.random.randn()
-            noise_omg = np.random.randn()
-            noise_gam = np.random.randn()
 
         vhat = vc + sd_v*noise_v
         omghat = omgc + sd_omg*noise_omg
@@ -53,21 +54,18 @@ class Turtlebot():
 
         return self.propagate_state(state, vhat, omghat, gamhat)
        
-    def propagate_state(self, state, v, omg, gam):
+    def propagate_state(self, state, v, omg, gam=0):
         # Accepts either number or array of numbers for vhat, omghat, [gamhat], state
-        # x, y, th = state
-        # x, y, th = state[:,np.newaxis]
-        # x, y, th = x.flatten(), y.flatten(), th.flatten()
         if isinstance(v, float):
             state = self.compute_curr_state(state, v, omg, gam)
         else:
             n = v.shape[0]
             for k in range(1,n):
-                state[:,k] = self.compute_curr_state(state[:,k-1], v[k], omg[k])
-        
+                state[:,k] = self.compute_curr_state(state[:,k], v[k], omg[k], gam[k])
+
         return state
 
-    def compute_curr_state(self, state, v:float, omg:float, gam=0):
+    def compute_curr_state(self, state, v, omg, gam):
         x, y, th = state
         vo = v/omg
         
@@ -78,13 +76,13 @@ class Turtlebot():
 
         return np.array([x, y, th])
 
-    def get_measurements(self, state:np.ndarray, particle=True) -> np.ndarray:
+    def get_measurements(self, state:np.ndarray, particles=True) -> np.ndarray:
         x, y, th = state
         mdx = pm.lmarks[0] - x
         mdy = pm.lmarks[1] - y
 
         # senor noise
-        if particle:
+        if particles:
             r_noise = 0
             phi_noise = 0
         else:

@@ -39,9 +39,9 @@ N = tbot.N
 state_hist = np.zeros((3,N))
 state_hist[:,0] = pm.state0
 Chi = np.zeros((3, pm.M))
-for i in range(1, N):
-    state = tbot.sample_motion_model(tbot.vc[i], tbot.omgc[i], tbot.states[:,i])
-    z = tbot.get_measurements(state, particle=False)
+for i in range(N):
+    state = tbot.propagate_state(tbot.states[:,i], tbot.vc[i], tbot.omgc[i])
+    z = tbot.get_measurements(state, particles=False)
     
     Chi = mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
