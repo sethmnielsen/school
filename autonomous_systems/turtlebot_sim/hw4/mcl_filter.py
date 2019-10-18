@@ -44,16 +44,15 @@ class MCL():
         # self.P = np.cov(self.Chi)
 
         self.xhat = np.mean(self.Chi, axis=1) 
-        x_errors = self.Chi - self.xhat[:,None]
 
-        diff = self.Chi - self.xhat.reshape(3,1)
-        self.P = np.mean(self.w) * diff @ diff.T
-        # self.P = np.cov(np.mean(self.w)*x_errors)
+        est_errors = self.Chi - self.xhat[:,None]
+        # np.cov is equivalent to P = np.mean(self.w) * est_errors @ est_errors.T
+        self.P = np.cov(est_errors)
 
-        # uniq = len(np.unique(inds))
-        # if uniq/pm.M < 0.5:
-        #     Q = self.P / (pm.M*uniq)**(1/3)
-        #     self.Chi += Q @ np.random.randn(*self.Chi.shape)
+        uniq = len(np.unique(inds))
+        if uniq/pm.M < 0.5:
+            Q = self.P / (pm.M*uniq)**(1/3)
+            self.Chi += Q @ np.random.randn(*self.Chi.shape)
 
 
     def measurement_prob(self, zdiff, sigs):

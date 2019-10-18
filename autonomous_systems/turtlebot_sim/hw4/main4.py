@@ -43,7 +43,7 @@ for i in range(N):
     state = tbot.states[:,i]
 
     # update plot animation
-    plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
+    plotter.update_mcl_plot(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
 
     z = tbot.get_measurements(state, particles=False)
     mcl.update(tbot.vc[i], tbot.omgc[i], z)

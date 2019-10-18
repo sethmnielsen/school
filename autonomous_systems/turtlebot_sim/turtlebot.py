@@ -40,17 +40,19 @@ class Turtlebot():
 
         # if isinstance(vc, np.ndarray):
         if particles:
-            n = pm.M
+            m = 10  # noise multiplier
+            n = pm.M  # number of random numbers to generate
             noise_gam = np.random.randn( n )
             propagate = self.propagate_particles
         else:
-            n = vc.shape[0]
+            m = 1  # noise multiplier
+            n = vc.shape[0]  # number of random numbers to generate
             noise_gam = 0
             propagate = self.propagate_state
 
-        vhat = vc + sd_v*np.random.randn( n )
-        omghat = omgc + sd_omg*np.random.randn( n )
-        gamhat = sd_gam*noise_gam
+        vhat = vc + sd_v*np.random.randn( n ) * m
+        omghat = omgc + sd_omg*np.random.randn( n ) * m
+        gamhat = sd_gam*noise_gam * m
         
         return propagate(state, vhat, omghat, gamhat)
        

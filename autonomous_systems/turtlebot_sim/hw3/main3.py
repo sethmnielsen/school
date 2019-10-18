@@ -37,25 +37,13 @@ if __name__ == '__main__':
 
     # Histories
     N = turtle.N
-    # state_hist = np.zeros((N, 3))
-    # xhat_hist = np.zeros((N, 3))
-    # est_err_hist = np.zeros((N, 3))
-    # err_cov_hist = np.zeros((N, 3))
-    
     for i in range(1, N):
         zt = turtle.get_measurements(turtle.states[i])
         K = ukf.update(zt, turtle.vc[i], turtle.omgc[i])
 
         # plotty plotty plot plot
         # update plot animation
-        plotter.update_kalman(turtle.states[i], ukf.xhat, ukf.Sigma.diagonal(), i)
-
-        # append to plotting variable histories
-        # state, xhat, err, x_cov, y_cov, th_cov, K
-        # state_hist[i] = turtle.state
-        # xhat_hist[i] = ukf.xhat
-        # est_err_hist[i] = ukf.xhat - turtle.state
-        # err_cov_hist[i] = ukf.Sigma.diagonal()
+        plotter.update_kalman_plot(turtle.states[i], ukf.xhat, ukf.Sigma.diagonal(), i)
 
     plotter.make_plots()
 
