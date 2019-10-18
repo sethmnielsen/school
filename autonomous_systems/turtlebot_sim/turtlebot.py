@@ -8,7 +8,7 @@ from utils import wrap
 class Turtlebot():
     def __init__(self):
         # time
-        self.t_end = 20
+        self.t_end = pm.t_end
         self.N = len(pm.t_arr)
 
         # Current state, state history array
@@ -34,9 +34,9 @@ class Turtlebot():
         # Accepts either number or array of numbers for vc, omgc, state
         alphas = pm.alphas
 
-        sd_v = np.sqrt(alphas[0]*vc**2 + alphas[1]*omgc**2)
-        sd_omg = np.sqrt(alphas[2]*vc**2 + alphas[3]*omgc**2)
-        sd_gam = np.sqrt(alphas[4]*vc**2 + alphas[5]*omgc**2)
+        sd_v   = np.sqrt( alphas[0]*(vc**2) + alphas[1]*(omgc**2) )
+        sd_omg = np.sqrt( alphas[2]*(vc**2) + alphas[3]*(omgc**2) )
+        sd_gam = np.sqrt( alphas[4]*(vc**2) + alphas[5]*(omgc**2) )
 
         # if isinstance(vc, np.ndarray):
         if particles:
@@ -55,22 +55,18 @@ class Turtlebot():
         return propagate(state, vhat, omghat, gamhat)
        
     def propagate_state(self, state, v, omg, gam=0):
-        # Accepts either number or array of numbers for vhat, omghat, [gamhat], state
-        if isinstance(v, float):
-            state = self.compute_next_state(state, v, omg, gam)
-        else:
-            n = v.shape[0]
-            for k in range(n-1):
-                state[:,k+1] = self.compute_next_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
+        n = v.shape[0]
+        for k in range(n-1):
+            state[:,k+1] = self.compute_next_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
 
-        return state
+        return wrap(state, 2)
 
-    def propagate_particles(self, Chi, v, omg, gam=0):
-        Chi_next = self.compute_next_particles(Chi, v, omg, gam)
-        return Chi_next
+    def propagate_particles(self, Chi, vhat, omghat, gamhat=0):
+        Chi = self.compute_next_particles(Chi, vhat, omghat, gamhat)
+        return Chi
 
-    def compute_next_particles(self, Chi, v, omg, gam):
-        Chi = self.compute_next_state(Chi, v, omg, gam)
+    def compute_next_particles(self, Chi, vhat, omghat, gamhat):
+        Chi = self.compute_next_state(Chi, vhat, omghat, gamhat)
         mask = abs(Chi[2]) > np.pi
         Chi[2][mask] = wrap(Chi[2][mask])
         return Chi

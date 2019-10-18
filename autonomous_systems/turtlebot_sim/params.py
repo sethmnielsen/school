@@ -8,7 +8,8 @@ y0 = -3
 th0 = np.pi/2
 state0 = [x0, y0, th0]
 
-t_arr = np.arange(0, 20, dt)
+t_end = 20
+t_arr = np.arange(0, t_end, dt)
 
 # noise 
 sig_r = 0.1 # [m]
@@ -30,4 +31,4 @@ num_lms = lmarks.shape[1]
 ndim = 7
 
 # Particle Filter
-M = 1000
+M = 5000

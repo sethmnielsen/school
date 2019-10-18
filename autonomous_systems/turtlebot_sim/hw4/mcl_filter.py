@@ -27,10 +27,9 @@ class MCL():
         self.w = np.zeros(pm.M)
         self.w.fill(1/pm.M)
 
-    def update(self, v, omg, z):
+    def update(self, vc, omgc, z):
         w_lmarks = np.ones((pm.num_lms,pm.M))
-        Chi_prev = np.copy(self.Chi)
-        self.Chi = self.tbot.sample_motion_model(v, omg, self.Chi, particles=True)
+        self.Chi = self.tbot.sample_motion_model(vc, omgc, self.Chi, particles=True)
         for i in range(pm.num_lms):
             zhat = self.tbot.get_measurements(self.Chi, pm.lmarks[:,i], particles=True)
             zdiff = wrap( z[:,i,None] - zhat, dim=1 )
@@ -42,15 +41,19 @@ class MCL():
         self.w = self.w / np.sum(self.w)
         self.Chi, inds = self.low_variance_sampler()
 
-        self.xhat = np.mean(self.Chi, axis=1) 
-        self.xhat[2] = wrap(self.xhat[2])
-        x_errors = self.Chi - self.xhat[:,None]
-        self.P = np.cov(x_errors)
+        # self.P = np.cov(self.Chi)
 
-        uniq = len(np.unique(inds))
-        if uniq/pm.M < 0.5:
-            Q = self.P / (pm.M*uniq)**(1/3)
-            self.Chi += Q @ np.random.randn(*self.Chi.shape)
+        self.xhat = np.mean(self.Chi, axis=1) 
+        x_errors = self.Chi - self.xhat[:,None]
+
+        diff = self.Chi - self.xhat.reshape(3,1)
+        self.P = np.mean(self.w) * diff @ diff.T
+        # self.P = np.cov(np.mean(self.w)*x_errors)
+
+        # uniq = len(np.unique(inds))
+        # if uniq/pm.M < 0.5:
+        #     Q = self.P / (pm.M*uniq)**(1/3)
+        #     self.Chi += Q @ np.random.randn(*self.Chi.shape)
 
 
     def measurement_prob(self, zdiff, sigs):

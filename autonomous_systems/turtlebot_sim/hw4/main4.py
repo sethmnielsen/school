@@ -16,10 +16,9 @@ np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
 tbot = Turtlebot()
 mcl = MCL(tbot)
 
-display = True
+animate = True
 
-if display:
-    plotter = Plotter()
+plotter = Plotter(animate)
 
 # Parse cmd line args
 args = sys.argv[1:]
@@ -44,11 +43,9 @@ for i in range(N):
     state = tbot.states[:,i]
 
     # update plot animation
-    if display:
-        plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
+    plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
 
     z = tbot.get_measurements(state, particles=False)
     mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
-if display:
-    plotter.make_plots()
+plotter.make_plots()
