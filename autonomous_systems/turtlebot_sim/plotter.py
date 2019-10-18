@@ -37,7 +37,7 @@ class Plotter():
                 
 
         # Draw turtlebot
-        cur_head = self.heading2Rotation(th0) @ self.bot_body_heading
+        cur_head = self.heading2Rotation(th0) @ self.bot_body_heading                    
         head_x = np.array([0,cur_head[0]]) + x0    
         head_y = np.array([0,cur_head[1]]) + y0
         self.bot_body = ptc.CirclePolygon( (x0, y0), 

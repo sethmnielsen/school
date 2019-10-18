@@ -40,42 +40,47 @@ class Turtlebot():
 
         # if isinstance(vc, np.ndarray):
         if particles:
-            noise_v = np.random.randn( pm.M )
-            noise_omg = np.random.randn( pm.M )
-            noise_gam = np.random.randn( pm.M )
+            n = pm.M
+            noise_gam = np.random.randn( n )
+            propagate = self.propagate_particles
         else:
-            noise_v = np.random.randn( vc.shape[0] )
-            noise_omg = np.random.randn( vc.shape[0] )
+            n = vc.shape[0]
             noise_gam = 0
+            propagate = self.propagate_state
 
-        vhat = vc + sd_v*noise_v
-        omghat = omgc + sd_omg*noise_omg
+        vhat = vc + sd_v*np.random.randn( n )
+        omghat = omgc + sd_omg*np.random.randn( n )
         gamhat = sd_gam*noise_gam
-
-        return self.propagate_state(state, vhat, omghat, gamhat)
+        
+        return propagate(state, vhat, omghat, gamhat)
        
     def propagate_state(self, state, v, omg, gam=0):
         # Accepts either number or array of numbers for vhat, omghat, [gamhat], state
         if isinstance(v, float):
-            state = self.compute_curr_state(state, v, omg, gam)
+            state = self.compute_next_state(state, v, omg, gam)
         else:
             n = v.shape[0]
-            prpgate_state = np.zeros((3,n))
             for k in range(n-1):
-                prpgate_state[:,k] = self.compute_curr_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
+                state[:,k+1] = self.compute_next_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
 
-        return prpgate_state
+        return state
 
-    def compute_curr_state(self, state, v, omg, gam):
-        x, y, th = state
+    def propagate_particles(self, Chi, v, omg, gam=0):
+        Chi_next = self.compute_next_state(Chi, v, omg, gam)
+        return Chi_next
+
+    def compute_next_state(self, x, v, omg, gam):
         vo = v/omg
-        
+        th = x[2]
         th_plus = th + omg*pm.dt
-        x = x - vo*np.sin(th) + vo*np.sin(th_plus)
-        y = y + vo*np.cos(th) - vo*np.cos(th_plus)
-        th = th_plus + gam*pm.dt
+        
+        x += np.array([vo*np.sin(th) + vo*np.sin(th_plus),
+                       vo*np.cos(th) - vo*np.cos(th_plus),
+                       omg*pm.dt + gam*pm.dt])
 
-        return np.array([x, y, th])
+        mask = abs(x[2]) > np.pi
+        x[2][mask] = wrap(x[2][mask])
+        return x
 
     def get_measurements(self, state, lmark=pm.lmarks, particles=True) -> np.ndarray:
         x, y, th = state

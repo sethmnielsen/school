@@ -23,9 +23,6 @@ class MCL():
         x_errors = wrap(self.Chi - self.xhat[:,None], dim=2)
         self.sigma = np.cov(x_errors)
 
-        # plt.plot(self.Chi[0], self.Chi[1], '.', color='orange')
-        # plt.show()
-        
         m = pm.M
         self.w = np.zeros(pm.M)
         self.w.fill(1/pm.M)
