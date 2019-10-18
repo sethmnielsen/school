@@ -20,7 +20,7 @@ class Turtlebot():
         self.omgc = np.zeros(self.N)
 
 
-    def build_vel_arrays(self):
+    def build_vel_and_state(self):
         alphas = pm.alphas
         
         # v/omg commands
@@ -66,20 +66,24 @@ class Turtlebot():
         return state
 
     def propagate_particles(self, Chi, v, omg, gam=0):
-        Chi_next = self.compute_next_state(Chi, v, omg, gam)
+        Chi_next = self.compute_next_particles(Chi, v, omg, gam)
         return Chi_next
+
+    def compute_next_particles(self, Chi, v, omg, gam):
+        Chi = self.compute_next_state(Chi, v, omg, gam)
+        mask = abs(Chi[2]) > np.pi
+        Chi[2][mask] = wrap(Chi[2][mask])
+        return Chi
 
     def compute_next_state(self, x, v, omg, gam):
         vo = v/omg
         th = x[2]
         th_plus = th + omg*pm.dt
         
-        x += np.array([vo*np.sin(th) + vo*np.sin(th_plus),
-                       vo*np.cos(th) - vo*np.cos(th_plus),
-                       omg*pm.dt + gam*pm.dt])
-
-        mask = abs(x[2]) > np.pi
-        x[2][mask] = wrap(x[2][mask])
+        x += np.array([-vo*np.sin(th) + vo*np.sin(th_plus),
+                      vo*np.cos(th) - vo*np.cos(th_plus),
+                      omg*pm.dt + gam*pm.dt])
+        
         return x
 
     def get_measurements(self, state, lmark=pm.lmarks, particles=True) -> np.ndarray:

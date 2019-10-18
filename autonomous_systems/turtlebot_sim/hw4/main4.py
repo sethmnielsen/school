@@ -11,7 +11,7 @@ from turtlebot import Turtlebot
 from utils import wrap
 import params as pm
 
-np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
+np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
 
 tbot = Turtlebot()
 mcl = MCL(tbot)
@@ -24,7 +24,7 @@ if display:
 # Parse cmd line args
 args = sys.argv[1:]
 if len(args) == 0: # Compute truth ourselves
-    tbot.build_vel_arrays()
+    tbot.build_vel_and_state()
 elif len(args) == 1 and args[0] in [1, 4, 5]:
     # Load mat_file data
     mat_file = f'ukf_data_{args[0]}.mat'
@@ -45,7 +45,7 @@ for i in range(N):
 
     # update plot animation
     if display:
-        plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
+        plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
 
     z = tbot.get_measurements(state, particles=False)
     mcl.update(tbot.vc[i], tbot.omgc[i], z)

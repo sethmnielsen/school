@@ -21,7 +21,7 @@ class MCL():
         
         self.xhat = np.mean(self.Chi, axis=1)
         x_errors = wrap(self.Chi - self.xhat[:,None], dim=2)
-        self.sigma = np.cov(x_errors)
+        self.P = np.cov(x_errors)
 
         m = pm.M
         self.w = np.zeros(pm.M)
@@ -29,6 +29,7 @@ class MCL():
 
     def update(self, v, omg, z):
         w_lmarks = np.ones((pm.num_lms,pm.M))
+        Chi_prev = np.copy(self.Chi)
         self.Chi = self.tbot.sample_motion_model(v, omg, self.Chi, particles=True)
         for i in range(pm.num_lms):
             zhat = self.tbot.get_measurements(self.Chi, pm.lmarks[:,i], particles=True)
@@ -36,18 +37,20 @@ class MCL():
             w_lmarks[i] *= self.measurement_prob(zdiff, 2*pm.sigs)
 
         w_lmarks_normalized = w_lmarks/np.sum(w_lmarks, axis=1)[:,np.newaxis]
-        if not np.all(np.isfinite(w_lmarks_normalized)):
-            print( 'NAN RIGH HUR !')
         w_lmarks = w_lmarks_normalized
         self.w = np.prod( w_lmarks, axis=0 )
         self.w = self.w / np.sum(self.w)
-        if not np.all(np.isfinite(self.w)):
-            print( 'WE GOT A NAN !')
-        self.Chi = self.low_variance_sampler()
+        self.Chi, inds = self.low_variance_sampler()
 
-        self.xhat = wrap( np.mean(self.Chi, axis=1), 2)
-        x_errors = wrap( self.Chi - self.xhat[:,None], 2)
-        self.sigma = np.cov(x_errors)
+        self.xhat = np.mean(self.Chi, axis=1) 
+        self.xhat[2] = wrap(self.xhat[2])
+        x_errors = self.Chi - self.xhat[:,None]
+        self.P = np.cov(x_errors)
+
+        uniq = len(np.unique(inds))
+        if uniq/pm.M < 0.5:
+            Q = self.P / (pm.M*uniq)**(1/3)
+            self.Chi += Q @ np.random.randn(*self.Chi.shape)
 
 
     def measurement_prob(self, zdiff, sigs):
@@ -63,6 +66,6 @@ class MCL():
         c = np.cumsum(self.w)
         U = np.arange(pm.M)*M_inv + r
         diff = c- U[:,None]
-        i = np.argmax(diff > 0, axis=1)
-
-        return self.Chi[:,i]
+        inds = np.argmax(diff > 0, axis=1)
+        
+        return self.Chi[:,inds], inds

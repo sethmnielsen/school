@@ -108,8 +108,6 @@ class Plotter():
         #     self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
 
         self.ax1.redraw_in_frame()
-        # time.sleep(0.1)
-        # plt.draw()
         plt.pause(0.0001)
         
 
@@ -151,7 +149,7 @@ class Plotter():
     def make_plots(self):
 
         f2, axes2 = plt.subplots(3, 1, sharex=True)
-        f2.suptitle('Three Landmarks UKF Localization - Estimation')
+        f2.suptitle('Three Landmarks MCL Localization - Estimation')
         axes2[0].plot(pm.t_arr, self.states[0], label='true')
         axes2[1].plot(pm.t_arr, self.states[1], label='true')
         axes2[2].plot(pm.t_arr, np.degrees(self.states[2]), label='true')
@@ -170,7 +168,7 @@ class Plotter():
         # ======================================
 
         f3, axes3 = plt.subplots(3, 1, sharex=True, num=3)
-        f3.suptitle('Three Landmarks UKF Localization - Error')
+        f3.suptitle('Three Landmarks MCL Localization - Error')
         axes3[0].plot(pm.t_arr, self.est_errors[0], label='error')
         axes3[1].plot(pm.t_arr, self.est_errors[1])
         axes3[2].plot(pm.t_arr, self.est_errors[2])
@@ -191,10 +189,10 @@ class Plotter():
         
         axes3[0].legend()
 
-        # plt.draw()
-        # plt.waitforbuttonpress(0)
-        # plt.close('all')
-        plt.show()
+        plt.draw()
+        plt.waitforbuttonpress(0)
+        plt.close('all')
+        # plt.show()
 
         print("Finished everything")
 
