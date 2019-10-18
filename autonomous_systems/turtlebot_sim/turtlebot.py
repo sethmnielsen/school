@@ -60,10 +60,11 @@ class Turtlebot():
             state = self.compute_curr_state(state, v, omg, gam)
         else:
             n = v.shape[0]
+            prpgate_state = np.zeros((3,n))
             for k in range(n-1):
-                state[:,k+1] = self.compute_curr_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
+                prpgate_state[:,k] = self.compute_curr_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
 
-        return state
+        return prpgate_state
 
     def compute_curr_state(self, state, v, omg, gam):
         x, y, th = state
@@ -101,3 +102,24 @@ class Turtlebot():
 
         z = np.vstack((r, phi))  # returns (2,3) array, combo of (r, phi) for each lmark
         return z
+
+
+
+
+
+        # vo = v/omg
+        # th = state[2]
+        # th_plus = th + omg*pm.dt
+        # s1 = np.sin(th)
+        # s2 = np.sin(th_plus)
+        # c1 = np.cos(th)
+        # c2 = np.cos(th_plus)
+
+        # A = np.array([-vo * s1 + vo * s2,
+        #                 vo * c1 - vo * c2,
+        #                 omg*pm.dt + gam*pm.dt])
+
+        # state += A
+        # angs_bad = state[2][ np.abs(state[2]) > np.pi ]
+        # if angs_bad.shape[0] > 0:
+        #     state = wrap(state, 2)

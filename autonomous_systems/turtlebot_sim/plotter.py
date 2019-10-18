@@ -5,6 +5,8 @@ import params as pm
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
 
 class Plotter():
     """ For animating turtlebot trajectory and estimation, and plotting the results"""
@@ -31,7 +33,7 @@ class Plotter():
         
         f1 = plt.figure(1)
         f1.clf()
-        self.ax1:matplotlib.axes._axes.Axes = plt.axes()
+        self.ax1 = plt.axes()  # type: Axes
                 
 
         # Draw turtlebot
@@ -45,7 +47,8 @@ class Plotter():
                                            color='b' )
         self.heading = plt.plot(head_x, head_y, 'r') # current heading
         self.trail = plt.plot(x0, y0, linewidth=8.0)  # trail
-        self.est_trail = plt.plot(self.xhats[:,0], self.xhats[:,1],'.', color=(1,0.65,0))
+        self.est_trail = plt.plot(self.xhats[0], self.xhats[1],'.', color=(1,0.65,0))
+        self.particles = plt.plot(self.Chi[0], self.Chi[1], '*', color='m')  # type: Line2D
 
         # Draw landmarks
         # self.lmarks_line = []
@@ -95,6 +98,9 @@ class Plotter():
         self.trail[0].set_ydata(self.states[1,:i])
         self.est_trail[0].set_xdata(self.xhats[0,:i])
         self.est_trail[0].set_ydata(self.xhats[1,:i])
+        # particles
+        self.particles[0].set_xdata(Chi[0])
+        self.particles[0].set_ydata(Chi[1])
         
         # measurement vectors
         # for k in range(pm.num_lms):
@@ -103,6 +109,7 @@ class Plotter():
 
         self.ax1.redraw_in_frame()
         # time.sleep(0.1)
+        # plt.draw()
         plt.pause(0.0001)
         
 

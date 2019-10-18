@@ -38,7 +38,10 @@ class MCL():
             zdiff = wrap( z[:,i,None] - zhat, dim=1 )
             w_lmarks[i] *= self.measurement_prob(zdiff, 2*pm.sigs)
 
-        w_lmarks = w_lmarks/np.sum(w_lmarks, axis=1)[:,np.newaxis]
+        w_lmarks_normalized = w_lmarks/np.sum(w_lmarks, axis=1)[:,np.newaxis]
+        if not np.all(np.isfinite(w_lmarks_normalized)):
+            print( 'NAN RIGH HUR !')
+        w_lmarks = w_lmarks_normalized
         self.w = np.prod( w_lmarks, axis=0 )
         self.w = self.w / np.sum(self.w)
         if not np.all(np.isfinite(self.w)):

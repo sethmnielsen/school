@@ -11,11 +11,15 @@ from turtlebot import Turtlebot
 from utils import wrap
 import params as pm
 
-np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
+np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
 tbot = Turtlebot()
 mcl = MCL(tbot)
-plotter = Plotter()
+
+display = True
+
+if display:
+    plotter = Plotter()
 
 # Parse cmd line args
 args = sys.argv[1:]
@@ -40,9 +44,11 @@ for i in range(N):
     state = tbot.states[:,i]
 
     # update plot animation
-    plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
+    if display:
+        plotter.update_particles(state, mcl.xhat, mcl.Chi, mcl.sigma.diagonal(), i)
+
     z = tbot.get_measurements(state, particles=False)
-    
     mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
-plotter.make_plots()
+if display:
+    plotter.make_plots()
