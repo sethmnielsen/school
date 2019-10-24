@@ -1,0 +1,80 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{algorithm,algpseudocode}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{color}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
+
+\newcommand{\defeq}{\stackrel{\triangle}{=}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\abs}[1]{\left|#1\right|}
+\definecolor{green}{rgb}{0.0, 0.25, 0.0}
+\newcommand{\rwbcomment}[1]{{\color{blue}RWB: #1}}
+
+\title{\LARGE \bf
+    Vision Based Boat Landing
+}
+
+\author{
+    Seth Nielsen, Randal W. Beard 
+}
+
+\begin{document}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+
+Abstract goes here.
+
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+In the effort to make small unmanned aerial vehicles (UAVs) navigate autonomously, an integral component of the problem is landing the vehicle safely. In many cases, it is desired to land the vehicle at a specific landing site with high precision. Current approaches often use inertial measurement unit (IMU), GPS, range, or other sensors to measure height above ground and inertial coordinates in an Earth-fixed, Earth-centered frame. Normally, a flat and stationary ground is assumed. In the case of landing on a moving platform, a more rubust approach is required, as the relative state of the vehicle with respect to the landing target may be constantly changing at a time-varying rate. Research on this problem has been done using the technique of placing on a moving platform a special marker, which has known size and known distinct features, and visually tracking the marker to estimate the vehicle's relative state with respect to the target platform. The problem with this approach is that it requires the moving platform to have that particular marker, thereby limiting the UAV's ability to land on only those moving platforms that have been specially prepared with the marker. This work proposes a novel solution for autonomous landing that would allow a small UAV to land on an arbitrary moving platform that requires no special preparation of any landing targets.  combination of estimation, perception, and control 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Problem Statement and Motivation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Estimating the Relative Pose of the Boat}
+
+\begin{itemize}
+\item Identifying the boat
+\item Path planning
+\item Line following
+\item Orbiting
+\item Controlled descent 
+\end{itemize}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Visual Servoing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Simulation Results}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experimental Results}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+\label{sec:conclusion}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{library.bib}
+
+\end{document}
+
+

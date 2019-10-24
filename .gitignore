@@ -11,7 +11,7 @@
 *.zip 
 
 *sigsys/
-*.tex
+
 
 *__pycache__
 *.mypy_cache
