@@ -19,3 +19,11 @@ class OGMapping():
         self.alpha = 1
         self.beta = 5
         self.z_max = 150
+
+    
+    def update_map(self, l):
+        for m in map:
+            l = l + self.inverse_sensor_model(m, )
+
+    def inverse_range_sensor_model(self):
+        pass
