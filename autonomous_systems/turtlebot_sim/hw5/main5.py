@@ -25,15 +25,15 @@ from hw5.og_mapping import OGMapping
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
-tbot = Turtlebot()
-ogmap = OGMapping()
-
 mat_file = 'matlab_data/state_meas_data.mat'
 data = loadmat(mat_file)
 X = data['X']  # (3, 759)
 z = data['z']  # (2, 11, 759)
 thk = data['thk'].flatten()  # (11)
 del data
+
+tbot = Turtlebot()
+ogmap = OGMapping(X, z, thk)
 
 animate = True
 

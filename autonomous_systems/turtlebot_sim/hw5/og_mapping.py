@@ -14,11 +14,15 @@ Use p(m_i)  = occupied be 0.6 to 0.7 if a "hit" is detected and 0.3 to 0.4 for p
 import numpy as np
 
 class OGMapping():
-    def __init__(self):
+    def __init__(self, X, z, thk):
         self.map = np.ones((100,100)) * 0.5
         self.alpha = 1
         self.beta = 5
         self.z_max = 150
+
+        self.X = X
+        self.z = z
+        self.thk = thk
 
     
     def update_map(self, l):
