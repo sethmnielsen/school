@@ -11,7 +11,7 @@ from utils import wrap
 import params as pm
 
 import pyqtgraph as pg
-from hw5.turtlebot_item import TurtleBotItem
+from hw5.turtlebot_app import TurtleApp
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
@@ -28,7 +28,7 @@ for i in range(N):
 
     #  image plot
     img = pg.ImageItem(border='w')
-    turtlebot = TurtleBotItem(X[:,idx], 1.5) 
+    turtlebot = TurtleApp(X[:,idx], 1.5) 
     view.addItem(img)
     view.addItem(turtlebot)
 
