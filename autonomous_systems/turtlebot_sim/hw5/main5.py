@@ -16,6 +16,7 @@ from hw5.turtlebot_app import TurtleApp
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
 tbot = Turtlebot()
+ogmap = 
 
 mat_file = 'state_meas_data.mat'
 data = loadmat(mat_file)
