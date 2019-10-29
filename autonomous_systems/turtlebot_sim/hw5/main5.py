@@ -17,6 +17,16 @@ np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
 tbot = Turtlebot()
 
+mat_file = 'state_meas_data.mat'
+data = loadmat(mat_file)
+omg = data['om'].flatten()
+t = data['t'].flatten()
+th = data['th'].flatten()
+v = data['v'].flatten()
+x = data['x'].flatten()
+y = data['y'].flatten()
+del data
+
 animate = True
 
 plotter = Plotter(animate)
