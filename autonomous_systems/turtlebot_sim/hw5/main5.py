@@ -4,8 +4,8 @@
 The state_meas_data.mat file includes three variables:
 
     - X: state vector holding (x, y, theta) at each time step
-    - z: measurement vector holding (range, bearing) for nine laser range finder measurements at each time step. NaN is reported if a "hit" is not detected.
-    - thk: vector of nine range finder pointing angles ranging between -pi/2 (-90 deg) and pi/2 (90 deg). Pointing angles are equally spaced at pi/10 rad (22.5 deg) of separation. 
+    - z: measurement vector holding (range, bearing) for eleven laser range finder measurements at each time step. NaN is reported if a "hit" is not detected.
+    - thk: vector of eleven range finder pointing angles ranging between -pi/2 (-90 deg) and pi/2 (90 deg). Pointing angles are equally spaced at pi/10 rad (22.5 deg) of separation. 
 Use the following parameters for your inverse range sensor model: alpha = 1 m, beta = 5 deg, z_max = 150 m.
 '''
 

@@ -15,19 +15,23 @@ import numpy as np
 
 class OGMapping():
     def __init__(self, X, z, thk):
-        self.map = np.ones((100,100)) * 0.5
+        # self.gridmap = np.zeros((3,100,100))
+        # self.gridmap[0] = self.gridmap[0] + np.arange(0.5,100,1.0)
+        # self.gridmap[1] = self.gridmap[0].T
+        self.gridmap = np.zeros((100,100))
         self.alpha = 1
         self.beta = 5
         self.z_max = 150
 
         self.X = X
-        self.z = z
+        self.z_r = z[0]
+        self.z_phi = z[0]
         self.thk = thk
-
     
     def update_map(self, l):
-        for m in map:
-            l = l + self.inverse_sensor_model(m, )
+        for m in self.gridmap:
+            # if m (cell) is located within field of view:
+            l = l + self.inverse_sensor_model()
 
     def inverse_range_sensor_model(self):
         pass
