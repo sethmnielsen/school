@@ -31,4 +31,4 @@ class OGMapping():
             l = l + self.inverse_sensor_model()
 
     def inverse_range_sensor_model(self):
-        pass
+        d = np.sqrt(())
