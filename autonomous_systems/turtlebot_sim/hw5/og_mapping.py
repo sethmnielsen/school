@@ -12,6 +12,7 @@ Use p(m_i)  = occupied be 0.6 to 0.7 if a "hit" is detected and 0.3 to 0.4 for p
 '''
 
 import numpy as np
+import hw5.params as pm
 
 class OGMapping():
     def __init__(self, X, z, thk):
@@ -19,9 +20,6 @@ class OGMapping():
         # self.gridmap[0] = self.gridmap[0] + np.arange(0.5,100,1.0)
         # self.gridmap[1] = self.gridmap[0].T
         self.gridmap = np.zeros((100,100))
-        self.alpha = 1
-        self.beta = 5
-        self.z_max = 150
 
         self.X = X
         self.z_r = z[0]
@@ -30,7 +28,6 @@ class OGMapping():
     
     def update_map(self, l):
         for m in self.gridmap:
-            # if m (cell) is located within field of view:
             l = l + self.inverse_sensor_model()
 
     def inverse_range_sensor_model(self):

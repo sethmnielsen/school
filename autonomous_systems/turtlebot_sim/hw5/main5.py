@@ -14,10 +14,9 @@ sys.path.append('..')
 import numpy as np
 from scipy.io import loadmat
 
-from plotter import Plotter
 from turtlebot import Turtlebot
 from utils import wrap
-import params as pm
+import hw5.params as pm
 
 import pyqtgraph as pg
 from hw5.turtlebot_app import TurtleApp
@@ -32,17 +31,14 @@ z = data['z']  # (2, 11, 759)
 thk = data['thk'].flatten()  # (11)
 del data
 
-tbot = Turtlebot()
+pm.state0 = X[:,0]
 ogmap = OGMapping(X, z, thk)
 
 animate = True
 
-plotter = Plotter(animate)
-tbot.build_vel_and_state()
+# plotter = Plotter(animate)
 
-N = tbot.N
 for i in range(N):
-    state = tbot.states[:,i]
 
     #  image plot
     img = pg.ImageItem(border='w')
@@ -56,4 +52,4 @@ for i in range(N):
     z = tbot.get_measurements(state, particles=False)
     # mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
-plotter.make_plots()
+# plotter.make_plots()

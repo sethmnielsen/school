@@ -1,12 +1,13 @@
 #!/usr/env python3
 
 import numpy as np
-
-import params as pm
 from utils import wrap
 
+pm = None
+
 class Turtlebot():
-    def __init__(self):
+    def __init__(self, params):
+        pm = params
         # time
         self.t_end = pm.t_end
         self.N = len(pm.t_arr)
