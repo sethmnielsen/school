@@ -25,7 +25,6 @@ class OGMapping():
 
         self.d = np.zeros((n,n))
         self.psi = np.zeros((n,n))
-        self.k = np.zeros((n,n))
         self.inds = np.indices((n,n))
 
         self.X = X
@@ -41,17 +40,23 @@ class OGMapping():
         #### Do nan checking for z_r and z_phi  ####
 
         gridmap = self.gridmap
+        logodds = np.zeros((pm.n,pm.n))
         dist_x = self.inds[0] - pos[0]
         dist_y = self.inds[1] - pos[1]
         
         self.d = np.sqrt( dist_x**2 + dist_y**2, out=self.d)
         self.psi = np.arctan2( dist_y, dist_x, out=self.psi ) - th
-        rel_angles = np.abs( psi[None,:,:] - z_phi[:, None, None] )
-        self.k = np.argmin(rel_angles, axis=0)
+        angle_diffs = np.abs( psi[None,:,:] - z_phi[:, None, None] )
+        k = np.argmin(angle_diffs, axis=0)
         
-        phi_k = np.take_along_axis(rel_angles, k[None,:,:])
+        phi_k = z_phi[k]
         r_k = z_r[k]
-        if d > np.min([pm.z_max, r_k + pm.alpha/2]) or np.abs(self.psi - phi_k) > pm.beta/2:
-            gridmap
+
+        mask_dr = ~(d > (r_k + pm.alpha/2))
+        mask_psiphi = np.abs( self.psi - phi_k ) > pm.beta/2
+        mask_occ = mask_dr * mask_psiphi
+
+        mask_free = 
+        logodds[mask_product]
             return 0.
         elif z_r 

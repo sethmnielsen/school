@@ -1,7 +1,7 @@
 import numpy as np
 
 alpha = 1  # 2 is better?
-beta = 2   # 5 from specs
+beta = np.radians(2)   # 5 from specs
 n = 100
 z_max = 150
 
