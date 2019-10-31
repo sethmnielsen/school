@@ -19,16 +19,30 @@ class OGMapping():
         # self.gridmap = np.zeros((3,100,100))
         # self.gridmap[0] = self.gridmap[0] + np.arange(0.5,100,1.0)
         # self.gridmap[1] = self.gridmap[0].T
-        self.gridmap = np.zeros((100,100))
+        n = pm.n
+        self.gridmap = np.zeros((n,n))
+        self.inds = np.indices(((n,n)))
+
+        self.d = np.zeros((n,n))
+        self.psi = np.zeros((n,n))
+        self.k = np.zeros((n,n))
+        self.inds = np.indices((n,n))
 
         self.X = X
         self.z_r = z[0]
         self.z_phi = z[0]
         self.thk = thk
     
-    def update_map(self, l):
-        for m in self.gridmap:
-            l = l + self.inverse_sensor_model()
+    def update_map(self, pos, z):
+        self.gridmap += self.inverse_sensor_model(pos, z)
 
-    def inverse_range_sensor_model(self):
-        d = np.sqrt(())
+    def inverse_range_sensor_model(self, pos, th, z_r, z_phi):
+        gridmap = self.gridmap
+        dist_x = self.inds[0] - pos[0]
+        dist_y = self.inds[1] - pos[1]
+        
+        self.d = np.sqrt( dist_x**2 + dist_y**2, out=self.d)
+        self.psi = np.arctan2( dist_y, dist_x, out=self.psi ) - th
+        res = np.abs( psi[None,:,:] - z_phi[:, None, None] )
+        self.k = np.argmin(res, axis=0)
+        
