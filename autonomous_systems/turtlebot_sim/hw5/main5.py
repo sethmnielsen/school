@@ -50,11 +50,7 @@ for i in range(X.shape[1]):
     z_rt = z_r[:,i]
     z_phit = z_phi[:,i]
 
-    ogmap.update_map( Xt, z_rt, z_phit )
-
-    np.exp(ogmap, out=probs)
-    1 - 1/(1 + ogmap)
-    np.subtract(np.add())
+    probs = ogmap.update_map( Xt, z_rt, z_phit )
 
     #  image plot
     # img = pg.ImageItem(border='w')

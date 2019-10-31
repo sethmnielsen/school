@@ -31,6 +31,7 @@ class OGMapping():
         pos = Xt[:2]
         th = Xt[2]
         self.gridmap += self.inverse_range_sensor_model(pos, th, z_rt, z_phit)
+        return 1 - 1/(1 + np.exp(self.gridmap))
 
     def inverse_range_sensor_model(self, pos, th, z_r, z_phi):
         logodds = np.zeros((pm.n,pm.n))
