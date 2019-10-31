@@ -27,11 +27,6 @@ class OGMapping():
         self.psi = np.zeros((n,n))
         self.inds = np.indices((n,n))
 
-        self.X = X
-        self.z_r = z[0]
-        self.z_phi = z[0]
-        self.thk = thk
-    
     def update_map(self, Xt, z_rt, z_phit):
         pos = Xt[:2]
         th = Xt[2]
@@ -50,11 +45,11 @@ class OGMapping():
         phi_k = z_phi[k]
         r_k = z_r[k]
 
-        mask_dr = self.d > (r_k + pm.alpha/2)
-        mask_psiphi = np.abs( self.psi - phi_k ) > pm.beta/2
-        mask0 = mask_dr | mask_psiphi
+        mask_dist = self.d > (r_k + pm.alpha/2)
+        mask_angle = np.abs( self.psi - phi_k ) > pm.beta/2
+        mask_unknown = mask_dist | mask_angle
 
-        mask_occ = ~mask0 & ( np.abs( self.d - r_k ) < pm.alpha/2 )
+        mask_occ = ~mask_unknown & ( np.abs( self.d - r_k ) < pm.alpha/2 )
         mask_free = ~mask_occ & ( self.d <= r_k )
 
         logodds[mask_occ] = pm.l_occ
