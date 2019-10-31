@@ -48,6 +48,10 @@ class OGMapping():
         self.psi = np.arctan2( dist_y, dist_x, out=self.psi ) - th
         rel_angles = np.abs( psi[None,:,:] - z_phi[:, None, None] )
         self.k = np.argmin(rel_angles, axis=0)
-        phi_k = np.take_along_axis(rel_angles, k[None,:,:])
-        if (d > z_r + pm.alpha/2) or ( np.abs(self.psi - phi_k) )
         
+        phi_k = np.take_along_axis(rel_angles, k[None,:,:])
+        r_k = z_r[k]
+        if d > np.min([pm.z_max, r_k + pm.alpha/2]) or np.abs(self.psi - phi_k) > pm.beta/2:
+            gridmap
+            return 0.
+        elif z_r 
