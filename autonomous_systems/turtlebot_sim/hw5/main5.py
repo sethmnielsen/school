@@ -16,12 +16,12 @@ sys.path.append('..')
 import numpy as np
 from scipy.io import loadmat
 
-from turtlebot import Turtlebot
+# from turtlebot import Turtlebot
 from utils import wrap
 import hw5.params as pm
 
-import pyqtgraph as pg
-from hw5.turtlebot_app import TurtleApp
+# import pyqtgraph as pg
+# from hw5.turtlebot_app import TurtleApp
 from hw5.og_mapping import OGMapping
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
@@ -33,6 +33,9 @@ z = data['z']  # (2, 11, 759)
 thk = data['thk'].flatten()  # (11)
 del data
 
+z[np.isnan(z)] = np.inf
+z_r, z_phi = z
+
 pm.state0 = X[:,0]
 ogmap = OGMapping(X, z, thk)
 
@@ -40,18 +43,25 @@ animate = True
 
 # plotter = Plotter(animate)
 
-for i in range(N):
+for i in range(X.shape[1]):
+    Xt = X[:,i]
+    z_rt = z_r[:,i]
+    z_phit = z_phi[:,i]
+
+    ogmap.update_map( Xt, z_rt, z_phit )
 
     #  image plot
-    img = pg.ImageItem(border='w')
-    turtlebot = TurtleApp(X[:,idx], 1.5) 
-    view.addItem(img)
-    view.addItem(turtlebot)
+    # img = pg.ImageItem(border='w')
+    # turtlebot = TurtleApp(X[:,idx], 1.5) 
+    # view.addItem(img)
+    # view.addItem(turtlebot)
 
     # update plot animation
     # plotter.update_mcl_plot(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
 
-    z = tbot.get_measurements(state, particles=False)
+    # z = tbot.get_measurements(state, particles=False)
     # mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
-# plotter.make_plots()
+
+
+    # if animate: update the TurtleApp

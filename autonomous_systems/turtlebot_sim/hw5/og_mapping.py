@@ -32,31 +32,32 @@ class OGMapping():
         self.z_phi = z[0]
         self.thk = thk
     
-    def update_map(self, pos, z):
-        self.gridmap += self.inverse_sensor_model(pos, z)
+    def update_map(self, Xt, z_rt, z_phit):
+        pos = Xt[:2]
+        th = Xt[2]
+        self.gridmap += self.inverse_range_sensor_model(pos, th, z_rt, z_phit)
 
     def inverse_range_sensor_model(self, pos, th, z_r, z_phi):
-
-        #### Do nan checking for z_r and z_phi  ####
-
-        gridmap = self.gridmap
         logodds = np.zeros((pm.n,pm.n))
         dist_x = self.inds[0] - pos[0]
         dist_y = self.inds[1] - pos[1]
         
         self.d = np.sqrt( dist_x**2 + dist_y**2, out=self.d)
         self.psi = np.arctan2( dist_y, dist_x, out=self.psi ) - th
-        angle_diffs = np.abs( psi[None,:,:] - z_phi[:, None, None] )
+        angle_diffs = np.abs( self.psi[None,:,:] - z_phi[:,None,None] )
         k = np.argmin(angle_diffs, axis=0)
         
         phi_k = z_phi[k]
         r_k = z_r[k]
 
-        mask_dr = ~(d > (r_k + pm.alpha/2))
+        mask_dr = self.d > (r_k + pm.alpha/2)
         mask_psiphi = np.abs( self.psi - phi_k ) > pm.beta/2
-        mask_occ = mask_dr * mask_psiphi
+        mask0 = mask_dr | mask_psiphi
 
-        mask_free = 
-        logodds[mask_product]
-            return 0.
-        elif z_r 
+        mask_occ = ~mask0 & ( np.abs( self.d - r_k ) < pm.alpha/2 )
+        mask_free = ~mask_occ & ( self.d <= r_k )
+
+        logodds[mask_occ] = pm.l_occ
+        logodds[mask_free] = pm.l_free
+
+        return logodds
