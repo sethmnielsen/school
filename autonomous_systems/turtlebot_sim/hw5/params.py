@@ -1,8 +1,8 @@
 import numpy as np
 
-alpha = 1  # 2 is better?
+alpha = 1.  # 2 is better?
 beta = np.radians(2)   # 5 from specs
-n = 100
+n = 102
 z_max = 150
 
 l_occ = np.log( 0.65 / (1 - 0.65) )

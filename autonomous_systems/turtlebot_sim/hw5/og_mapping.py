@@ -13,19 +13,20 @@ Use p(m_i)  = occupied be 0.6 to 0.7 if a "hit" is detected and 0.3 to 0.4 for p
 
 import numpy as np
 import hw5.params as pm
+from utils import wrap
 
 class OGMapping():
-    def __init__(self, X, z, thk):
+    def __init__(self, thk):
         # self.gridmap = np.zeros((3,100,100))
         # self.gridmap[0] = self.gridmap[0] + np.arange(0.5,100,1.0)
         # self.gridmap[1] = self.gridmap[0].T
         n = pm.n
+        self.thk = thk
         self.gridmap = np.zeros((n,n))
-        self.inds = np.indices(((n,n)))
 
         self.d = np.zeros((n,n))
         self.psi = np.zeros((n,n))
-        self.inds = np.indices((n,n))
+        self.inds = np.transpose(np.indices((n,n)), (0,2,1))
 
     def update_map(self, Xt, z_rt, z_phit):
         pos = Xt[:2]
@@ -40,20 +41,25 @@ class OGMapping():
         
         self.d = np.sqrt( dist_x**2 + dist_y**2, out=self.d)
         self.psi = np.arctan2( dist_y, dist_x, out=self.psi ) - th
-        angle_diffs = np.abs( self.psi[None,:,:] - z_phi[:,None,None] )
+        self.psi = wrap(self.psi)
+
+        angle_diffs = np.abs( self.psi[None,:,:] - self.thk[:,None,None] )
+        # angle_diffs = np.abs( self.psi[None,:,:] - z_phi[:,None,None] )
         k = np.argmin(angle_diffs, axis=0)
         
         phi_k = z_phi[k]
         r_k = z_r[k]
+        dphi_k = self.psi - phi_k
 
+        # Conditions - create masked arrays
         mask_dist = self.d > (r_k + pm.alpha/2)
-        mask_angle = np.abs( self.psi - phi_k ) > pm.beta/2
+        mask_angle = np.abs( dphi_k ) > pm.beta/2
         mask_unknown = mask_dist | mask_angle
 
         mask_occ = ~mask_unknown & ( np.abs( self.d - r_k ) < pm.alpha/2 )
-        mask_free = ~mask_occ & ( self.d <= r_k )
+        mask_free = ~mask_unknown & ~mask_occ & ( self.d <= r_k )
 
         logodds[mask_occ] = pm.l_occ
         logodds[mask_free] = pm.l_free
 
-        return logodds
+        return logodds.T

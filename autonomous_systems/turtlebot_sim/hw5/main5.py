@@ -1,5 +1,3 @@
-
-
 #!/usr/env python3
 
 '''
@@ -16,13 +14,11 @@ sys.path.append('..')
 import numpy as np
 from scipy.io import loadmat
 
-# from turtlebot import Turtlebot
 from utils import wrap
 import hw5.params as pm
 
-# import pyqtgraph as pg
-# from hw5.turtlebot_app import TurtleApp
-from hw5.og_mapping import OGMapping
+from pyqtgraph.Qt import QtCore, QtGui
+from hw5.turtlebot_app import App, TurtleApp
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
@@ -36,27 +32,13 @@ del data
 z[np.isnan(z)] = np.inf
 z_r, z_phi = z
 
-pm.state0 = X[:,0]
-ogmap = OGMapping(X, z, thk)
+app = QtGui.QApplication(sys.argv)
+thisapp = App(X, z, thk)
+thisapp.show()
+sys.exit(app.exec_())
 
-animate = True
 
-# plotter = Plotter(animate)
-
-probs = np.ones((pm.n, pm.n)) * 0.5
-
-for i in range(X.shape[1]):
-    Xt = X[:,i]
-    z_rt = z_r[:,i]
-    z_phit = z_phi[:,i]
-
-    probs = ogmap.update_map( Xt, z_rt, z_phit )
-
-    #  image plot
-    # img = pg.ImageItem(border='w')
-    # turtlebot = TurtleApp(X[:,idx], 1.5) 
-    # view.addItem(img)
-    # view.addItem(turtlebot)
+    
 
     # update plot animation
     # plotter.update_mcl_plot(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
@@ -65,5 +47,3 @@ for i in range(X.shape[1]):
     # mcl.update(tbot.vc[i], tbot.omgc[i], z)
 
 
-
-    # if animate: update the TurtleApp
