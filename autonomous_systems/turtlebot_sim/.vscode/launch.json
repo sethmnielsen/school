@@ -23,6 +23,15 @@
             "justMyCode": true
         },
         {
+            "name": "midterm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/midterm/main_midterm.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "Python: HW bb",
             "type": "python",
             "request": "launch",

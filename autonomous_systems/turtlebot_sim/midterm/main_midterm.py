@@ -4,43 +4,48 @@ import sys
 sys.path.append('..')
 import numpy as np
 from scipy.io import loadmat
+import scipy.linalg as spl
 
 from eif_filter import EIF
 from plotter import Plotter
-from turtlebot import Turtlebot
-from utils import wrap
 import params as pm
+from utils import wrap
 
 np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
 
-tbot = Turtlebot()
 eif = EIF()
 
 animate = True
 
-plotter = Plotter(animate)
+plotter = Plotter(animate, pm)
 
 # Load mat_file data
-mat_file = f'ukf_data_{args[0]}.mat'
+mat_file = f'./matlab_data/midterm_data.mat'
 data = loadmat(mat_file)
-x_state = data['X_tr'].flatten()
-phi = data['bearing_tr'].flatten()
-th = data['th'].flatten()
-v = data['v'].flatten()
-x = data['x'].flatten()
-y = data['y'].flatten()
+x_truth = data['X_tr'].squeeze()
+x_truth = wrap(x_truth, 2)
+t = data['t'].squeeze()
+r = data['range_tr'].squeeze().T
+phi = data['bearing_tr'].squeeze().T
+lmarks = data['m'].squeeze()
+v = data['v'].squeeze()
+vc = data['v_c'].squeeze()
+omg = data['om'].squeeze()
+omgc = data['om_c'].squeeze()
 del data
 # tbot.pass_matlab_data()
 
+eif.marks = lmarks
+eif.x_truth = x_truth
 
-N = tbot.N
+N = pm.N
 for i in range(N):
-    state = tbot.states[:,i]
+    eif.prediction_step(vc[i], omgc[i])
+    eif.measurement_correction(r[:,i], phi[:,i])
+
+    eif.write_history(i)
 
     # update plot animation
-    plotter.update_mcl_plot(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
+    plotter.update_eif_plot(x_truth[:,i], eif.xhat, i)
 
-    z = tbot.get_measurements(state, particles=False)
-    mcl.update(tbot.vc[i], tbot.omgc[i], z)
-
-plotter.make_plots()
+plotter.make_plots_eif(t, eif.ksi_hist, eif.error_cov_hist)

@@ -17,9 +17,6 @@ from utils import wrap
 
 class OGMapping():
     def __init__(self, thk):
-        # self.gridmap = np.zeros((3,100,100))
-        # self.gridmap[0] = self.gridmap[0] + np.arange(0.5,100,1.0)
-        # self.gridmap[1] = self.gridmap[0].T
         n = pm.n
         self.thk = thk
         self.gridmap = np.zeros((n,n))

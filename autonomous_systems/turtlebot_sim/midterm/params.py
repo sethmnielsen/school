@@ -9,7 +9,7 @@ th0 = np.pi/2
 state0 = [x0, y0, th0]
 
 t_end = 30
-N = t_end / dt
+N = int(t_end / dt + 1)
 
 # noise 
 sig_r = 0.2 # [m]
