@@ -1,13 +1,11 @@
 #!/usr/env python3
 
-import sys
-sys.path.append('..')
 import numpy as np
 from scipy.io import loadmat
 import scipy.linalg as spl
 
 from eif_filter import EIF
-from plotter import Plotter
+from plotter_midterm import PlotterMidterm
 import params as pm
 from utils import wrap
 
@@ -17,10 +15,10 @@ eif = EIF()
 
 animate = True
 
-plotter = Plotter(animate, pm)
+plotter = PlotterMidterm(animate, pm)
 
 # Load mat_file data
-mat_file = f'./matlab_data/midterm_data.mat'
+mat_file = f'./midterm_data.mat'
 data = loadmat(mat_file)
 x_truth = data['X_tr'].squeeze()
 x_truth = wrap(x_truth, 2)
@@ -33,7 +31,6 @@ vc = data['v_c'].squeeze()
 omg = data['om'].squeeze()
 omgc = data['om_c'].squeeze()
 del data
-# tbot.pass_matlab_data()
 
 eif.marks = lmarks
 eif.x_truth = x_truth

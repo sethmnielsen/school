@@ -1,11 +1,7 @@
 import numpy as np
-from numpy.linalg import multi_dot, inv, det
-import scipy.signal as ss
-import matplotlib.pyplot as plt
 import params as pm
 import scipy.linalg as spl
 from utils import wrap
-# from angle import Angle
 
 
 class EIF():
@@ -35,12 +31,14 @@ class EIF():
 
     def prediction_step(self, vc, omgc):
         self.xhat = spl.solve(self.OM, self.ksi)
+        self.xhat[2] = wrap(self.xhat[2])
+        
         # G = np.eye(3)        # Jacobian of g(u_t, x_t-1) wrt state
         # V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
         # M = np.zeros((2,2))  # noise in control space
 
         eps = np.array([pm.sig_v, pm.sig_omg]) * np.random.randn(2)
-        v_n, omg_n = np.array([vc, omgc]) + eps  # guess for vel from dynamics eqns
+        v_n, omg_n = np.array([vc, omgc]) + eps
 
         M = np.array([[v_n, 0],
                       [0, omg_n]])
@@ -57,14 +55,14 @@ class EIF():
         G[np.abs(G)<1e-6] = 0.
         V[np.abs(V)<1e-6] = 0.
         
-        self.xbar = self.xhat + np.array([vc*np.cos(th_hat), vc*np.sin(th_hat), omgc]) * pm.dt
+        dyn = np.array([vc*np.cos(th_hat), vc*np.sin(th_hat), omgc]) * pm.dt
+        self.xbar = self.xhat + dyn
         self.xbar[np.abs(self.xbar)<1e-6] = 0.
         self.xbar[2] = wrap(self.xbar[2])
         self.OMbar = spl.inv( G @ spl.solve(self.OM, G.T) + V @ M @ V.T )
         self.ksi_bar = self.OMbar @ self.xbar
 
     def measurement_correction(self, r, phi):
-
         for i in range(pm.num_lms):
             mdx = self.marks[0,i] - self.xbar[0]
             mdy = self.marks[1,i] - self.xbar[1]
@@ -81,8 +79,8 @@ class EIF():
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
 
-            self.OMbar = self.OMbar + H.T @ spl.solve(self.R, H)
-            self.ksi_bar = self.ksi_bar + H.T @ spl.solve(self.R, zdiff + H @ self.xbar )
+            self.OMbar += H.T @ spl.solve(self.R, H)
+            self.ksi_bar += H.T @ spl.solve(self.R, zdiff + H @ self.xbar )
         
         self.OM = self.OMbar
         self.ksi = self.ksi_bar
