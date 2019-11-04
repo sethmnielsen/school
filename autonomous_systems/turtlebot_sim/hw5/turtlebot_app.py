@@ -65,9 +65,8 @@ class App(QtGui.QMainWindow):
             self.counter += 1
             # time.sleep(0.05)
             self.counter += 1
-        # else:
-            # print(self.probs.T)
-            # sys.exit()
+        else:
+            sys.exit()
 
         self.data = 255 - self.probs * 255
         self.img.setImage(self.data) 
