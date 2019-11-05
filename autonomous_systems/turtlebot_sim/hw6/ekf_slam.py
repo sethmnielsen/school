@@ -19,16 +19,23 @@ from utils import wrap
 
 class EKF_SLAM():
     def __init__(self):
-        dims = 3+2*pm.num_lms
-        self.xhat = np.zeros(dims)
+        self.N = pm.num_lms
+        self.dims = 3 + 2*self.N
+        self.xhat = np.zeros(self.dims)
         np.concatenate(( pm.state0, pm.lmarks.T.flatten() ), out=self.xhat )
+        self.F = np.vstack(( np.eye(3), np.zeros((3,2*self.N)) ))
 
-        # Noise
         self.K = np.zeros(3)
         self.R = np.diag([pm.sig_r**2, pm.sig_phi**2])
         self.P = np.eye(3)
-        self.Pa = np.zeros((dims,dims))
+        self.Pa = np.zeros((self.dims,self.dims))
         self.Pa[np.diag_indices_from(self.Pa)] = 1e5
+
+
+        self.Ga = np.eye(self.dims) # Jacobian of g(u_t, x_t-1) wrt state
+        self.V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
+        self.M = np.zeros((2,2))  # noise in control space
+        self.Qa = np.zeros((dims, dims))
 
         # create history arrays
         self.xhat_hist = np.zeros((3, pm.N))
@@ -37,10 +44,6 @@ class EKF_SLAM():
         self.write_history(0)
 
     def prediction_step(self, vc, omgc):
-        G = np.eye(3)        # Jacobian of g(u_t, x_t-1) wrt state
-        V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
-        M = np.zeros((2,2))  # noise in control space
-
         # convenience terms
         th = self.xhat[2]
         th_plus = wrap(th + omgc*pm.dt)
@@ -48,37 +51,43 @@ class EKF_SLAM():
         c = np.cos(th) - np.cos(th_plus)
         s = np.sin(th) - np.sin(th_plus)
 
-        # G matrix
+        ## G matrix ##
         g02 = -vo * c
         g12 = -vo * s
-        G[:2, 2] = [g02, g12]
+        self.Ga[:2, 2] = [g02, g12]
 
         # V matrix
         v00 = -s / omgc
         v10 =  c / omgc  
         v01 =  vc*s / omgc**2  +  vc*np.cos(th_plus)*pm.dt / omgc
         v11 = -vc*c / omgc**2  +  vc*np.sin(th_plus)*pm.dt / omgc
-        V = np.array([[v00, v01],
-                      [v10, v11],
-                      [  0, pm.dt]])
+        self.V[:] = np.array([[v00, v01],
+                              [v10, v11],
+                              [  0, pm.dt]])
 
         # M matrix
         a1, a2, a3, a4 = pm.alphas
-        M = np.diag([a1*vc**2 + a2*omgc**2, a3*vc**2 + a4*omgc**2])
+        self.M[np.diag_indices_from(self.M)] = [a1*vc**2 + a2*omgc**2, a3*vc**2 + a4*omgc**2]
+
+        # Q matrix
+        self.Qa[:3,:3] = multi_dot([self.V, self.M, self.V.T])
 
         # Prediction state and covariance
         dyn = np.array([-vo*s, vo*c, omgc*pm.dt])
-        self.xhat += dyn
-        self.P = multi_dot([G, self.P, G.T]) + multi_dot([V, M, V.T])
+        self.xhat += (self.F.T @ dyn)
+        self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
     def measurement_correction(self, r, phi):
+        delta = np.zeros(2)
         for i in range(pm.num_lms):
-            mdx = pm.lmarks[0,i] - self.xhat[0]
-            mdy = pm.lmarks[1,i] - self.xhat[1]
+            delta = pm.lmarks[:,i] - self.xhat[:2]
             th = self.xhat[2]
-            q = mdx**2 + mdy**2
+            q = delta @ delta
             r_hat = np.sqrt(q)
-            phi_hat = np.arctan2(mdy, mdx) - th
+            phi_hat = np.arctan2(delta[1], delta[0]) - th
+
+            Hlow = 1/q * np.array([[ -r_hat*delta[0], -r_hat*delta[1], 0,  ]])
+
             H = np.array([[-mdx/r_hat, -mdy/r_hat,  0],
                           [ mdy/q, -mdx/q, -1]])
 
