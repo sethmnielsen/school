@@ -6,20 +6,33 @@ from utils import wrap
 pm = None
 
 class Turtlebot():
-    def __init__(self, params):
+    def __init__(self, params, vc=None, omgc=None):
         pm = params
+        
         # time
-        self.t_end = pm.t_end
         self.N = len(pm.t_arr)
 
         # Current state, state history array
         self.states = np.zeros((3, self.N))
         self.states[:,0] = pm.state0
+        build_vel_arrays = True
 
         # velocities
-        self.vc = np.zeros(self.N)
-        self.omgc = np.zeros(self.N)
+        if vc is not None and omgc is not None:
+            self.vc = vc
+            self.omgc = omgc
+            build_vel_arrays = False
+        else:
+            self.vc = np.zeros(self.N)
+            self.omgc = np.zeros(self.N)
 
+        self.v = np.zeros(self.N)
+        self.omg = np.zeros(self.N)
+
+        if build_vel_arrays:
+            self.build_vel_and_state()
+        else:
+            self.sample_motion_model(self.vc, self.omgc, self.states)
 
     def build_vel_and_state(self):
         alphas = pm.alphas
@@ -39,7 +52,6 @@ class Turtlebot():
         sd_omg = np.sqrt( alphas[2]*(vc**2) + alphas[3]*(omgc**2) )
         sd_gam = np.sqrt( alphas[4]*(vc**2) + alphas[5]*(omgc**2) )
 
-        # if isinstance(vc, np.ndarray):
         if particles:
             m = 10  # noise multiplier
             n = pm.M  # number of random numbers to generate
@@ -51,11 +63,11 @@ class Turtlebot():
             noise_gam = 0
             propagate = self.propagate_state
 
-        vhat = vc + sd_v*np.random.randn( n ) * m
-        omghat = omgc + sd_omg*np.random.randn( n ) * m
-        gamhat = sd_gam*noise_gam * m
+        self.v = vc + sd_v*np.random.randn( n ) * m
+        self.omg = omgc + sd_omg*np.random.randn( n ) * m
+        gam = sd_gam*noise_gam * m
         
-        return propagate(state, vhat, omghat, gamhat)
+        return propagate(state, self.v, self.omg, gam)
        
     def propagate_state(self, state, v, omg, gam=0):
         n = v.shape[0]

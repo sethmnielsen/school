@@ -4,6 +4,7 @@ import numpy as np
 import scipy.linalg as spl
 
 from ekf_slam import EKF_SLAM
+from turtlebot import Turtlebot
 from plotter import Plotter
 import params as pm
 from utils import wrap
@@ -11,27 +12,18 @@ from utils import wrap
 np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
 
 ekfs = ekf_slam()
+tbot = Turtlebot(pm, pm.vc, pm.omgc)
 
 animate = True
 
-plotter = Plotter(animate, pm)
-
-x_truth = 
-t = 
-r = 
-phi = 
-lmarks = 
-v = 
-vc = 
-omg = 
-omgc = 
+plotter = Plotter(animate)
 
 ekfs.marks = lmarks
 ekfs.x_truth = x_truth
 
 N = pm.N
 for i in range(N):
-    ekfs.prediction_step(vc[i], omgc[i])
+    ekfs.prediction_step(tbot.vc[i], tbot.omgc[i])
     ekfs.measurement_correction(r[:,i], phi[:,i])
 
     ekfs.write_history(i)
