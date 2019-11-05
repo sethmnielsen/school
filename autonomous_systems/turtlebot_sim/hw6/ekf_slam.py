@@ -86,11 +86,11 @@ class EKF_SLAM():
             r_hat = np.sqrt(q)
             phi_hat = np.arctan2(delta[1], delta[0]) - th
 
-            Hlow = 1/q * np.array([[ -r_hat*delta[0], -r_hat*delta[1], 0,  ]])
+            Hlow = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
+                                    delta[1], -delta[0], -q, -delta[1], delta[0]
+                                    )).reshape(2,5)
 
-            H = np.array([[-mdx/r_hat, -mdy/r_hat,  0],
-                          [ mdy/q, -mdx/q, -1]])
-
+            F = np.array()
             
             z = np.array([r[i], phi[i]])
             zhat = np.array([r_hat, phi_hat]) + np.diag(self.R)
