@@ -1,4 +1,4 @@
-import numpy as np
+aimport numpy as np
 import params as pm
 import scipy.linalg as spl
 from utils import wrap

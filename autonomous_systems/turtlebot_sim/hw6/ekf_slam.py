@@ -9,6 +9,7 @@ For this assignment, you are to modify your EKF localization algorithm and simul
 3) Narrow the field of view of your sensor to 180 deg, 90 deg, and 45 deg. How does this affect the localization and mapping results? Create an animation of landmark true locations, estimated locations, and estimation covariance (ellipses, 2-sigma) versus time for your simulation.
 
 4) Create a loop-closing scenario with a narrow FOV sensor on your robot. Show how closing the loop (seeing landmarks for second time), results in a drop in landmark location uncertainty for recently viewed landmarks.
+tinyurl.com/byurobotgame
 '''
 import numpy as np
 from numpy.linalg import multi_dot
@@ -18,12 +19,16 @@ from utils import wrap
 
 class EKF_SLAM():
     def __init__(self):
-        self.xhat = np.copy(pm.state0)
+        dims = 3+2*pm.num_lms
+        self.xhat = np.zeros(dims)
+        np.concatenate(( pm.state0, pm.lmarks.T.flatten() ), out=self.xhat )
 
         # Noise
         self.K = np.zeros(3)
         self.R = np.diag([pm.sig_r**2, pm.sig_phi**2])
         self.P = np.eye(3)
+        self.Pa = np.zeros((dims,dims))
+        self.Pa[np.diag_indices_from(self.Pa)] = 1e5
 
         # create history arrays
         self.xhat_hist = np.zeros((3, pm.N))
@@ -62,7 +67,8 @@ class EKF_SLAM():
         M = np.diag([a1*vc**2 + a2*omgc**2, a3*vc**2 + a4*omgc**2])
 
         # Prediction state and covariance
-        self.xhat += [-vo*s, vo*c, omgc*pm.dt]
+        dyn = np.array([-vo*s, vo*c, omgc*pm.dt])
+        self.xhat += dyn
         self.P = multi_dot([G, self.P, G.T]) + multi_dot([V, M, V.T])
 
     def measurement_correction(self, r, phi):
@@ -90,5 +96,5 @@ class EKF_SLAM():
 
 
     def write_history(self, i):
-        self.xhat_hist[:,i] = self.xhat
+        self.xhat_hist[:,i] = self.xhat[:3]
         self.error_cov_hist[:,i] = self.P.diagonal()
