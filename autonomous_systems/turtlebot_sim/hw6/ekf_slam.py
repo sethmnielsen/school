@@ -11,51 +11,84 @@ For this assignment, you are to modify your EKF localization algorithm and simul
 4) Create a loop-closing scenario with a narrow FOV sensor on your robot. Show how closing the loop (seeing landmarks for second time), results in a drop in landmark location uncertainty for recently viewed landmarks.
 '''
 import numpy as np
-import hw6.params as pm
+from numpy.linalg import multi_dot
+import scipy.linalg as spl
+import params as pm
 from utils import wrap
 
 class EKF_SLAM():
-    def __init__(self, thk):
-        n = pm.n
-        self.thk = thk
-        self.gridmap = np.zeros((n,n))
+    def __init__(self):
+        self.xhat = np.copy(pm.state0)
 
-        self.d = np.zeros((n,n))
-        self.psi = np.zeros((n,n))
-        self.inds = np.transpose(np.indices((n,n)), (0,2,1))
+        # Noise
+        self.K = np.zeros(3)
+        self.R = np.diag([pm.sig_r**2, pm.sig_phi**2])
+        self.P = np.eye(3)
 
-    def update_map(self, Xt, z_rt, z_phit):
-        pos = Xt[:2]
-        th = Xt[2]
-        self.gridmap += self.inverse_range_sensor_model(pos, th, z_rt, z_phit)
-        return 1 - 1/(1 + np.exp(self.gridmap))
+        # create history arrays
+        self.xhat_hist = np.zeros((3, pm.N))
+        self.error_cov_hist = np.zeros((3, pm.N))
 
-    def inverse_range_sensor_model(self, pos, th, z_r, z_phi):
-        logodds = np.zeros((pm.n,pm.n))
-        dist_x = self.inds[0] - pos[0]
-        dist_y = self.inds[1] - pos[1]
-        
-        self.d = np.sqrt( dist_x**2 + dist_y**2, out=self.d)
-        self.psi = np.arctan2( dist_y, dist_x, out=self.psi ) - th
-        self.psi = wrap(self.psi)
+        self.write_history(0)
 
-        angle_diffs = np.abs( self.psi[None,:,:] - self.thk[:,None,None] )
-        # angle_diffs = np.abs( self.psi[None,:,:] - z_phi[:,None,None] )
-        k = np.argmin(angle_diffs, axis=0)
-        
-        phi_k = z_phi[k]
-        r_k = z_r[k]
-        dphi_k = self.psi - phi_k
+    def prediction_step(self, vc, omgc):
+        G = np.eye(3)        # Jacobian of g(u_t, x_t-1) wrt state
+        V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
+        M = np.zeros((2,2))  # noise in control space
 
-        # Conditions - create masked arrays
-        mask_dist = self.d > (r_k + pm.alpha/2)
-        mask_angle = np.abs( dphi_k ) > pm.beta/2
-        mask_unknown = mask_dist | mask_angle
+        # convenience terms
+        th = self.xhat[2]
+        th_plus = wrap(th + omgc*pm.dt)
+        vo = vc/omgc
+        c = np.cos(th) - np.cos(th_plus)
+        s = np.sin(th) - np.sin(th_plus)
 
-        mask_occ = ~mask_unknown & ( np.abs( self.d - r_k ) < pm.alpha/2 )
-        mask_free = ~mask_unknown & ~mask_occ & ( self.d <= r_k )
+        # G matrix
+        g02 = -vo * c
+        g12 = -vo * s
+        G[:2, 2] = [g02, g12]
 
-        logodds[mask_occ] = pm.l_occ
-        logodds[mask_free] = pm.l_free
+        # V matrix
+        v00 = -s / omgc
+        v10 =  c / omgc  
+        v01 =  vc*s / omgc**2  +  vc*np.cos(th_plus)*pm.dt / omgc
+        v11 = -vc*c / omgc**2  +  vc*np.sin(th_plus)*pm.dt / omgc
+        V = np.array([[v00, v01],
+                      [v10, v11],
+                      [  0, pm.dt]])
 
-        return logodds.T
+        # M matrix
+        a1, a2, a3, a4 = pm.alphas
+        M = np.diag([a1*vc**2 + a2*omgc**2, a3*vc**2 + a4*omgc**2])
+
+        # Prediction state and covariance
+        self.xhat += [-vo*s, vo*c, omgc*pm.dt]
+        self.P = multi_dot([G, self.P, G.T]) + multi_dot([V, M, V.T])
+
+    def measurement_correction(self, r, phi):
+        for i in range(pm.num_lms):
+            mdx = pm.lmarks[0,i] - self.xhat[0]
+            mdy = pm.lmarks[1,i] - self.xhat[1]
+            th = self.xhat[2]
+            q = mdx**2 + mdy**2
+            r_hat = np.sqrt(q)
+            phi_hat = np.arctan2(mdy, mdx) - th
+            H = np.array([[-mdx/r_hat, -mdy/r_hat,  0],
+                          [ mdy/q, -mdx/q, -1]])
+
+            
+            z = np.array([r[i], phi[i]])
+            zhat = np.array([r_hat, phi_hat]) + np.diag(self.R)
+            zdiff = z - zhat
+            zdiff[1] = wrap(zdiff[1])
+
+            S = multi_dot([H, self.P, H.T]) + self.R
+            K = multi_dot([self.P, H.T, spl.inv(S)])
+
+            self.xhat += K@(zdiff)
+            self.P = (np.eye(3) - K @ H) @ self.P
+
+
+    def write_history(self, i):
+        self.xhat_hist[:,i] = self.xhat
+        self.error_cov_hist[:,i] = self.P.diagonal()

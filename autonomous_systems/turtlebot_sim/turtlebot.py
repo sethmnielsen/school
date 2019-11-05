@@ -2,13 +2,10 @@
 
 import numpy as np
 from utils import wrap
-
-pm = None
+import hw6.params as pm
 
 class Turtlebot():
     def __init__(self, params, vc=None, omgc=None):
-        pm = params
-        
         # time
         self.N = len(pm.t_arr)
 
@@ -50,18 +47,22 @@ class Turtlebot():
 
         sd_v   = np.sqrt( alphas[0]*(vc**2) + alphas[1]*(omgc**2) )
         sd_omg = np.sqrt( alphas[2]*(vc**2) + alphas[3]*(omgc**2) )
-        sd_gam = np.sqrt( alphas[4]*(vc**2) + alphas[5]*(omgc**2) )
 
         if particles:
             m = 10  # noise multiplier
             n = pm.M  # number of random numbers to generate
-            noise_gam = np.random.randn( n )
             propagate = self.propagate_particles
+
+            sd_gam = np.sqrt( alphas[4]*(vc**2) + alphas[5]*(omgc**2) )
+            noise_gam = np.random.randn( n )
+
         else:
             m = 1  # noise multiplier
             n = vc.shape[0]  # number of random numbers to generate
-            noise_gam = 0
             propagate = self.propagate_state
+
+            sd_gam = np.zeros(self.v.shape)
+            noise_gam = 0
 
         self.v = vc + sd_v*np.random.randn( n ) * m
         self.omg = omgc + sd_omg*np.random.randn( n ) * m
@@ -69,7 +70,7 @@ class Turtlebot():
         
         return propagate(state, self.v, self.omg, gam)
        
-    def propagate_state(self, state, v, omg, gam=0):
+    def propagate_state(self, state, v, omg, gam):
         n = v.shape[0]
         for k in range(n-1):
             state[:,k+1] = self.compute_next_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
@@ -97,7 +98,7 @@ class Turtlebot():
         
         return x
 
-    def get_measurements(self, state, lmark=pm.lmarks, particles=True) -> np.ndarray:
+    def get_measurements(self, state, lmark=pm.lmarks, particles=False) -> np.ndarray:
         x, y, th = state
         mdx = lmark[0] - x
         mdy = lmark[1] - y
@@ -107,8 +108,8 @@ class Turtlebot():
             r_noise = 0
             phi_noise = 0
         else:
-            r_noise = np.random.normal(0, pm.sigs[0], pm.num_lms)
-            phi_noise = np.random.normal(0, pm.sigs[1], pm.num_lms)
+            r_noise = np.random.normal(0, pm.sig_r, pm.num_lms)
+            phi_noise = np.random.normal(0, pm.sig_phi, pm.num_lms)
 
         # r_noise2 = pm.sig_r*np.random.randn(3)
         # phi_noise2 = pm.sig_phi*np.random.randn(3)
@@ -117,8 +118,8 @@ class Turtlebot():
         # phi_noise = phi_noise2
         # compute simulated r and phi measurements
         r = np.sqrt(np.add(mdx**2,mdy**2)) + r_noise
-        phi_raw = np.arctan2(mdy, mdx) - th
-        phi = wrap(phi_raw + phi_noise)
+        phi_raw = np.arctan2(mdy, mdx) - th + phi_noise
+        phi = wrap(phi_raw)
 
         z = np.vstack((r, phi))  # returns (2,3) array, combo of (r, phi) for each lmark
         return z
