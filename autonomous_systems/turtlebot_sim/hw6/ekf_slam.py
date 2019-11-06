@@ -20,23 +20,37 @@ from utils import wrap
 class EKF_SLAM():
     def __init__(self):
         self.N = pm.num_lms
-        self.dims = 3 + 2*self.N
-        self.xhat = np.zeros(self.dims)
+        self.dim = 3 + 2*self.N
+        self.xhat = np.zeros(self.dim)
         np.concatenate(( pm.state0, pm.lmarks.T.flatten() ), out=self.xhat )
-        self.F = np.vstack(( np.eye(3), np.zeros((3,2*self.N)) ))
+        self.Fx = np.vstack(( np.eye(3), np.zeros((3,2*self.N)) ))
+        # self.Fxj = []
+        # for i in range(self.N):
+        #     F = np.zeros((5,self.dim))
+        #     F[:3,:3] = np.eye(3)
+        #     F[3:, 3+(2*i-2)] = np.eye(2)
+        cols_order = []
+        cols = np.arange(self.dim)
+        for i in range(self.N):
+            cols_select = np.copy(cols)
+            k = 2*i-2
+            cols_select[3:] = np.roll(cols_select[3:], shift=k)
+            cols_order.append(cols_select)
+        self.H_inds = np.array(cols_order)
+        self.Ha = np.zeros((2,self.dim))
 
         self.K = np.zeros(3)
         self.R = np.diag([pm.sig_r**2, pm.sig_phi**2])
         self.P = np.eye(3)
-        self.Pa = np.zeros((self.dims,self.dims))
+        self.Pa = np.zeros((self.dim,self.dim))
         self.Pa[np.diag_indices_from(self.Pa)] = 1e5
 
 
-        self.Ga = np.eye(self.dims) # Jacobian of g(u_t, x_t-1) wrt state
+        self.Ga = np.eye(self.dim) # Jacobian of g(u_t, x_t-1) wrt state
         self.V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
         self.M = np.zeros((2,2))  # noise in control space
-        self.Qa = np.zeros((dims, dims))
-        self.Ha = np.zeros((5,self.dims))
+        self.Qa = np.zeros((self.dim, self.dim))
+        self.Ha = np.zeros((5,self.dim))
 
         # create history arrays
         self.xhat_hist = np.zeros((3, pm.N))
@@ -75,7 +89,7 @@ class EKF_SLAM():
 
         # Prediction state and covariance
         dyn = np.array([-vo*s, vo*c, omgc*pm.dt])
-        self.xhat += (self.F.T @ dyn)
+        self.xhat += (self.Fx.T @ dyn)
         self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
     def measurement_correction(self, r, phi):
@@ -87,22 +101,26 @@ class EKF_SLAM():
             r_hat = np.sqrt(q)
             phi_hat = np.arctan2(delta[1], delta[0]) - th
 
-            Hlow = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
+            self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
                                     delta[1], -delta[0], -q, -delta[1], delta[0]
                                     )).reshape(2,5)
-
-            F = np.array()
+            inds = (np.array([0,1]).reshape(2,1), self.H_inds[i]) 
+            Ha = self.Ha[inds]
             
             z = np.array([r[i], phi[i]])
             zhat = np.array([r_hat, phi_hat]) + np.diag(self.R)
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
 
-            S = multi_dot([H, self.P, H.T]) + self.R
-            K = multi_dot([self.P, H.T, spl.inv(S)])
+            #### Figure out how to update self.Pa(Sigma) ####
+            #### Is it just an automatic update? pg. 29 of slides ####
+            
+
+            S = multi_dot([Ha, self.P, Ha.T]) + self.R
+            K = multi_dot([self.P, Ha.T, spl.inv(S)])
 
             self.xhat += K@(zdiff)
-            self.P = (np.eye(3) - K @ H) @ self.P
+            self.P = (np.eye(3) - K @ Ha) @ self.P
 
 
     def write_history(self, i):
