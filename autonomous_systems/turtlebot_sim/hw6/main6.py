@@ -10,7 +10,7 @@ from turtlebot import Turtlebot
 from plotter import Plotter
 from utils import wrap
 
-np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
+np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
 ekfs = EKF_SLAM()
 tbot = Turtlebot(pm, pm.vc, pm.omgc)
@@ -23,6 +23,7 @@ plotter = Plotter(animate, pm)
 finished = False
 N = pm.N
 for i in range(N):
+    print(i)
     state = tbot.states[:,i]
     
     ekfs.prediction_step(tbot.vc[i], tbot.omgc[i])
@@ -35,7 +36,6 @@ for i in range(N):
     try:
         plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.P.diagonal(), i)
     except KeyboardInterrupt:
-        print('Im hereee')
         break
 
     if i == N-1:

@@ -111,11 +111,6 @@ class Turtlebot():
             r_noise = np.random.normal(0, pm.sig_r, pm.num_lms)
             phi_noise = np.random.normal(0, pm.sig_phi, pm.num_lms)
 
-        # r_noise2 = pm.sig_r*np.random.randn(3)
-        # phi_noise2 = pm.sig_phi*np.random.randn(3)
-
-        # r_noise = r_noise2
-        # phi_noise = phi_noise2
         # compute simulated r and phi measurements
         r = np.sqrt(np.add(mdx**2,mdy**2)) + r_noise
         phi_raw = np.arctan2(mdy, mdx) - th + phi_noise
@@ -123,24 +118,3 @@ class Turtlebot():
 
         z = np.vstack((r, phi))  # returns (2,3) array, combo of (r, phi) for each lmark
         return z
-
-
-
-
-
-        # vo = v/omg
-        # th = state[2]
-        # th_plus = th + omg*pm.dt
-        # s1 = np.sin(th)
-        # s2 = np.sin(th_plus)
-        # c1 = np.cos(th)
-        # c2 = np.cos(th_plus)
-
-        # A = np.array([-vo * s1 + vo * s2,
-        #                 vo * c1 - vo * c2,
-        #                 omg*pm.dt + gam*pm.dt])
-
-        # state += A
-        # angs_bad = state[2][ np.abs(state[2]) > np.pi ]
-        # if angs_bad.shape[0] > 0:
-        #     state = wrap(state, 2)

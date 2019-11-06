@@ -41,8 +41,6 @@ class Plotter():
             f1 = plt.figure(1)
             self.ax1 = f1.add_subplot(1,1,1)  # type: Axes
 
-            f1.canvas.mpl_connect('key_press_event', self.keypress)
-            
             # Draw turtlebot
             self.trail, = self.ax1.plot(*pm.state0[:2], linewidth=2)  # trail
             self.est_trail, = self.ax1.plot(*pm.state0[:2],linewidth=2,color=(1,0.65,0))
@@ -82,13 +80,6 @@ class Plotter():
             self.ax1.set_ylim(-sz, sz)
             f1.canvas.draw()
             plt.show(block=False)
-
-    def keypress(self, event):
-        sys.stdout.flush()
-        if event.key=='q':
-            # plt.close('all')
-            raise KeyboardInterrupt
-
 
     def update_kalman_plot(self, state, xhat, error_cov, i):
         self.states[i] = state
@@ -130,7 +121,7 @@ class Plotter():
 
     def update_ekfs_plot(self, state, xhat, error_cov, i):
         self.states[:,i] = state
-        self.xhats[:,i] = xhat
+        self.xhats[:,i] = xhat[:3]
         self.covariance[:,i] = error_cov
 
         x, y, theta = state
@@ -149,15 +140,8 @@ class Plotter():
         self.trail.set_data(*self.states[:2,:j])
         self.est_trail.set_data(*self.xhats[:2,:j])
 
-        # measurement vectors
-        # for k in range(pm.num_lms):
-        #     self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
-        #     self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
-
         self.ax1.redraw_in_frame()
         plt.pause(0.0005)
-        # keypress = plt.waitforbuttonpress(0.0005)
-        # print(keypress)
         
     def update_mcl_plot(self, state, xhat, Chi, covar, i):
         self.states[:, i] = state
@@ -296,8 +280,8 @@ class Plotter():
         covar[covar<0] = 0
         error_bounds = 2*np.sqrt(covar)
         
-        est_errors_nowrap = xhats - states
-        est_errors[2] = wrap(est_errors_nowrap[2])
+        est_errors = xhats - states
+        est_errors[2] = wrap(est_errors[2])
 
         # ======================================
         

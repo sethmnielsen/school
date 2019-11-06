@@ -23,12 +23,7 @@ class EKF_SLAM():
         self.dim = 3 + 2*self.N
         self.xhat = np.zeros(self.dim)
         np.concatenate(( pm.state0, pm.lmarks.T.flatten() ), out=self.xhat )
-        self.Fx = np.vstack(( np.eye(3), np.zeros((3,2*self.N)) ))
-        # self.Fxj = []
-        # for i in range(self.N):
-        #     F = np.zeros((5,self.dim))
-        #     F[:3,:3] = np.eye(3)
-        #     F[3:, 3+(2*i-2)] = np.eye(2)
+        self.Fx = np.hstack(( np.eye(3), np.zeros((3,2*self.N)) ))
         cols_order = []
         cols = np.arange(self.dim)
         for i in range(self.N):
@@ -46,11 +41,11 @@ class EKF_SLAM():
         self.Pa[np.diag_indices_from(self.Pa)] = 1e5
 
 
-        self.Ga = np.eye(self.dim) # Jacobian of g(u_t, x_t-1) wrt state
+        self.Ga = np.eye(self.dim) # Jacobian of g(u_t, x_t-1) wrt state (motion)
         self.V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
         self.M = np.zeros((2,2))  # noise in control space
         self.Qa = np.zeros((self.dim, self.dim))
-        self.Ha = np.zeros((5,self.dim))
+        self.Ha = np.zeros((2,self.dim))
 
         # create history arrays
         self.xhat_hist = np.zeros((3, pm.N))
@@ -108,7 +103,7 @@ class EKF_SLAM():
             Ha = self.Ha[inds]
             
             z = np.array([r[i], phi[i]])
-            zhat = np.array([r_hat, phi_hat]) + np.diag(self.R)
+            zhat = np.array([r_hat, phi_hat])
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
 
@@ -116,12 +111,11 @@ class EKF_SLAM():
             #### Is it just an automatic update? pg. 29 of slides ####
             
 
-            S = multi_dot([Ha, self.P, Ha.T]) + self.R
-            K = multi_dot([self.P, Ha.T, spl.inv(S)])
+            S = multi_dot([Ha, self.Pa, Ha.T]) + self.R
+            K = multi_dot([self.Pa, Ha.T, spl.inv(S)])
 
             self.xhat += K@(zdiff)
-            self.P = (np.eye(3) - K @ Ha) @ self.P
-
+            self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
 
     def write_history(self, i):
         self.xhat_hist[:,i] = self.xhat[:3]
