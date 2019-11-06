@@ -8,8 +8,10 @@ import matplotlib.patches as ptc
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from utils import wrap
-import seaborn
-seaborn.set_style("whitegrid")
+import seaborn as sns
+from seaborn import xkcd_rgb as xcolor
+sns.set_style("whitegrid")
+sns.set_palette('deep',n_colors=100)
 
 import hw6.params as pm
 
@@ -31,17 +33,16 @@ class Plotter():
         self.xhats[:,0] = pm.state0
 
         # Robot physical constants    
-        bot_radius = 0.25
+        bot_radius = 0.5
         poly_res = 12
         bot_body_alpha = 0.7
         self.bot_body_heading = np.array([bot_radius, 0])
 
-        # plt.ion()
         if self.animate:
             f1 = plt.figure(1)
             self.ax1 = f1.add_subplot(1,1,1)  # type: Axes
 
-            # Draw turtlebot
+            ##### ****TURTLEBOT**** #####
             self.trail, = self.ax1.plot(*pm.state0[:2], linewidth=2)  # trail
             self.est_trail, = self.ax1.plot(*pm.state0[:2],linewidth=2,color=(1,0.65,0))
 
@@ -54,27 +55,39 @@ class Plotter():
                                             alpha=bot_body_alpha, 
                                             color='b' )
             self.heading, = self.ax1.plot(head_x, head_y, 'r') # current heading
+            self.ax1.add_patch(self.bot_body)
+            
 
-            if particles:
-                self.particles, = self.ax1.plot(self.Chi[0], self.Chi[1], '*', color='m')  # type: Line2D
-
-            # Draw landmarks
+            ##### ****LANDMARKS**** #####
             # self.lmarks_line = []
             for i in range(pm.num_lms):
-                patch = ptc.CirclePolygon( (pm.lmarks[0,i], pm.lmarks[1,i]),
-                                            2*bot_radius, 
+                lmark_patch = ptc.CirclePolygon( (pm.lmarks[0,i], pm.lmarks[1,i]),
+                                            bot_radius/2, 
                                             poly_res, 
                                             alpha=bot_body_alpha, 
-                                            color='g' )
-                self.ax1.add_patch(patch)
+                                            color=xcolor['pale green'],
+                                            ec=xcolor['dark pastel green'] )
+                self.ax1.add_patch(lmark_patch)
+
+                ##### ****COVARIANCE ELLIPSES**** #####                
+                covar_patch = ptc.Ellipse( (pm.lmarks[0,i], pm.lmarks[1,i]),
+                                            width=1, 
+                                            height=1,
+                                            angle=0, 
+                                            alpha=0.2, 
+                                            color='darkseagreen' )
+                # self.ax1.add_patch(covar_patch)
+
+
+            self.lmark_estimates, = self.ax1.plot(pm.lmarks[0], pm.lmarks[1], 
+                                               'x',
+                                               c=xcolor["pale red"])
+
+
+            ##### PARTICLES #####
+            if particles:
+                self.particles, = self.ax1.plot(self.Chi[0], self.Chi[1], '*', color='m')  # type: Line2D
                 
-
-                # measurement vectors
-                # line = plt.plot([x0, pm.lmarks[0,i]], [y0, pm.lmarks[1,i]], 'c')
-                # self.lmarks_line.append(line[0])
-
-            self.ax1.add_patch(self.bot_body)
-
             sz = pm.sz
             self.ax1.set_xlim(-sz, sz)
             self.ax1.set_ylim(-sz, sz)
@@ -135,10 +148,14 @@ class Plotter():
         self.bot_body.xy = (x, y)
         self.heading.set_xdata(head_x)
         self.heading.set_ydata(head_y)
+
         # trails
         j = i+1
         self.trail.set_data(*self.states[:2,:j])
         self.est_trail.set_data(*self.xhats[:2,:j])
+
+        # landmark estimates
+        # self.lmark_estimates.set_data
 
         self.ax1.redraw_in_frame()
         plt.pause(0.05)
