@@ -141,7 +141,7 @@ class Plotter():
         self.est_trail.set_data(*self.xhats[:2,:j])
 
         self.ax1.redraw_in_frame()
-        plt.pause(0.0005)
+        plt.pause(0.05)
         
     def update_mcl_plot(self, state, xhat, Chi, covar, i):
         self.states[:, i] = state

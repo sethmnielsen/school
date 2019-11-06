@@ -23,7 +23,6 @@ plotter = Plotter(animate, pm)
 finished = False
 N = pm.N
 for i in range(N):
-    print(i)
     state = tbot.states[:,i]
     
     ekfs.prediction_step(tbot.vc[i], tbot.omgc[i])
