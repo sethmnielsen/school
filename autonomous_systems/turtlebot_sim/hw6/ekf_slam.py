@@ -36,6 +36,7 @@ class EKF_SLAM():
         self.V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
         self.M = np.zeros((2,2))  # noise in control space
         self.Qa = np.zeros((dims, dims))
+        self.Ha = np.zeros((5,self.dims))
 
         # create history arrays
         self.xhat_hist = np.zeros((3, pm.N))
