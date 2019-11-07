@@ -24,7 +24,7 @@ class EKF_SLAM():
         self.N = self.pm.num_lms
         self.dim = 3 + 2*self.N
         self.xhat = np.zeros(self.dim)
-        self.xhat[3:] = np.ravel(self.pm.lmarks, order='F')
+        # self.xhat[3:] = np.ravel(self.pm.lmarks, order='F')
         # self.xhat = np.random.randn(self.dim)
         # np.concatenate(( self.pm.state0, self.pm.lmarks.T.flatten() ), out=self.xhat )
 
@@ -94,16 +94,15 @@ class EKF_SLAM():
         self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
     def measurement_correction(self, r, phi):
-        delta = np.zeros(2)
+        th = self.xhat[2]
+        delta = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
         for i in range(self.pm.num_lms):
-            delta = self.pm.lmarks[:,i] - self.xhat[:2]
-            th = self.xhat[2]
-            q = delta @ delta
+            q = delta[:,i] @ delta[:,i]
             r_hat = np.sqrt(q)
-            phi_hat = np.arctan2(delta[1], delta[0]) - th
+            phi_hat = np.arctan2(delta[1,i], delta[0,i]) - th
 
-            self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
-                                    delta[1], -delta[0], -q, -delta[1], delta[0]
+            self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta[:,i], 0, r_hat*delta[:,i], 
+                                    delta[1,i], -delta[0,i], -q, -delta[1,i], delta[0,i]
                                     )).reshape(2,5)
             inds = (np.array([0,1]).reshape(2,1), self.H_inds[i]) 
             Ha = self.Ha[inds]

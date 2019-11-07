@@ -6,10 +6,10 @@ rho = 4
 sz = 12
 
 state0 = np.array([0, 0, 0])
-alphas = np.array([0.1, 0.01, 0.01, 0.1]) * 0.0001
+alphas = np.array([0.1, 0.01, 0.01, 0.1])
 
-sig_r = 0.1 * 0.01
-sig_phi = 0.05 * 0.01
+sig_r = 0.1
+sig_phi = 0.05
 
 radius = 3
 circumference_points = 10
