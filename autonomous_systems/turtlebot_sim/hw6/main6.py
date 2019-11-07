@@ -12,7 +12,6 @@ from utils import wrap
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
 
-print('landmarks:\n', pm.lmarks)
 ekfs = EKF_SLAM(pm)
 tbot = Turtlebot(pm, pm.vc, pm.omgc)
 tbot.states[:,0] = pm.state0

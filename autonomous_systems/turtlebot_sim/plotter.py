@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
+from matplotlib.collections import PatchCollection
+from matplotlib.collections import EllipseCollection
+from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
+                               AutoMinorLocator)
 from utils import wrap
 import seaborn as sns
 from seaborn import xkcd_rgb as xcolor
@@ -34,42 +38,46 @@ class Plotter():
 
         # Robot physical constants    
         bot_radius = 0.5
-        poly_res = 12
-        bot_body_alpha = 0.7
-        self.bot_body_heading = np.array([bot_radius, 0])
+        bot_alpha = 0.7
+        self.bot_head_indicator = np.array([bot_radius, 0])
 
         if self.animate:
-            f1 = plt.figure(1)
+            f1: plt.Figure = plt.figure(num=1, figsize=(4,4), dpi=150)
             self.ax1 = f1.add_subplot(1,1,1)  # type: Axes
+            self.ax1.xaxis.set_major_locator(MultipleLocator(2))
+            self.ax1.yaxis.set_major_locator(MultipleLocator(2))
 
             ##### ****TURTLEBOT**** #####
             self.trail, = self.ax1.plot(*self.pm.state0[:2], linewidth=2)  # trail
             self.est_trail, = self.ax1.plot(*self.pm.state0[:2],linewidth=2,color=(1,0.65,0))
 
-            cur_head = self.heading2Rotation(th0) @ self.bot_body_heading                    
+            cur_head = self.Rb_i(th0) @ self.bot_head_indicator                    
             head_x = np.array([0,cur_head[0]]) + x0    
             head_y = np.array([0,cur_head[1]]) + y0
             self.bot_body = ptc.CirclePolygon( (x0, y0), 
                                             radius=bot_radius, 
-                                            resolution=poly_res, 
-                                            alpha=bot_body_alpha, 
+                                            resolution=20, 
+                                            alpha=bot_alpha, 
                                             color='b' )
             self.heading, = self.ax1.plot(head_x, head_y, 'r') # current heading
             self.ax1.add_patch(self.bot_body)
             
 
             ##### ****LANDMARKS**** #####
-            # self.lmarks_line = []
+            lmarks_patches = []
+            covar_patches = []
             for i in range(self.pm.num_lms):
-                lmark_patch = ptc.CirclePolygon( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
-                                            bot_radius/2, 
-                                            poly_res, 
-                                            alpha=bot_body_alpha, 
+                lmark_patch = ptc.RegularPolygon( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
+                                            numVertices=20, 
+                                            radius=bot_radius/2, 
+                                            alpha=bot_alpha, 
                                             zorder=2,
                                             color=xcolor['pale green'],
                                             ec=xcolor['dark pastel green'] )
 
-                ##### ****COVARIANCE ELLIPSES**** #####                
+                ##### ****COVARIANCE ELLIPSES**** #####
+                widths = np.ones(self.pm.num_lms)
+                angles = np.zeros(self.pm.num_lms)
                 covar_patch = ptc.Ellipse( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
                                             width=1, 
                                             height=1,
@@ -77,12 +85,23 @@ class Plotter():
                                             alpha=0.4,
                                             zorder=1, 
                                             color=xcolor['light lavender'] )
+                
+                lmarks_patches.append(lmark_patch)
+                covar_patches.append(covar_patch)
 
-                self.ax1.add_patch(covar_patch)
-                self.ax1.add_patch(lmark_patch)
+            self.lmarks_ = PatchCollection(lmarks_patches, match_original=True)
 
+            elp_offsets = np.column_stack((self.pm.lmarks[0], self.pm.lmarks[1]))
+            self.ellipses_ = EllipseCollection(widths, widths, angles, 
+                                               facecolors=xcolor['light lavender'],
+                                               alpha=0.4,
+                                               offsets=elp_offsets,
+                                               transOffset=self.ax1.transData)
 
-            self.lmark_estimates, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
+            self.ax1.add_collection(self.lmarks_)
+            self.ax1.add_collection(self.ellipses_)
+
+            self.lmark_estimates_, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
                                                'x',
                                                c=xcolor["pale red"],
                                                zorder=3)
@@ -112,7 +131,7 @@ class Plotter():
         self.bot_body.xy = (x, y)
 
         # heading indicator
-        cur_head = self.heading2Rotation(theta) @ self.bot_body_heading
+        cur_head = self.Rb_i(theta) @ self.bot_head_indicator
         head_x = np.array([0,cur_head[0]]) + x
         head_y = np.array([0,cur_head[1]]) + y
         self.heading.set_xdata(head_x)
@@ -140,13 +159,14 @@ class Plotter():
         self.states[:,i] = state
         self.xhats[:,i] = xhat[:3]
         self.covariance[:,i] = error_cov
+        est_lmarks = np.vstack((xhat[3::2], xhat[4::2]))
 
         x, y, theta = state
-
-        cur_head = self.heading2Rotation(theta) @ self.bot_body_heading
-
-        head_x = np.array([0,cur_head[0]]) + x
-        head_y = np.array([0,cur_head[1]]) + y
+        Rb_i = self.Rb_i(theta)
+        cur_head_xy = Rb_i @ self.bot_head_indicator
+        
+        head_x = np.array([0,cur_head_xy[0]]) + x
+        head_y = np.array([0,cur_head_xy[1]]) + y
 
         # turtlebot patch and heading
         self.bot_body.xy = (x, y)
@@ -157,9 +177,9 @@ class Plotter():
         j = i+1
         self.trail.set_data(*self.states[:2,:j])
         self.est_trail.set_data(*self.xhats[:2,:j])
-
+        
         # landmark estimates
-        # self.lmark_estimates.set_data
+        self.lmark_estimates_.set_data(*est_lmarks)
 
         self.ax1.redraw_in_frame()
         plt.pause(0.05)
@@ -176,7 +196,7 @@ class Plotter():
             y = cur_state[1]
             theta = cur_state[2]
 
-            cur_head = self.heading2Rotation(theta) @ self.bot_body_heading
+            cur_head = self.Rb_i(theta) @ self.bot_head_indicator
 
             head_x = np.array([0,cur_head[0]]) + x
             head_y = np.array([0,cur_head[1]]) + y
@@ -219,7 +239,7 @@ class Plotter():
             self.est_trail[0].set_ydata(self.xhats[1,:i])
 
             # turtlebot patch and heading
-            cur_head = self.heading2Rotation(theta) @ self.bot_body_heading
+            cur_head = self.Rb_i(theta) @ self.bot_head_indicator
 
             head_x = np.array([0,cur_head[0]]) + x
             head_y = np.array([0,cur_head[1]]) + y
@@ -429,7 +449,7 @@ class Plotter():
         print("Finished everything")
 
 
-    def heading2Rotation(self, psi):
+    def Rb_i(self, psi):
         c_psi = np.cos(psi)
         s_psi = np.sin(psi)
 

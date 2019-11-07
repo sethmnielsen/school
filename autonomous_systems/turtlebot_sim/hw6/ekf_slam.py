@@ -23,7 +23,9 @@ class EKF_SLAM():
         
         self.N = self.pm.num_lms
         self.dim = 3 + 2*self.N
-        self.xhat = np.random.randn(self.dim)
+        self.xhat = np.zeros(self.dim)
+        self.xhat[3:] = np.ravel(self.pm.lmarks, order='F')
+        # self.xhat = np.random.randn(self.dim)
         # np.concatenate(( self.pm.state0, self.pm.lmarks.T.flatten() ), out=self.xhat )
 
 
@@ -110,7 +112,6 @@ class EKF_SLAM():
             zhat = np.array([r_hat, phi_hat])
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
-
             #### Figure out how to update self.Pa(Sigma) ####
             #### Is it just an automatic update? pg. 29 of slides ####
             
