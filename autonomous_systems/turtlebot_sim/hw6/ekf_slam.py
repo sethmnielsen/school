@@ -15,15 +15,18 @@ import numpy as np
 from numpy.linalg import multi_dot
 import scipy.linalg as spl
 
-import params as pm
 from utils import wrap
 
 class EKF_SLAM():
-    def __init__(self):
-        self.N = pm.num_lms
+    def __init__(self, params):
+        self.pm = params
+        
+        self.N = self.pm.num_lms
         self.dim = 3 + 2*self.N
-        self.xhat = np.zeros(self.dim)
-        np.concatenate(( pm.state0, pm.lmarks.T.flatten() ), out=self.xhat )
+        self.xhat = np.random.randn(self.dim)
+        # np.concatenate(( self.pm.state0, self.pm.lmarks.T.flatten() ), out=self.xhat )
+
+
         self.Fx = np.hstack(( np.eye(3), np.zeros((3,2*self.N)) ))
         cols_order = []
         cols = np.arange(self.dim)
@@ -36,7 +39,7 @@ class EKF_SLAM():
         self.Ha = np.zeros((2,self.dim))
 
         self.K = np.zeros(3)
-        self.R = np.diag([pm.sig_r**2, pm.sig_phi**2])
+        self.R = np.diag([self.pm.sig_r**2, self.pm.sig_phi**2])
         self.P = np.eye(3)
         self.Pa = np.zeros((self.dim,self.dim))
         self.Pa[np.diag_indices_from(self.Pa)] = 1e5
@@ -49,15 +52,15 @@ class EKF_SLAM():
         self.Ha = np.zeros((2,self.dim))
 
         # create history arrays
-        self.xhat_hist = np.zeros((3, pm.N))
-        self.error_cov_hist = np.zeros((3, pm.N))
+        self.xhat_hist = np.zeros((3, self.pm.N))
+        self.error_cov_hist = np.zeros((3, self.pm.N))
 
         self.write_history(0)
 
     def prediction_step(self, vc, omgc):
         # convenience terms
         th = self.xhat[2]
-        th_plus = wrap(th + omgc*pm.dt)
+        th_plus = wrap(th + omgc*self.pm.dt)
         vo = vc/omgc
         c = np.cos(th) - np.cos(th_plus)
         s = np.sin(th) - np.sin(th_plus)
@@ -70,28 +73,28 @@ class EKF_SLAM():
         # V matrix
         v00 = -s / omgc
         v10 =  c / omgc  
-        v01 =  vc*s / omgc**2  +  vc*np.cos(th_plus)*pm.dt / omgc
-        v11 = -vc*c / omgc**2  +  vc*np.sin(th_plus)*pm.dt / omgc
+        v01 =  vc*s / omgc**2  +  vc*np.cos(th_plus)*self.pm.dt / omgc
+        v11 = -vc*c / omgc**2  +  vc*np.sin(th_plus)*self.pm.dt / omgc
         self.V[:] = np.array([[v00, v01],
                               [v10, v11],
-                              [  0, pm.dt]])
+                              [  0, self.pm.dt]])
 
         # M matrix
-        a1, a2, a3, a4 = pm.alphas
+        a1, a2, a3, a4 = self.pm.alphas
         self.M[np.diag_indices_from(self.M)] = [a1*vc**2 + a2*omgc**2, a3*vc**2 + a4*omgc**2]
 
         # Q matrix
         self.Qa[:3,:3] = multi_dot([self.V, self.M, self.V.T])
 
         # Prediction state and covariance
-        dyn = np.array([-vo*s, vo*c, omgc*pm.dt])
+        dyn = np.array([-vo*s, vo*c, omgc*self.pm.dt])
         self.xhat += (self.Fx.T @ dyn)
         self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
     def measurement_correction(self, r, phi):
         delta = np.zeros(2)
-        for i in range(pm.num_lms):
-            delta = pm.lmarks[:,i] - self.xhat[:2]
+        for i in range(self.pm.num_lms):
+            delta = self.pm.lmarks[:,i] - self.xhat[:2]
             th = self.xhat[2]
             q = delta @ delta
             r_hat = np.sqrt(q)

@@ -23,7 +23,7 @@ pos = np.array([radius*np.cos(angles), radius*np.sin(angles)])
 x_truth = np.array([*pos, angles])
 t_arr = np.arange(0, pizza_slices*num_pizzas, dt)
 N = len(t_arr)
-num_lms = 5
+num_lms = 3
 lmarks = np.random.rand(2,num_lms) * 2*sz - sz
 
 

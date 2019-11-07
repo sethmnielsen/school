@@ -2,16 +2,16 @@
 
 import numpy as np
 from utils import wrap
-import hw6.params as pm
 
 class Turtlebot():
     def __init__(self, params, vc=None, omgc=None):
+        self.pm = params
         # time
-        self.N = len(pm.t_arr)
+        self.N = len(self.pm.t_arr)
 
         # Current state, state history array
         self.states = np.zeros((3, self.N))
-        self.states[:,0] = pm.state0
+        self.states[:,0] = self.pm.state0
         build_vel_arrays = True
 
         # velocities
@@ -32,25 +32,25 @@ class Turtlebot():
             self.sample_motion_model(self.vc, self.omgc, self.states)
 
     def build_vel_and_state(self):
-        alphas = pm.alphas
+        alphas = self.pm.alphas
         
         # v/omg commands
-        self.vc = 1 + .5 * np.cos(2 * np.pi * 0.2 * pm.t_arr) # 0.2 on HW3 pdf
-        self.omgc = -0.2 + 2 * np.cos(2 * np.pi * 0.6 * pm.t_arr) # 0.6 on HW3 pdf
+        self.vc = 1 + .5 * np.cos(2 * np.pi * 0.2 * self.pm.t_arr) # 0.2 on HW3 pdf
+        self.omgc = -0.2 + 2 * np.cos(2 * np.pi * 0.6 * self.pm.t_arr) # 0.6 on HW3 pdf
         
         # v/omg real outputs (noise added)
         self.states = self.sample_motion_model(self.vc, self.omgc, self.states)
 
     def sample_motion_model(self, vc, omgc, state, particles=False):
         # Accepts either number or array of numbers for vc, omgc, state
-        alphas = pm.alphas
+        alphas = self.pm.alphas
 
         sd_v   = np.sqrt( alphas[0]*(vc**2) + alphas[1]*(omgc**2) )
         sd_omg = np.sqrt( alphas[2]*(vc**2) + alphas[3]*(omgc**2) )
 
         if particles:
             m = 10  # noise multiplier
-            n = pm.M  # number of random numbers to generate
+            n = self.pm.M  # number of random numbers to generate
             propagate = self.propagate_particles
 
             sd_gam = np.sqrt( alphas[4]*(vc**2) + alphas[5]*(omgc**2) )
@@ -90,31 +90,31 @@ class Turtlebot():
     def compute_next_state(self, x, v, omg, gam):
         vo = v/omg
         th = x[2]
-        th_plus = th + omg*pm.dt
+        th_plus = th + omg*self.pm.dt
         
         x += np.array([-vo*np.sin(th) + vo*np.sin(th_plus),
                       vo*np.cos(th) - vo*np.cos(th_plus),
-                      omg*pm.dt + gam*pm.dt])
+                      omg*self.pm.dt + gam*self.pm.dt])
         
         return x
 
-    def get_measurements(self, state, lmark=pm.lmarks, particles=False) -> np.ndarray:
+    def get_measurements(self, state, particles=False) -> np.ndarray:
         x, y, th = state
-        mdx = lmark[0] - x
-        mdy = lmark[1] - y
+        mdx = self.pm.lmarks[0] - x
+        mdy = self.pm.lmarks[1] - y
 
-        # senor noise
+        # sensor noise
         if particles:
             r_noise = 0
             phi_noise = 0
         else:
-            r_noise = np.random.normal(0, pm.sig_r, pm.num_lms)
-            phi_noise = np.random.normal(0, pm.sig_phi, pm.num_lms)
+            r_noise = np.random.normal(0, self.pm.sig_r, self.pm.num_lms)
+            phi_noise = np.random.normal(0, self.pm.sig_phi, self.pm.num_lms)
 
         # compute simulated r and phi measurements
         r = np.sqrt(np.add(mdx**2,mdy**2)) + r_noise
         phi_raw = np.arctan2(mdy, mdx) - th + phi_noise
         phi = wrap(phi_raw)
 
-        z = np.vstack((r, phi))  # returns (2,3) array, combo of (r, phi) for each lmark
+        z = np.vstack((r, phi))
         return z

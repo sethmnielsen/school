@@ -13,14 +13,14 @@ from seaborn import xkcd_rgb as xcolor
 sns.set_style("whitegrid")
 sns.set_palette('deep',n_colors=100)
 
-import hw6.params as pm
-
 class Plotter():
     """ For animating turtlebot trajectory and estimation, and plotting the results"""
 
     def __init__(self, animate, params, particles=False):
         self.animate = animate
-        N = pm.N
+        self.pm = params
+
+        N = self.pm.N
         self.states = np.zeros((3, N))
         self.xhats = np.zeros((3, N))
         self.est_errors = np.zeros((3, N))
@@ -28,9 +28,9 @@ class Plotter():
         self.Chi = np.zeros((3,N))
         self.ksi = np.zeros((3, N))
 
-        x0, y0, th0 = pm.state0
-        self.states[:,0] = pm.state0
-        self.xhats[:,0] = pm.state0
+        x0, y0, th0 = self.pm.state0
+        self.states[:,0] = self.pm.state0
+        self.xhats[:,0] = self.pm.state0
 
         # Robot physical constants    
         bot_radius = 0.5
@@ -43,8 +43,8 @@ class Plotter():
             self.ax1 = f1.add_subplot(1,1,1)  # type: Axes
 
             ##### ****TURTLEBOT**** #####
-            self.trail, = self.ax1.plot(*pm.state0[:2], linewidth=2)  # trail
-            self.est_trail, = self.ax1.plot(*pm.state0[:2],linewidth=2,color=(1,0.65,0))
+            self.trail, = self.ax1.plot(*self.pm.state0[:2], linewidth=2)  # trail
+            self.est_trail, = self.ax1.plot(*self.pm.state0[:2],linewidth=2,color=(1,0.65,0))
 
             cur_head = self.heading2Rotation(th0) @ self.bot_body_heading                    
             head_x = np.array([0,cur_head[0]]) + x0    
@@ -60,35 +60,39 @@ class Plotter():
 
             ##### ****LANDMARKS**** #####
             # self.lmarks_line = []
-            for i in range(pm.num_lms):
-                lmark_patch = ptc.CirclePolygon( (pm.lmarks[0,i], pm.lmarks[1,i]),
+            for i in range(self.pm.num_lms):
+                lmark_patch = ptc.CirclePolygon( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
                                             bot_radius/2, 
                                             poly_res, 
                                             alpha=bot_body_alpha, 
+                                            zorder=2,
                                             color=xcolor['pale green'],
                                             ec=xcolor['dark pastel green'] )
-                self.ax1.add_patch(lmark_patch)
 
                 ##### ****COVARIANCE ELLIPSES**** #####                
-                covar_patch = ptc.Ellipse( (pm.lmarks[0,i], pm.lmarks[1,i]),
+                covar_patch = ptc.Ellipse( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
                                             width=1, 
                                             height=1,
                                             angle=0, 
-                                            alpha=0.2, 
-                                            color='darkseagreen' )
-                # self.ax1.add_patch(covar_patch)
+                                            alpha=0.4,
+                                            zorder=1, 
+                                            color=xcolor['light lavender'] )
+
+                self.ax1.add_patch(covar_patch)
+                self.ax1.add_patch(lmark_patch)
 
 
-            self.lmark_estimates, = self.ax1.plot(pm.lmarks[0], pm.lmarks[1], 
+            self.lmark_estimates, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
                                                'x',
-                                               c=xcolor["pale red"])
+                                               c=xcolor["pale red"],
+                                               zorder=3)
 
 
             ##### PARTICLES #####
             if particles:
                 self.particles, = self.ax1.plot(self.Chi[0], self.Chi[1], '*', color='m')  # type: Line2D
                 
-            sz = pm.sz
+            sz = self.pm.sz
             self.ax1.set_xlim(-sz, sz)
             self.ax1.set_ylim(-sz, sz)
             f1.canvas.draw()
@@ -115,15 +119,15 @@ class Plotter():
         self.heading.set_ydata(head_y)
 
         # trails
-        self.trail[0].set_xdata(self.states[:i,0])
-        self.trail[0].set_ydata(self.states[:i,1])
-        self.est_trail[0].set_xdata(self.xhats[:i,0])
-        self.est_trail[0].set_ydata(self.xhats[:i,1])
+        self.trail[0].set_xdata(self.states[1:i,0])
+        self.trail[0].set_ydata(self.states[1:i,1])
+        self.est_trail[0].set_xdata(self.xhats[1:i,0])
+        self.est_trail[0].set_ydata(self.xhats[1:i,1])
 
         # measurement vectors
-        for k in range(pm.num_lms):
-            self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
-            self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
+        for k in range(self.pm.num_lms):
+            self.lmarks_line[k].set_xdata([x, self.pm.lmarks[0,k]])
+            self.lmarks_line[k].set_ydata([y, self.pm.lmarks[1,k]])
 
         self.ax1.relim() 
         self.ax1.autoscale_view(True,True,True) 
@@ -191,9 +195,9 @@ class Plotter():
             self.particles[0].set_ydata(Chi[1])
             
             # measurement vectors
-            # for k in range(pm.num_lms):
-            #     self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
-            #     self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
+            # for k in range(self.pm.num_lms):
+            #     self.lmarks_line[k].set_xdata([x, self.pm.lmarks[0,k]])
+            #     self.lmarks_line[k].set_ydata([y, self.pm.lmarks[1,k]])
 
             self.ax1.redraw_in_frame()
             plt.pause(0.0001)
@@ -225,9 +229,9 @@ class Plotter():
             self.heading[0].set_ydata(head_y)
             
             # measurement vectors
-            # for k in range(pm.num_lms):
-            #     self.lmarks_line[k].set_xdata([x, pm.lmarks[0,k]])
-            #     self.lmarks_line[k].set_ydata([y, pm.lmarks[1,k]])
+            # for k in range(self.pm.num_lms):
+            #     self.lmarks_line[k].set_xdata([x, self.pm.lmarks[0,k]])
+            #     self.lmarks_line[k].set_ydata([y, self.pm.lmarks[1,k]])
 
             self.ax1.redraw_in_frame()
             plt.pause(0.0001)
@@ -236,7 +240,7 @@ class Plotter():
     def make_plots(self):
         a = 2
         b = 200
-        t_arr = pm.t_arr[a:b]
+        t_arr = self.pm.t_arr[a:b]
         states = self.states[:, a:b]
         xhats = self.xhats[:, a:b]
         est_errors = self.est_errors[:, a:b]
