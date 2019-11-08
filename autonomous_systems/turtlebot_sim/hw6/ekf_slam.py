@@ -24,8 +24,8 @@ class EKF_SLAM():
         self.N = self.pm.num_lms
         self.dim = 3 + 2*self.N
         self.xhat = np.zeros(self.dim)
-        self.xhat[2] = np.pi/2
-        self.xhat[0] = 5
+        self.xhat[:3] = np.array(self.pm.state0)
+        self.discovered = np.full(self.N, False)
         # self.xhat[3:] = np.ravel(self.pm.lmarks, order='F')
         # self.xhat = np.random.randn(self.dim)
         # np.concatenate(( self.pm.state0, self.pm.lmarks.T.flatten() ), out=self.xhat )
@@ -100,8 +100,9 @@ class EKF_SLAM():
         deltas = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
 
         lmarks_estimates = np.vstack((self.xhat[3::2], self.xhat[4::2]))
-        for k in inds_detected:
-            lmarks_estimates[:,k] = np.array([x,y]).reshape(2,1) + deltas[:,k]
+        lmarks_undiscovered = lmarks_estimates[~self.discovered]
+        if len(inds_detected[1]) > 0:
+            lmarks_estimates[inds_detected] = self.xhat[:2,None] + deltas[inds_detected]
 
         self.xhat[3::2] = lmarks_estimates[0]
         self.xhat[4::2] = lmarks_estimates[1]
