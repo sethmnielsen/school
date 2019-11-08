@@ -26,14 +26,14 @@ for i in range(N):
     state = tbot.states[:,i]
     
     ekfs.prediction_step(tbot.vc[i], tbot.omgc[i])
-    z = tbot.get_measurements(state)
-    ekfs.measurement_correction(z[0], z[1])
+    z, lmarks_detected = tbot.get_measurements(state)
+    ekfs.measurement_correction(z[0], z[1], lmarks_detected)
 
     ekfs.write_history(i)
 
     # update plot animation
     try:
-        plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.P.diagonal(), i)
+        plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.Pa.diagonal()[3:], i)
     except KeyboardInterrupt:
         break
 
@@ -41,6 +41,4 @@ for i in range(N):
         finished = True
 
 if finished:
-    plotter.make_plots_ekfs(pm.t_arr, ekfs.error_cov_hist)
-    
-sys.exit()
+    plotter.make_plots_ekfs(pm.t_arr)

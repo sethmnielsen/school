@@ -112,9 +112,17 @@ class Turtlebot():
             phi_noise = np.random.normal(0, self.pm.sig_phi, self.pm.num_lms)
 
         # compute simulated r and phi measurements
-        r = np.sqrt(np.add(mdx**2,mdy**2)) + r_noise
-        phi_raw = np.arctan2(mdy, mdx) - th + phi_noise
+        r = np.sqrt(np.add(mdx**2,mdy**2))
+        phi_raw = np.arctan2(mdy, mdx) - th
         phi = wrap(phi_raw)
 
+        # Check for landmarks within range of sensor
+        lmarks_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
+        inds_detected = np.nonzero(lmarks_mask)
+
+        r += r_noise
+        phi += phi_noise
+        
         z = np.vstack((r, phi))
-        return z
+        return z, inds_detected
+

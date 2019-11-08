@@ -1,19 +1,20 @@
 import numpy as np
 
-fov = 90
-rho = 4
+num_lms = 5
+fov = np.radians(180)
+rho = 5
 
 sz = 12
 
-state0 = np.array([0, 0, 0])
+state0 = np.array([5, 0, np.pi/2])
 alphas = np.array([0.1, 0.01, 0.01, 0.1])
 
 sig_r = 0.1
 sig_phi = 0.05
 
-radius = 3
+radius = 5
 circumference_points = 10
-num_circles = 2
+num_circles = 10
 dt = 0.1
 
 # (x – h)2 + (y – k)2 = r2, center point (h, k) and radius r
@@ -23,10 +24,9 @@ dt = 0.1
 # x_truth = np.array([*pos, angles])
 t_arr = np.arange(0, circumference_points*num_circles, dt)
 N = len(t_arr)
-num_lms = 10
 m = sz*0.8
 lmarks = np.random.rand(2,num_lms) * 2*m - m
 
 
 vc = np.ones(N) * 2
-omgc = np.ones(N) * np.pi/5
+omgc = np.ones(N) * np.pi/8

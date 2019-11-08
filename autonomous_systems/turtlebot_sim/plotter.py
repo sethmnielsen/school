@@ -11,6 +11,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.collections import EllipseCollection
 from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
                                AutoMinorLocator)
+from mpl_toolkits.mplot3d import Axes3D
 from utils import wrap
 import seaborn as sns
 from seaborn import xkcd_rgb as xcolor
@@ -76,36 +77,42 @@ class Plotter():
                                             ec=xcolor['dark pastel green'] )
 
                 ##### ****COVARIANCE ELLIPSES**** #####
-                widths = np.ones(self.pm.num_lms)
-                angles = np.zeros(self.pm.num_lms)
-                covar_patch = ptc.Ellipse( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
-                                            width=1, 
-                                            height=1,
-                                            angle=0, 
-                                            alpha=0.4,
-                                            zorder=1, 
-                                            color=xcolor['light lavender'] )
+                # widths = np.ones(self.pm.num_lms)
+                # angles = np.zeros(self.pm.num_lms)
+                # covar_patch = ptc.Ellipse( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
+                #                             width=1, 
+                #                             height=1,
+                #                             angle=0, 
+                #                             alpha=0.4,
+                #                             zorder=1, 
+                #                             color=xcolor['light lavender'] )
                 
                 lmarks_patches.append(lmark_patch)
-                covar_patches.append(covar_patch)
+                # covar_patches.append(covar_patch)
 
             self.lmarks_ = PatchCollection(lmarks_patches, match_original=True)
 
-            elp_offsets = np.column_stack((self.pm.lmarks[0], self.pm.lmarks[1]))
-            self.ellipses_ = EllipseCollection(widths, widths, angles, 
-                                               facecolors=xcolor['light lavender'],
-                                               alpha=0.4,
-                                               offsets=elp_offsets,
-                                               transOffset=self.ax1.transData)
+            # elp_offsets = np.column_stack((self.pm.lmarks[0], self.pm.lmarks[1]))
+            # self.ellipses_ = EllipseCollection(widths, widths, angles, 
+            #                                    facecolors=xcolor['light lavender'],
+            #                                    alpha=0.4,
+            #                                    offsets=elp_offsets,
+            #                                    transOffset=self.ax1.transData)
 
             self.ax1.add_collection(self.lmarks_)
-            self.ax1.add_collection(self.ellipses_)
+            # self.ax1.add_collection(self.ellipses_)
 
             self.lmark_estimates_, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
                                                'x',
                                                c=xcolor["pale red"],
                                                zorder=3)
+            
+            ##### ****FOV WEDGE**** #####
+            th1 = np.degrees(wrap(th0 - self.pm.fov/2))
+            th2 = np.degrees(wrap(th0 + self.pm.fov/2))
+            self.fov = ptc.Wedge( (x0, y0), self.pm.rho, th1, th2, alpha=0.3)
 
+            self.ax1.add_patch(self.fov)
 
             ##### PARTICLES #####
             if particles:
@@ -125,13 +132,13 @@ class Plotter():
 
         x = state[0]
         y = state[1]
-        theta = state[2]
+        th = state[2]
 
         # turtlebot body patch
         self.bot_body.xy = (x, y)
 
         # heading indicator
-        cur_head = self.Rb_i(theta) @ self.bot_head_indicator
+        cur_head = self.Rb_i(th) @ self.bot_head_indicator
         head_x = np.array([0,cur_head[0]]) + x
         head_y = np.array([0,cur_head[1]]) + y
         self.heading.set_xdata(head_x)
@@ -158,11 +165,15 @@ class Plotter():
     def update_ekfs_plot(self, state, xhat, error_cov, i):
         self.states[:,i] = state
         self.xhats[:,i] = xhat[:3]
-        self.covariance[:,i] = error_cov
+        if self.covariance.shape[0] != error_cov.shape[0]:
+            self.covariance = np.zeros((error_cov.shape[0], self.pm.N))
+            self.covariance[:,0] = error_cov 
+        else:
+            self.covariance[:,i] = error_cov
         est_lmarks = np.vstack((xhat[3::2], xhat[4::2]))
 
-        x, y, theta = state
-        Rb_i = self.Rb_i(theta)
+        x, y, th = state
+        Rb_i = self.Rb_i(th)
         cur_head_xy = Rb_i @ self.bot_head_indicator
         
         head_x = np.array([0,cur_head_xy[0]]) + x
@@ -179,10 +190,22 @@ class Plotter():
         self.est_trail.set_data(*self.xhats[:2,:j])
         
         # landmark estimates
-        self.lmark_estimates_.set_data(*est_lmarks)
+        detected_lms = np.nonzero( (abs(est_lmarks[0])>1e-10) 
+                                    & (abs(est_lmarks[1])>1e-10) )[0]
+        self.lmark_estimates_.set_data(*est_lmarks[:,detected_lms])
+
+        # covariance ellipses
+        #self.ellipses_.set_data()
+
+        # FOV wedge
+        th1 = np.degrees(wrap(th - self.pm.fov/2))
+        th2 = np.degrees(wrap(th + self.pm.fov/2))
+        self.fov.set_center((x, y))
+        self.fov.set_theta1(th1)
+        self.fov.set_theta2(th2)
 
         self.ax1.redraw_in_frame()
-        plt.pause(0.05)
+        plt.pause(0.0001)
         
     def update_mcl_plot(self, state, xhat, Chi, covar, i):
         self.states[:, i] = state
@@ -194,9 +217,9 @@ class Plotter():
             cur_state = state
             x = cur_state[0]
             y = cur_state[1]
-            theta = cur_state[2]
+            th = cur_state[2]
 
-            cur_head = self.Rb_i(theta) @ self.bot_head_indicator
+            cur_head = self.Rb_i(th) @ self.bot_head_indicator
 
             head_x = np.array([0,cur_head[0]]) + x
             head_y = np.array([0,cur_head[1]]) + y
@@ -230,7 +253,7 @@ class Plotter():
             cur_state = state
             x = cur_state[0]
             y = cur_state[1]
-            theta = cur_state[2]
+            th = cur_state[2]
 
             # trails
             self.trail[0].set_xdata(self.states[0,:i])
@@ -239,7 +262,7 @@ class Plotter():
             self.est_trail[0].set_ydata(self.xhats[1,:i])
 
             # turtlebot patch and heading
-            cur_head = self.Rb_i(theta) @ self.bot_head_indicator
+            cur_head = self.Rb_i(th) @ self.bot_head_indicator
 
             head_x = np.array([0,cur_head[0]]) + x
             head_y = np.array([0,cur_head[1]]) + y
@@ -315,10 +338,13 @@ class Plotter():
 
         print("Finished everything")
 
-    def make_plots_ekfs(self, t_arr, covar):
+    def make_plots_ekfs(self, t_arr):
         states = self.states
         xhats = self.xhats
+        covar = self.covariance
+
         covar[covar<0] = 0
+        covar_2d = np.vstack((covar[::2], covar[1::2]))
         error_bounds = 2*np.sqrt(covar)
         
         est_errors = xhats - states
@@ -346,26 +372,29 @@ class Plotter():
         # ======================================
 
         f3, axes3 = plt.subplots(3, 1, sharex=True, num=3)
-        f3.suptitle(r'Estimation Error and $2\sigma$ Bounds')
+        f3.suptitle(r'Estimation Error')
         axes3[0].plot(t_arr, est_errors[0], label='error')
         axes3[1].plot(t_arr, est_errors[1])
         axes3[2].plot(t_arr, est_errors[2])
-
-        # Covariance plots (+/- 2 sigma)
-        axes3[0].plot(t_arr,  error_bounds[0], linestyle='dashed', label='covariance', color='orange')
-        axes3[1].plot(t_arr,  error_bounds[1], linestyle='dashed', color='orange')
-        axes3[2].plot(t_arr,  error_bounds[2], linestyle='dashed', color='orange')
-
-        axes3[0].plot(t_arr,  -error_bounds[0], linestyle='dashed', color='orange')
-        axes3[1].plot(t_arr,  -error_bounds[1], linestyle='dashed', color='orange')
-        axes3[2].plot(t_arr,  -error_bounds[2], linestyle='dashed', color='orange')
 
         axes3[0].set_ylabel('x error (m)')
         axes3[1].set_ylabel('y error (m)')
         axes3[2].set_ylabel('heading error (rad)')
         axes3[2].set_xlabel('time (s)')
+
+        # ======================================
+
+        # fig4 = plt.figure(4)
+        # ax3d = fig4.add_subplot(111, projection='3d')
         
-        axes3[0].legend()
+        # num_lms = self.pm.num_lms
+        # bar_inds = np.indices((num_lms, num_lms))
+        # dx = np.ones(num_lms)
+        # dy = dx
+
+        # ax3d.bar3d(bar_inds[0], bar_inds[1],1,1,0,)
+
+        # ======================================
 
         plt.draw()
         # plt.waitforbuttonpress(0)

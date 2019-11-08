@@ -24,6 +24,8 @@ class EKF_SLAM():
         self.N = self.pm.num_lms
         self.dim = 3 + 2*self.N
         self.xhat = np.zeros(self.dim)
+        self.xhat[2] = np.pi/2
+        self.xhat[0] = 5
         # self.xhat[3:] = np.ravel(self.pm.lmarks, order='F')
         # self.xhat = np.random.randn(self.dim)
         # np.concatenate(( self.pm.state0, self.pm.lmarks.T.flatten() ), out=self.xhat )
@@ -55,7 +57,7 @@ class EKF_SLAM():
 
         # create history arrays
         self.xhat_hist = np.zeros((3, self.pm.N))
-        self.error_cov_hist = np.zeros((3, self.pm.N))
+        self.error_cov_hist = np.zeros((2*self.N, self.pm.N))
 
         self.write_history(0)
 
@@ -93,16 +95,26 @@ class EKF_SLAM():
         self.xhat += (self.Fx.T @ dyn)
         self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
-    def measurement_correction(self, r, phi):
-        th = self.xhat[2]
-        delta = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
-        for i in range(self.pm.num_lms):
-            q = delta[:,i] @ delta[:,i]
-            r_hat = np.sqrt(q)
-            phi_hat = np.arctan2(delta[1,i], delta[0,i]) - th
+    def measurement_correction(self, r, phi, inds_detected):
+        x, y, th = self.xhat[:3]
+        deltas = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
 
-            self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta[:,i], 0, r_hat*delta[:,i], 
-                                    delta[1,i], -delta[0,i], -q, -delta[1,i], delta[0,i]
+        lmarks_estimates = np.vstack((self.xhat[3::2], self.xhat[4::2]))
+        for k in inds_detected:
+            lmarks_estimates[:,k] = np.array([x,y]).reshape(2,1) + deltas[:,k]
+
+        self.xhat[3::2] = lmarks_estimates[0]
+        self.xhat[4::2] = lmarks_estimates[1]
+        
+        for i in range(self.pm.num_lms):
+            self.xhat[:2] + deltas[:,i]
+            delta = deltas[:,i]
+            q = delta @ delta
+            r_hat = np.sqrt(q)
+            phi_hat = np.arctan2(delta[1], delta[0]) - th
+
+            self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
+                                    delta[1], -delta[0], -q, -delta[1], delta[0]
                                     )).reshape(2,5)
             inds = (np.array([0,1]).reshape(2,1), self.H_inds[i]) 
             Ha = self.Ha[inds]
@@ -111,9 +123,6 @@ class EKF_SLAM():
             zhat = np.array([r_hat, phi_hat])
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
-            #### Figure out how to update self.Pa(Sigma) ####
-            #### Is it just an automatic update? pg. 29 of slides ####
-            
 
             S = multi_dot([Ha, self.Pa, Ha.T]) + self.R
             K = multi_dot([self.Pa, Ha.T, spl.inv(S)])
@@ -123,4 +132,4 @@ class EKF_SLAM():
 
     def write_history(self, i):
         self.xhat_hist[:,i] = self.xhat[:3]
-        self.error_cov_hist[:,i] = self.P.diagonal()
+        self.error_cov_hist[:,i] = self.Pa.diagonal()[3:]
