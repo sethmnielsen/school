@@ -68,10 +68,12 @@ class EKF_SLAM():
         vo = vc/omgc
         c = np.cos(th) - np.cos(th_plus)
         s = np.sin(th) - np.sin(th_plus)
+        vos = vo*s
+        voc = vo*c
 
         ## G matrix ##
-        g02 = -vo * c
-        g12 = -vo * s
+        g02 = -voc
+        g12 = -vos
         self.Ga[:2, 2] = [g02, g12]
 
         # V matrix
@@ -91,32 +93,37 @@ class EKF_SLAM():
         self.Qa[:3,:3] = multi_dot([self.V, self.M, self.V.T])
 
         # Prediction state and covariance
-        dyn = np.array([-vo*s, vo*c, omgc*self.pm.dt])
-        self.xhat += (self.Fx.T @ dyn)
+        dyn = np.array([-vos, voc, omgc*self.pm.dt])
+        self.xhat[:3] += dyn
         self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
     def measurement_correction(self, r, phi, inds_detected):
         x, y, th = self.xhat[:3]
-        deltas = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
+        rel_meas = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
 
         lmarks_estimates = np.vstack((self.xhat[3::2], self.xhat[4::2]))
-        lmarks_undiscovered = lmarks_estimates[~self.discovered]
-        if len(inds_detected[1]) > 0:
-            lmarks_estimates[inds_detected] = self.xhat[:2,None] + deltas[inds_detected]
+        # lmarks_undiscovered = lmarks_estimates[~self.discovered]
+        newly_discovered_inds = np.flatnonzero(~self.discovered & inds_detected)
+        self.discovered[newly_discovered_inds] = True
+        lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
+        # lmarks_new_inds[1] = ~self.discovered[inds_detected[1]]
+        if len(newly_discovered_inds) > 0:
+            lmarks_estimates[lmarks_new_inds] = self.xhat[:2,None] + rel_meas[lmarks_new_inds]
 
         self.xhat[3::2] = lmarks_estimates[0]
         self.xhat[4::2] = lmarks_estimates[1]
+
+        deltas = lmarks_estimates - self.xhat[:2,None]
         
         for i in range(self.pm.num_lms):
-            self.xhat[:2] + deltas[:,i]
             delta = deltas[:,i]
             q = delta @ delta
             r_hat = np.sqrt(q)
             phi_hat = np.arctan2(delta[1], delta[0]) - th
 
             self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
-                                    delta[1], -delta[0], -q, -delta[1], delta[0]
-                                    )).reshape(2,5)
+                                             delta[1], -delta[0], -q, -delta[1], delta[0]
+                                             )).reshape(2,5)
             inds = (np.array([0,1]).reshape(2,1), self.H_inds[i]) 
             Ha = self.Ha[inds]
             

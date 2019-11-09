@@ -102,7 +102,9 @@ class Plotter():
             self.ax1.add_collection(self.lmarks_)
             # self.ax1.add_collection(self.ellipses_)
 
-            self.lmark_estimates_, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
+            # self.lmark_estimates_, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
+            pos_init = np.zeros(self.pm.lmarks.shape[0])
+            self.lmark_estimates_, = self.ax1.plot(pos_init, pos_init, 
                                                'x',
                                                c=xcolor["pale red"],
                                                zorder=3)
@@ -123,6 +125,7 @@ class Plotter():
             self.ax1.set_ylim(-sz, sz)
             f1.canvas.draw()
             plt.show(block=False)
+            plt.pause(0.0001)
 
     def update_kalman_plot(self, state, xhat, error_cov, i):
         self.states[i] = state

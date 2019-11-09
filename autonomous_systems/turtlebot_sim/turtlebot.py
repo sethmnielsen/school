@@ -73,7 +73,7 @@ class Turtlebot():
     def propagate_state(self, state, v, omg, gam):
         n = v.shape[0]
         for k in range(n-1):
-            state[:,k+1] = self.compute_next_state(state[:,k], v[k+1], omg[k+1], gam[k+1])
+            state[:,k+1] = self.compute_next_state(np.array(state[:,k]), v[k+1], omg[k+1], gam[k+1])
 
         return wrap(state, 2)
 
@@ -117,13 +117,14 @@ class Turtlebot():
         phi = wrap(phi_raw)
 
         # Check for landmarks within range of sensor
-        lmarks_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
-        detected = np.nonzero(lmarks_mask)[0]
-        inds_detected = (np.array([[0],[1]]), detected)
+        # lmarks_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
+        # detected = np.flatnonzero(lmarks_mask)
+        # inds_detected = (np.array([[0],[1]]), lmarks_mask)
+        detected_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
 
         r += r_noise
         phi += phi_noise
         
         z = np.vstack((r, phi))
-        return z, inds_detected
+        return z, detected_mask
 

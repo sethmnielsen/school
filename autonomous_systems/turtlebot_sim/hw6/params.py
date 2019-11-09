@@ -1,12 +1,12 @@
 import numpy as np
 
-num_lms = 5
+num_lms = 10
 fov = np.radians(180)
 rho = 5
 
 sz = 12
 
-state0 = np.array([5, 0, np.pi/2])
+state0 = np.array([0, 0, 0])
 alphas = np.array([0.1, 0.01, 0.01, 0.1])
 
 sig_r = 0.1
