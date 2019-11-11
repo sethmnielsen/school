@@ -107,6 +107,7 @@ class EKF_SLAM():
         lmarks_estimates = np.vstack((self.xhat[3::2], self.xhat[4::2]))
         newly_discovered_inds = np.flatnonzero(~self.discovered & detected_mask )
         self.discovered[newly_discovered_inds] = True
+        # lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
         lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
 
         if len(newly_discovered_inds) > 0:
@@ -136,7 +137,8 @@ class EKF_SLAM():
             zhat = np.array([r_hat, phi_hat])
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
-
+            print(zdiff)
+            
             S = multi_dot([Ha, self.Pa_bar, Ha.T]) + self.R
             K = multi_dot([self.Pa_bar, Ha.T, spl.inv(S)])
 
