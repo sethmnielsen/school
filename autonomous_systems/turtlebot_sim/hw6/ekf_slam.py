@@ -34,7 +34,7 @@ class EKF_SLAM():
         self.Fx = np.hstack(( np.eye(3), np.zeros((3,2*self.N)) ))
         cols_order = []
         cols = np.arange(self.dim)
-        for i in range(self.N):
+        for i in range(1,self.N+1):
             cols_select = np.copy(cols)
             k = 2*i-2
             cols_select[3:] = np.roll(cols_select[3:], shift=k)
@@ -46,7 +46,8 @@ class EKF_SLAM():
         self.R = np.diag([self.pm.sig_r**2, self.pm.sig_phi**2])
         self.P = np.eye(3)
         self.Pa = np.zeros((self.dim,self.dim))
-        self.Pa[np.diag_indices_from(self.Pa)] = 1e5
+        pa_init_inds = (np.arange(3,self.dim), np.arange(3,self.dim))
+        self.Pa[pa_init_inds] = 1e5
 
 
         self.Ga = np.eye(self.dim) # Jacobian of g(u_t, x_t-1) wrt state (motion)
@@ -95,28 +96,32 @@ class EKF_SLAM():
         # Prediction state and covariance
         dyn = np.array([-vos, voc, omgc*self.pm.dt])
         self.xhat[:3] += dyn
-        self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
+        self.xhat[2] = wrap(self.xhat[2])
+        self.Pa_bar = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
-    def measurement_correction(self, r, phi, inds_detected):
+    def measurement_correction(self, z_full, detected_mask):
+        r, phi = z_full
         x, y, th = self.xhat[:3]
-        rel_meas = np.array([r*np.cos(phi+th), r*np.sin(phi+th)])
-
+        detected_inds = np.flatnonzero(detected_mask)
+        
         lmarks_estimates = np.vstack((self.xhat[3::2], self.xhat[4::2]))
-        # lmarks_undiscovered = lmarks_estimates[~self.discovered]
-        newly_discovered_inds = np.flatnonzero(~self.discovered & inds_detected)
+        newly_discovered_inds = np.flatnonzero(~self.discovered & detected_mask )
         self.discovered[newly_discovered_inds] = True
         lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
-        # lmarks_new_inds[1] = ~self.discovered[inds_detected[1]]
+
         if len(newly_discovered_inds) > 0:
-            lmarks_estimates[lmarks_new_inds] = self.xhat[:2,None] + rel_meas[lmarks_new_inds]
+            r_init, phi_init = z_full[lmarks_new_inds]
+            rel_meas = np.array([r_init*np.cos(phi_init+th), r_init*np.sin(phi_init+th)])
+            lmarks_estimates[lmarks_new_inds] = self.xhat[:2,None] + rel_meas
 
         self.xhat[3::2] = lmarks_estimates[0]
         self.xhat[4::2] = lmarks_estimates[1]
 
-        deltas = lmarks_estimates - self.xhat[:2,None]
+        # deltas = lmarks_estimates[detected_mask] - self.xhat[:2,None]
         
-        for i in range(self.pm.num_lms):
-            delta = deltas[:,i]
+        for i, m in enumerate( detected_inds ):
+            # delta = deltas[:,i]
+            delta = lmarks_estimates[:,m] - self.xhat[:2]
             q = delta @ delta
             r_hat = np.sqrt(q)
             phi_hat = np.arctan2(delta[1], delta[0]) - th
@@ -124,19 +129,21 @@ class EKF_SLAM():
             self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
                                              delta[1], -delta[0], -q, -delta[1], delta[0]
                                              )).reshape(2,5)
-            inds = (np.array([0,1]).reshape(2,1), self.H_inds[i]) 
+            inds = (np.array([0,1]).reshape(2,1), self.H_inds[m]) 
             Ha = self.Ha[inds]
             
-            z = np.array([r[i], phi[i]])
+            z = np.array([r[m], phi[m]])
             zhat = np.array([r_hat, phi_hat])
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
 
-            S = multi_dot([Ha, self.Pa, Ha.T]) + self.R
-            K = multi_dot([self.Pa, Ha.T, spl.inv(S)])
+            S = multi_dot([Ha, self.Pa_bar, Ha.T]) + self.R
+            K = multi_dot([self.Pa_bar, Ha.T, spl.inv(S)])
 
             self.xhat += K@(zdiff)
-            self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
+            self.xhat[2] = wrap(self.xhat[2])
+            self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa_bar
+        
 
     def write_history(self, i):
         self.xhat_hist[:,i] = self.xhat[:3]

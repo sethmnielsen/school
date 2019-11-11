@@ -12,14 +12,14 @@ class Turtlebot():
         # Current state, state history array
         self.states = np.zeros((3, self.N))
         self.states[:,0] = self.pm.state0
-        build_vel_arrays = True
 
         # velocities
         if vc is not None and omgc is not None:
+            build_vel_arrays = False
             self.vc = vc
             self.omgc = omgc
-            build_vel_arrays = False
         else:
+            build_vel_arrays = True
             self.vc = np.zeros(self.N)
             self.omgc = np.zeros(self.N)
 
@@ -75,7 +75,8 @@ class Turtlebot():
         for k in range(n-1):
             state[:,k+1] = self.compute_next_state(np.array(state[:,k]), v[k+1], omg[k+1], gam[k+1])
 
-        return wrap(state, 2)
+        state = wrap(state,2)
+        return state
 
     def propagate_particles(self, Chi, vhat, omghat, gamhat=0):
         Chi = self.compute_next_particles(Chi, vhat, omghat, gamhat)
@@ -113,17 +114,18 @@ class Turtlebot():
 
         # compute simulated r and phi measurements
         r = np.sqrt(np.add(mdx**2,mdy**2))
-        phi_raw = np.arctan2(mdy, mdx) - th
-        phi = wrap(phi_raw)
+        phi = np.arctan2(mdy, mdx) - th
+        phi = wrap(phi)
 
         # Check for landmarks within range of sensor
         # lmarks_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
         # detected = np.flatnonzero(lmarks_mask)
         # inds_detected = (np.array([[0],[1]]), lmarks_mask)
-        detected_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
 
         r += r_noise
+        detected_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
         phi += phi_noise
+        phi = wrap(phi)
         
         z = np.vstack((r, phi))
         return z, detected_mask

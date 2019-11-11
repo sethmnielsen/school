@@ -25,11 +25,14 @@ N = pm.N
 for i in range(1,N):
     # i is my timestep
     state = tbot.states[:,i]
-    
+    print(state)
     ekfs.prediction_step(tbot.vc[i-1], tbot.omgc[i-1])
-    z, lmarks_detected = tbot.get_measurements(state)
-    ekfs.measurement_correction(z[0], z[1], lmarks_detected)
+    z, detected_mask = tbot.get_measurements(state)
+    if np.any(detected_mask):
+        ekfs.measurement_correction(z, detected_mask)
 
+    # print('\n\nXHAT:\n',ekfs.xhat)
+    
     ekfs.write_history(i)
 
     # update plot animation
