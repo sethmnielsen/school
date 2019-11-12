@@ -215,8 +215,9 @@ class Plotter():
         # widths[detected_lms] = 2*np.sqrt(P_vals_lm[detected_lms*2])
         # heights[detected_lms] = 2*np.sqrt(P_vals_lm[detected_lms*2+1])
         self.ellipses_.set_offsets(offsets)
-        self.ellipses_._widths[:] = w[0]
-        self.ellipses_._heights[:] = w[1]
+        w_2sig = 2*np.sqrt(w)
+        self.ellipses_._widths[:] = w_2sig[0]
+        self.ellipses_._heights[:] = w_2sig[1]
         self.ellipses_._angles[:] = P_angs
 
         # FOV wedge

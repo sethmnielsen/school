@@ -31,7 +31,8 @@ class EKF_SLAM():
         self.a = np.zeros(self.pm.num_lms)
         self.b = np.array(self.a)
         self.c = np.array(self.a)
-        self.v_all = np.ones((2,2,50))  # eigen vectors
+        # self.v_all = np.ones((2,2,50))  # eigen vectors
+        # self.v_maj = np.ones((2,50))  # eigen vectors (only the major ones)
         self.w = np.zeros((2,self.N))   # eigen values
         self.P_angs = np.zeros(self.N)  # angle of covar ellipse (from max eigen vec)
 
@@ -151,16 +152,30 @@ class EKF_SLAM():
             self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
         
     def compute_eigs(self):
-        a = self.Pa.diagonal()[::2][self.discovered]
-        b = self.Pa.diagonal()[1::2][self.discovered]
-        c = self.Pa.ravel()[1::self.Pa.shape[0]+1][::2][self.discovered]
+        # unpack data for discovered landmarks
+        p = self.Pa[3:,3:]
 
+        # unpack values of each landmark 2x2 covariance matrix block
+        a = p.diagonal()[::2][self.discovered]
+        b = p.diagonal()[1::2][self.discovered]
+        c = p.ravel()[1::p.shape[0]+1][::2][self.discovered]
+
+        # quadratic formula to find eigenvalues
         q = np.sqrt( (a-b)*(a-b)/4 + c*c )
         r = (a+b)/2
-        self.w = np.array([r+q, r-q])[self.discovered]
+        w = np.array([r+q, r-q])
 
-        self.v_all[:,1] = (w[self.discovered]-a)/c
-        self.P_angs = np.arctan(v_all[0,1])
+        # setting vx of all eigenvecs as 1, compute vy using eigenvalues (w)
+        vy = (w[0]-a)/c  # only need major eigvec
+        if np.any(vy<-1e-5):
+            print("NEGATIVE!!!!!")
+
+        # compute angle from x-axis to eigvec pointing along major axis
+        # (i.e., eigvec with largest eigval)
+        p_angs = np.arctan(vy)  # arctan(vy/vx), with all vx = 1
+
+        self.w[:,self.discovered] = w
+        self.P_angs[self.discovered] = p_angs
 
     def write_history(self, i):
         self.xhat_hist[:,i] = self.xhat[:3]
