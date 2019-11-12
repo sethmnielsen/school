@@ -1,7 +1,7 @@
 import numpy as np
 
-num_lms = 5
-fov = np.radians(90)
+num_lms = 50
+fov = np.radians(45)
 rho = 8
 
 sz = 12

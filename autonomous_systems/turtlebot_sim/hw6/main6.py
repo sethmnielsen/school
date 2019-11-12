@@ -37,7 +37,7 @@ for i in range(1,N):
 
     # update plot animation
     try:
-        plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.Pa.diagonal()[3:], i)
+        plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.Pa, i)
     except KeyboardInterrupt:
         break
 

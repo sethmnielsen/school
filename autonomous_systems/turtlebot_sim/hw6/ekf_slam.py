@@ -97,7 +97,7 @@ class EKF_SLAM():
         dyn = np.array([-vos, voc, omgc*self.pm.dt])
         self.xhat[:3] += dyn
         self.xhat[2] = wrap(self.xhat[2])
-        self.Pa_bar = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
+        self.Pa = multi_dot([self.Ga, self.Pa, self.Ga.T]) + self.Qa
 
     def measurement_correction(self, z_full, detected_mask):
         r, phi = z_full
@@ -137,14 +137,13 @@ class EKF_SLAM():
             zhat = np.array([r_hat, phi_hat])
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])
-            print(zdiff)
             
-            S = multi_dot([Ha, self.Pa_bar, Ha.T]) + self.R
-            K = multi_dot([self.Pa_bar, Ha.T, spl.inv(S)])
+            S = multi_dot([Ha, self.Pa, Ha.T]) + self.R
+            K = multi_dot([self.Pa, Ha.T, spl.inv(S)])
 
             self.xhat += K@(zdiff)
             self.xhat[2] = wrap(self.xhat[2])
-            self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa_bar
+            self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
         
 
     def write_history(self, i):

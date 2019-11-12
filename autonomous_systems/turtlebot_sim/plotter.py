@@ -2,6 +2,8 @@
 
 import sys
 import numpy as np
+import scipy.linalg as spl
+
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
@@ -36,6 +38,14 @@ class Plotter():
         x0, y0, th0 = self.pm.state0
         self.states[:,0] = self.pm.state0
         self.xhats[:,0] = self.pm.state0
+
+        # Covariance ellipses
+        self.a = np.zeros(self.pm.num_lms)
+        self.b = np.array(self.a)
+        self.c = np.array(self.a)
+        self.v_all = np.ones((2,2,50))  # eigen vectors
+        self.Pmats = np.
+
 
         # Robot physical constants    
         bot_radius = 0.5
@@ -76,9 +86,6 @@ class Plotter():
                                             color=xcolor['pale green'],
                                             ec=xcolor['dark pastel green'] )
 
-                ##### ****COVARIANCE ELLIPSES**** #####
-                # widths = np.ones(self.pm.num_lms)
-                # angles = np.zeros(self.pm.num_lms)
                 # covar_patch = ptc.Ellipse( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
                 #                             width=1, 
                 #                             height=1,
@@ -90,25 +97,32 @@ class Plotter():
                 lmarks_patches.append(lmark_patch)
                 # covar_patches.append(covar_patch)
 
-            self.lmarks_ = PatchCollection(lmarks_patches, match_original=True)
+            self.lmarks_ = PatchCollection(lmarks_patches, match_original=True, zorder=2)
 
-            # elp_offsets = np.column_stack((self.pm.lmarks[0], self.pm.lmarks[1]))
-            # self.ellipses_ = EllipseCollection(widths, widths, angles, 
-            #                                    facecolors=xcolor['light lavender'],
-            #                                    alpha=0.4,
-            #                                    offsets=elp_offsets,
-            #                                    transOffset=self.ax1.transData)
-
-            self.ax1.add_collection(self.lmarks_)
-            # self.ax1.add_collection(self.ellipses_)
-
-            # self.lmark_estimates_, = self.ax1.plot(self.pm.lmarks[0], self.pm.lmarks[1], 
+            ##### ****LANDMARK ESTIMATES**** #####
             pos_init = np.zeros(self.pm.lmarks.shape[0])
             self.lmark_estimates_, = self.ax1.plot(pos_init, pos_init, 
                                                'x',
                                                c=xcolor["pale red"],
                                                zorder=3)
             
+            ##### ****COVARIANCE ELLIPSES**** #####
+            widths = np.zeros(self.pm.num_lms)
+            angles = np.zeros(self.pm.num_lms)
+            elp_offsets = np.column_stack((self.pm.lmarks[0], self.pm.lmarks[1]))
+            self.ellipses_ = EllipseCollection(widths, widths, angles, 
+                                               facecolors=xcolor['light lavender'],
+                                               edgecolors=xcolor['lilac'],
+                                               alpha=0.6,
+                                               units='xy',
+                                               offsets=elp_offsets,
+                                               transOffset=self.ax1.transData,
+                                               zorder=1)
+            
+
+            self.ax1.add_collection(self.ellipses_)
+            self.ax1.add_collection(self.lmarks_)
+
             ##### ****FOV WEDGE**** #####
             th1 = np.degrees(wrap(th0 - self.pm.fov/2))
             th2 = np.degrees(wrap(th0 + self.pm.fov/2))
@@ -126,6 +140,8 @@ class Plotter():
             f1.canvas.draw()
             plt.show(block=False)
             plt.pause(0.0001)
+
+
 
     def update_kalman_plot(self, state, xhat, error_cov, i):
         self.states[i] = state
@@ -165,14 +181,16 @@ class Plotter():
         # time.sleep(0.1)
         plt.pause(0.005)
 
-    def update_ekfs_plot(self, state, xhat, error_cov, i):
+    def update_ekfs_plot(self, state, xhat, covar_mat, i):
         self.states[:,i] = state
         self.xhats[:,i] = xhat[:3]
-        if self.covariance.shape[0] != error_cov.shape[0]:
-            self.covariance = np.zeros((error_cov.shape[0], self.pm.N))
-            self.covariance[:,0] = error_cov 
+        covar_vals = covar_mat.diagonal()
+        covar_vals_lm = covar_vals[3:]
+        if self.covariance.shape[0] != covar_vals.shape[0]:
+            self.covariance = np.zeros((covar_vals.shape[0], self.pm.N))
+            self.covariance[:,0] = covar_vals 
         else:
-            self.covariance[:,i] = error_cov
+            self.covariance[:,i] = covar_vals
         est_lmarks = np.vstack((xhat[3::2], xhat[4::2]))
 
         x, y, th = state
@@ -193,12 +211,20 @@ class Plotter():
         self.est_trail.set_data(*self.xhats[:2,:j])
         
         # landmark estimates
-        detected_lms = np.nonzero( (abs(est_lmarks[0])>1e-10) 
-                                    & (abs(est_lmarks[1])>1e-10) )[0]
-        self.lmark_estimates_.set_data(*est_lmarks[:,detected_lms])
+        detected_lms = np.flatnonzero( (abs(est_lmarks[0])>1e-10) 
+                                    & (abs(est_lmarks[1])>1e-10) )
+        lmarks_plot = est_lmarks[:,detected_lms]
+        self.lmark_estimates_.set_data(*lmarks_plot)
 
         # covariance ellipses
-        #self.ellipses_.set_data()
+        offsets = np.array(est_lmarks.T)
+        widths = np.zeros(self.pm.num_lms)
+        heights = np.zeros(self.pm.num_lms)
+        widths[detected_lms] = 2*np.sqrt(covar_vals_lm[detected_lms*2])
+        heights[detected_lms] = 2*np.sqrt(covar_vals_lm[detected_lms*2+1])
+        self.ellipses_.set_offsets(offsets)
+        self.ellipses_._widths[:] = widths
+        self.ellipses_._heights[:] = heights
 
         # FOV wedge
         th1 = np.degrees(wrap(th - self.pm.fov/2))
