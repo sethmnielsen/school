@@ -39,14 +39,6 @@ class Plotter():
         self.states[:,0] = self.pm.state0
         self.xhats[:,0] = self.pm.state0
 
-        # Covariance ellipses
-        self.a = np.zeros(self.pm.num_lms)
-        self.b = np.array(self.a)
-        self.c = np.array(self.a)
-        self.v_all = np.ones((2,2,50))  # eigen vectors
-        self.Pmats = np.
-
-
         # Robot physical constants    
         bot_radius = 0.5
         bot_alpha = 0.7
@@ -181,16 +173,16 @@ class Plotter():
         # time.sleep(0.1)
         plt.pause(0.005)
 
-    def update_ekfs_plot(self, state, xhat, covar_mat, i):
+    def update_ekfs_plot(self, state, xhat, P_mat, P_angs, w, i):
         self.states[:,i] = state
         self.xhats[:,i] = xhat[:3]
-        covar_vals = covar_mat.diagonal()
-        covar_vals_lm = covar_vals[3:]
-        if self.covariance.shape[0] != covar_vals.shape[0]:
-            self.covariance = np.zeros((covar_vals.shape[0], self.pm.N))
-            self.covariance[:,0] = covar_vals 
+        P_vals = P_mat.diagonal()
+        P_vals_lm = P_vals[3:]
+        if self.covariance.shape[0] != P_vals.shape[0]:
+            self.covariance = np.zeros((P_vals.shape[0], self.pm.N))
+            self.covariance[:,0] = P_vals 
         else:
-            self.covariance[:,i] = covar_vals
+            self.covariance[:,i] = P_vals
         est_lmarks = np.vstack((xhat[3::2], xhat[4::2]))
 
         x, y, th = state
@@ -218,13 +210,14 @@ class Plotter():
 
         # covariance ellipses
         offsets = np.array(est_lmarks.T)
-        widths = np.zeros(self.pm.num_lms)
-        heights = np.zeros(self.pm.num_lms)
-        widths[detected_lms] = 2*np.sqrt(covar_vals_lm[detected_lms*2])
-        heights[detected_lms] = 2*np.sqrt(covar_vals_lm[detected_lms*2+1])
+        # widths = np.zeros(self.pm.num_lms)
+        # heights = np.zeros(self.pm.num_lms)
+        # widths[detected_lms] = 2*np.sqrt(P_vals_lm[detected_lms*2])
+        # heights[detected_lms] = 2*np.sqrt(P_vals_lm[detected_lms*2+1])
         self.ellipses_.set_offsets(offsets)
-        self.ellipses_._widths[:] = widths
-        self.ellipses_._heights[:] = heights
+        self.ellipses_._widths[:] = w[0]
+        self.ellipses_._heights[:] = w[1]
+        self.ellipses_._angles[:] = P_angs
 
         # FOV wedge
         th1 = np.degrees(wrap(th - self.pm.fov/2))

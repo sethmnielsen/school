@@ -31,13 +31,12 @@ for i in range(1,N):
     if np.any(detected_mask):
         ekfs.measurement_correction(z, detected_mask)
 
-    # print('\n\nXHAT:\n',ekfs.xhat)
-    
+    ekfs.compute_eigs()
     ekfs.write_history(i)
 
     # update plot animation
     try:
-        plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.Pa, i)
+        plotter.update_ekfs_plot(state, ekfs.xhat, ekfs.Pa, ekfs.P_angs, ekfs.w, i)
     except KeyboardInterrupt:
         break
 

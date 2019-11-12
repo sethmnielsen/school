@@ -26,9 +26,14 @@ class EKF_SLAM():
         self.xhat = np.zeros(self.dim)
         self.xhat[:3] = np.array(self.pm.state0)
         self.discovered = np.full(self.N, False)
-        # self.xhat[3:] = np.ravel(self.pm.lmarks, order='F')
-        # self.xhat = np.random.randn(self.dim)
-        # np.concatenate(( self.pm.state0, self.pm.lmarks.T.flatten() ), out=self.xhat )
+
+        # Eigenv's for covariance ellipses
+        self.a = np.zeros(self.pm.num_lms)
+        self.b = np.array(self.a)
+        self.c = np.array(self.a)
+        self.v_all = np.ones((2,2,50))  # eigen vectors
+        self.w = np.zeros((2,self.N))   # eigen values
+        self.P_angs = np.zeros(self.N)  # angle of covar ellipse (from max eigen vec)
 
 
         self.Fx = np.hstack(( np.eye(3), np.zeros((3,2*self.N)) ))
@@ -145,6 +150,17 @@ class EKF_SLAM():
             self.xhat[2] = wrap(self.xhat[2])
             self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
         
+    def compute_eigs(self):
+        a = self.Pa.diagonal()[::2][self.discovered]
+        b = self.Pa.diagonal()[1::2][self.discovered]
+        c = self.Pa.ravel()[1::self.Pa.shape[0]+1][::2][self.discovered]
+
+        q = np.sqrt( (a-b)*(a-b)/4 + c*c )
+        r = (a+b)/2
+        self.w = np.array([r+q, r-q])[self.discovered]
+
+        self.v_all[:,1] = (w[self.discovered]-a)/c
+        self.P_angs = np.arctan(v_all[0,1])
 
     def write_history(self, i):
         self.xhat_hist[:,i] = self.xhat[:3]
