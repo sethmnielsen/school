@@ -14,10 +14,22 @@
             "justMyCode": true
         },
         {
-            "name": "Python: HW",
+            "name": "HW",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/hw6/main6.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "HW GPU",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/hw6/main6.py",
+            "args": [
+                "--gpu"
+            ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true

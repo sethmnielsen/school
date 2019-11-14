@@ -1,8 +1,15 @@
 #!usr/env python3
 
 import sys
+import shared
+if shared.USE_CUPY:
+    import cupy as xp
+else:
+    import numpy as xp
+
 import numpy as np
-import scipy.linalg as spl
+import chainer as ch
+from chainer.backend import copyto as cpn
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -30,39 +37,42 @@ class Plotter():
         N = self.pm.N
         self.states = np.zeros((3, N))
         self.xhats = np.zeros((3, N))
-        self.est_errors = np.zeros((3, N))
         self.covariance = np.zeros((3, N))
-        self.Chi = np.zeros((3,N))
-        self.ksi = np.zeros((3, N))
 
-        x0, y0, th0 = self.pm.state0
-        self.states[:,0] = self.pm.state0
-        self.xhats[:,0] = self.pm.state0
+        self.est_errors = xp.zeros((3, N))
+        self.covar_ekfs = xp.zeros((2*self.pm.num_lms, N))
+        self.Chi = xp.zeros((3,N))
+        self.ksi = xp.zeros((3,N))
+
+        x0, y0, th0 = self.pm.state0.tolist()
+        self.states[:,0] = self.pm.state0.tolist()
+        self.xhats[:,0] = self.pm.state0.tolist()
 
         # Robot physical constants    
         bot_radius = 0.5
         bot_alpha = 0.7
-        self.bot_head_indicator = np.array([bot_radius, 0])
+        self.bot_head_indicator = xp.array([bot_radius, 0])
+        self.head = np.zeros((2,2))
 
         if self.animate:
             f1: plt.Figure = plt.figure(num=1, figsize=(4,4), dpi=150)
-            self.ax1 = f1.add_subplot(1,1,1)  # type: Axes
+            self.ax1 = f1.add_subplot(1,1,1, rasterized=False)  # type: Axes
             self.ax1.xaxis.set_major_locator(MultipleLocator(2))
             self.ax1.yaxis.set_major_locator(MultipleLocator(2))
 
             ##### ****TURTLEBOT**** #####
-            self.trail, = self.ax1.plot(*self.pm.state0[:2], linewidth=2)  # trail
-            self.est_trail, = self.ax1.plot(*self.pm.state0[:2],linewidth=2,color=(1,0.65,0))
+            self.trail, = self.ax1.plot(*self.pm.state0.tolist()[:2], linewidth=2)  # trail
+            self.est_trail, = self.ax1.plot(*self.pm.state0.tolist()[:2],linewidth=2,color=(1,0.65,0))
 
-            cur_head = self.Rb_i(th0) @ self.bot_head_indicator                    
-            head_x = np.array([0,cur_head[0]]) + x0    
-            head_y = np.array([0,cur_head[1]]) + y0
+            cur_head = (self.Rb_i(th0) @ self.bot_head_indicator).tolist()
+            cpn( self.head[0], xp.array([0,cur_head[0]]) + x0 )
+            cpn( self.head[1], xp.array([0,cur_head[1]]) + y0 )
             self.bot_body = ptc.CirclePolygon( (x0, y0), 
                                             radius=bot_radius, 
                                             resolution=20, 
                                             alpha=bot_alpha, 
                                             color='b' )
-            self.heading, = self.ax1.plot(head_x, head_y, 'r') # current heading
+            self.heading, = self.ax1.plot(self.head[0], self.head[1], 'r') # current heading
             self.ax1.add_patch(self.bot_body)
             
 
@@ -78,16 +88,7 @@ class Plotter():
                                             color=xcolor['pale green'],
                                             ec=xcolor['dark pastel green'] )
 
-                # covar_patch = ptc.Ellipse( (self.pm.lmarks[0,i], self.pm.lmarks[1,i]),
-                #                             width=1, 
-                #                             height=1,
-                #                             angle=0, 
-                #                             alpha=0.4,
-                #                             zorder=1, 
-                #                             color=xcolor['light lavender'] )
-                
                 lmarks_patches.append(lmark_patch)
-                # covar_patches.append(covar_patch)
 
             self.lmarks_ = PatchCollection(lmarks_patches, match_original=True, zorder=2)
 
@@ -99,15 +100,15 @@ class Plotter():
                                                zorder=3)
             
             ##### ****COVARIANCE ELLIPSES**** #####
-            widths = np.zeros(self.pm.num_lms)
+            self.w_2sig = np.zeros(self.pm.lmarks.shape)
             angles = np.zeros(self.pm.num_lms)
-            elp_offsets = np.column_stack((self.pm.lmarks[0], self.pm.lmarks[1]))
-            self.ellipses_ = EllipseCollection(widths, widths, angles, 
+            self.elp_offsets = np.zeros(self.pm.lmarks.T.shape)
+            self.ellipses_ = EllipseCollection(self.w_2sig[0], self.w_2sig[0], angles, 
                                                facecolors=xcolor['light lavender'],
                                                edgecolors=xcolor['lilac'],
                                                alpha=0.6,
                                                units='xy',
-                                               offsets=elp_offsets,
+                                               offsets=self.elp_offsets,
                                                transOffset=self.ax1.transData,
                                                zorder=1)
             
@@ -116,19 +117,20 @@ class Plotter():
             self.ax1.add_collection(self.lmarks_)
 
             ##### ****FOV WEDGE**** #####
-            th1 = np.degrees(wrap(th0 - self.pm.fov/2))
-            th2 = np.degrees(wrap(th0 + self.pm.fov/2))
-            self.fov = ptc.Wedge( (x0, y0), self.pm.rho, th1, th2, alpha=0.3)
+            if self.pm.rho < self.pm.sz:
+                th1 = xp.degrees(wrap(th0 - self.pm.fov/2)).item()
+                th2 = xp.degrees(wrap(th0 + self.pm.fov/2)).item()
+                self.fov = ptc.Wedge( (x0, y0), self.pm.rho, th1, th2, alpha=0.3)
 
-            self.ax1.add_patch(self.fov)
+                self.ax1.add_patch(self.fov)
 
             ##### PARTICLES #####
             if particles:
                 self.particles, = self.ax1.plot(self.Chi[0], self.Chi[1], '*', color='m')  # type: Line2D
                 
             sz = self.pm.sz
-            self.ax1.set_xlim(-sz, sz)
-            self.ax1.set_ylim(-sz, sz)
+            self.ax1.set_xlim([-sz, sz])
+            self.ax1.set_ylim(-sz+self.pm.center, sz+self.pm.center)
             f1.canvas.draw()
             plt.show(block=False)
             plt.pause(0.0001)
@@ -150,8 +152,8 @@ class Plotter():
 
         # heading indicator
         cur_head = self.Rb_i(th) @ self.bot_head_indicator
-        head_x = np.array([0,cur_head[0]]) + x
-        head_y = np.array([0,cur_head[1]]) + y
+        head_x = xp.array([0,cur_head[0]]) + x
+        head_y = xp.array([0,cur_head[1]]) + y
         self.heading.set_xdata(head_x)
         self.heading.set_ydata(head_y)
 
@@ -174,61 +176,50 @@ class Plotter():
         plt.pause(0.005)
 
     def update_ekfs_plot(self, state, xhat, P_mat, P_angs, w, i):
-        self.states[:,i] = state
-        self.xhats[:,i] = xhat[:3]
-        P_vals = P_mat.diagonal()
-        P_vals_lm = P_vals[3:]
-        if self.covariance.shape[0] != P_vals.shape[0]:
-            self.covariance = np.zeros((P_vals.shape[0], self.pm.N))
-            self.covariance[:,0] = P_vals 
-        else:
-            self.covariance[:,i] = P_vals
-        est_lmarks = np.vstack((xhat[3::2], xhat[4::2]))
-
-        x, y, th = state
+        # Save values to history arrays
+        cpn(self.xhats[:,i], xhat[:3])
+        cpn(self.states[:,i], state)
+        self.covar_ekfs[:,i] = P_mat.diagonal()[3:]
+                
+        # Updating the plot
+        x, y, th = state.tolist()
         Rb_i = self.Rb_i(th)
-        cur_head_xy = Rb_i @ self.bot_head_indicator
-        
-        head_x = np.array([0,cur_head_xy[0]]) + x
-        head_y = np.array([0,cur_head_xy[1]]) + y
+        cur_head_xy = (Rb_i @ self.bot_head_indicator).tolist()
+        cpn( self.head[0], np.array([0,cur_head_xy[0]]) + x )
+        cpn( self.head[1], np.array([0,cur_head_xy[1]]) + y )
 
-        # turtlebot patch and heading
-        self.bot_body.xy = (x, y)
-        self.heading.set_xdata(head_x)
-        self.heading.set_ydata(head_y)
-
-        # trails
-        j = i+1
-        self.trail.set_data(*self.states[:2,:j])
-        self.est_trail.set_data(*self.xhats[:2,:j])
-        
         # landmark estimates
-        detected_lms = np.flatnonzero( (abs(est_lmarks[0])>1e-10) 
+        est_lmarks = xp.vstack((xhat[3::2], xhat[4::2]))
+        detected_lms = xp.flatnonzero( (abs(est_lmarks[0])>1e-10) 
                                     & (abs(est_lmarks[1])>1e-10) )
-        lmarks_plot = est_lmarks[:,detected_lms]
-        self.lmark_estimates_.set_data(*lmarks_plot)
+        lmarks_plot = np.zeros((2, len(detected_lms) ))
+        cpn( lmarks_plot, est_lmarks[:,detected_lms])
 
         # covariance ellipses
-        offsets = np.array(est_lmarks.T)
-        # widths = np.zeros(self.pm.num_lms)
-        # heights = np.zeros(self.pm.num_lms)
-        # widths[detected_lms] = 2*np.sqrt(P_vals_lm[detected_lms*2])
-        # heights[detected_lms] = 2*np.sqrt(P_vals_lm[detected_lms*2+1])
-        self.ellipses_.set_offsets(offsets)
-        w_2sig = 2*np.sqrt(w)
-        self.ellipses_._widths[:] = w_2sig[0]
-        self.ellipses_._heights[:] = w_2sig[1]
-        self.ellipses_._angles[:] = P_angs
+        cpn( self.elp_offsets, est_lmarks.T )
+        cpn( self.ellipses_._angles[:], P_angs )
+        cpn( self.w_2sig, 2*xp.sqrt(w) )
 
         # FOV wedge
-        th1 = np.degrees(wrap(th - self.pm.fov/2))
-        th2 = np.degrees(wrap(th + self.pm.fov/2))
-        self.fov.set_center((x, y))
-        self.fov.set_theta1(th1)
-        self.fov.set_theta2(th2)
+        if self.pm.rho < self.pm.sz:
+            th1 = xp.degrees(wrap(th - self.pm.fov/2)).item()
+            th2 = xp.degrees(wrap(th + self.pm.fov/2)).item()
+            self.fov.set_center((x, y))
+            self.fov.set_theta1(th1)
+            self.fov.set_theta2(th2)
+
+
+        self.bot_body.xy = (x, y)
+        self.heading.set_data(*self.head)
+        self.trail.set_data(*self.states[:2,:i+1])
+        self.est_trail.set_data(*self.xhats[:2,:i+1])
+        self.lmark_estimates_.set_data(*lmarks_plot)
+        self.ellipses_.set_offsets(self.elp_offsets)
+        self.ellipses_._widths[:] = self.w_2sig[0]
+        self.ellipses_._heights[:] = self.w_2sig[1]
 
         self.ax1.redraw_in_frame()
-        plt.pause(0.0001)
+        plt.pause(0.00001)
         
     def update_mcl_plot(self, state, xhat, Chi, covar, i):
         self.states[:, i] = state
@@ -244,8 +235,8 @@ class Plotter():
 
             cur_head = self.Rb_i(th) @ self.bot_head_indicator
 
-            head_x = np.array([0,cur_head[0]]) + x
-            head_y = np.array([0,cur_head[1]]) + y
+            head_x = xp.array([0,cur_head[0]]) + x
+            head_y = xp.array([0,cur_head[1]]) + y
 
             # turtlebot patch and heading
             self.bot_body.xy = (x, y)
@@ -287,8 +278,8 @@ class Plotter():
             # turtlebot patch and heading
             cur_head = self.Rb_i(th) @ self.bot_head_indicator
 
-            head_x = np.array([0,cur_head[0]]) + x
-            head_y = np.array([0,cur_head[1]]) + y
+            head_x = xp.array([0,cur_head[0]]) + x
+            head_y = xp.array([0,cur_head[1]]) + y
 
             self.bot_body.xy = (x, y)
             self.heading[0].set_xdata(head_x)
@@ -311,7 +302,7 @@ class Plotter():
         xhats = self.xhats[:, a:b]
         est_errors = self.est_errors[:, a:b]
         covar = self.covariance[:, a:b]
-        error_bounds = 2*np.sqrt(covar)
+        error_bounds = 2*xp.sqrt(covar)
 
         f2, axes2 = plt.subplots(3, 1, sharex=True, num=2)
         f2.suptitle('Three Landmarks MCL Localization - Estimation')
@@ -367,8 +358,8 @@ class Plotter():
         covar = self.covariance
 
         covar[covar<0] = 0
-        covar_2d = np.vstack((covar[::2], covar[1::2]))
-        error_bounds = 2*np.sqrt(covar)
+        covar_2d = xp.vstack((covar[::2], covar[1::2]))
+        error_bounds = 2*xp.sqrt(covar)
         
         est_errors = xhats - states
         est_errors[2] = wrap(est_errors[2])
@@ -411,8 +402,8 @@ class Plotter():
         # ax3d = fig4.add_subplot(111, projection='3d')
         
         # num_lms = self.pm.num_lms
-        # bar_inds = np.indices((num_lms, num_lms))
-        # dx = np.ones(num_lms)
+        # bar_inds = xp.indices((num_lms, num_lms))
+        # dx = xp.ones(num_lms)
         # dy = dx
 
         # ax3d.bar3d(bar_inds[0], bar_inds[1],1,1,0,)
@@ -430,12 +421,12 @@ class Plotter():
         states = self.states
         xhats = self.xhats
         covar[covar<0] = 0
-        error_bounds = 2*np.sqrt(covar)
+        error_bounds = 2*xp.sqrt(covar)
         
         est_errors_nowrap = xhats - states
         est_errors = wrap(est_errors_nowrap, 2)
 
-        # fat_errors = abs(est_errors_nowrap[2])>=np.pi
+        # fat_errors = abs(est_errors_nowrap[2])>=xp.pi
         # xhats[2][fat_errors] -= est_errors[2][fat_errors]
         # xhats[2][fat_errors] *= -1
 
@@ -502,10 +493,11 @@ class Plotter():
 
 
     def Rb_i(self, psi):
-        c_psi = np.cos(psi)
-        s_psi = np.sin(psi)
+        ch.backend.get_array_module()
+        c_psi = xp.cos(psi).item()
+        s_psi = xp.sin(psi).item()
 
-        R_yaw = np.array([[c_psi, s_psi],
+        R_yaw = xp.array([[c_psi, s_psi],
                         [-s_psi, c_psi]])
 
         return R_yaw.T  # transpose to return body to inertial

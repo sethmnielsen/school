@@ -1,16 +1,21 @@
-import numpy as np
+import shared
+
+if shared.USE_CUPY:
+    import cupy as xp
+else:
+    import numpy as xp
 
 def wrap(input_angle, dim=None):
-    if isinstance(input_angle, np.ndarray):
+    if isinstance(input_angle, xp.ndarray):
         if input_angle.size == 0:
             return input_angle
         else:
-            angle = np.array(input_angle)
+            angle = xp.array(input_angle)
     else:
         angle = input_angle
     
     if dim:
-        angle[dim] -= 2*np.pi * np.floor((angle[dim] + np.pi) / (2*np.pi))
+        angle[dim] -= 2*xp.pi * xp.floor((angle[dim] + xp.pi) / (2*xp.pi))
     else:
-        angle -= 2*np.pi * np.floor((angle + np.pi) / (2*np.pi))
+        angle -= 2*xp.pi * xp.floor((angle + xp.pi) / (2*xp.pi))
     return angle

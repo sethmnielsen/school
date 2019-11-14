@@ -1,32 +1,35 @@
+import shared
+if shared.USE_CUPY:
+    import cupy as xp
+else:
+    import numpy as xp
+
 import numpy as np
 
-num_lms = 50
-fov = np.radians(45)
-rho = 8
 
+## NUMPY OR CUPY SPECIFIC ARRAYS
+num_lms = 100
 sz = 12
+center = 5
+state0 = xp.array([0, 0, 0])
+alphas = xp.array([0.1, 0.01, 0.01, 0.1])
 
-state0 = np.array([0, 0, 0])
-alphas = np.array([0.1, 0.01, 0.01, 0.1])
+m = sz*0.8
+lmarks = xp.random.rand(2,num_lms) * 2*m - m
+lmarks[1] += center
+
+N = 300
+vc = xp.ones(N) * 2
+omgc = xp.ones(N) * xp.pi/10
+
+
+## OTHER VARIABLES
+
+fov = np.radians(45)
+rho = 8 
 
 sig_r = 0.1
 sig_phi = 0.05
 
-radius = 5
-circumference_points = 10
-num_circles = 10
 dt = 0.1
-
-# (x – h)2 + (y – k)2 = r2, center point (h, k) and radius r
-# interval = np.pi/(circumference_points/2)
-# angles = np.arange(0, 2*np.pi, interval)
-# pos = np.array([radius*np.cos(angles), radius*np.sin(angles)])
-# x_truth = np.array([*pos, angles])
-t_arr = np.arange(0, circumference_points*num_circles, dt)
-N = len(t_arr)
-m = sz*0.8
-lmarks = np.random.rand(2,num_lms) * 2*m - m
-
-
-vc = np.ones(N) * 2
-omgc = np.ones(N) * np.pi/8
+t_arr = np.arange(0, N//dt, dt)
