@@ -172,7 +172,6 @@ class Plotter():
         self.ax1.autoscale_view(True,True,True) 
 
         self.ax1.redraw_in_frame()
-        # time.sleep(0.1)
         plt.pause(0.005)
 
     def update_ekfs_plot(self, state, xhat, P_mat, P_angs, w, i):
