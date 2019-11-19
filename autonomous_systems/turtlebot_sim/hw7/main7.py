@@ -11,7 +11,7 @@ if __name__ == '__main__':
     else:
         shared.USE_CUPY = False
         import numpy as xp
-        xp.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=160)
+        xp.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=120)
 
     from fast_slam import Fast_SLAM
     import params as pm

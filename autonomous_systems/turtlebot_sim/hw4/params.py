@@ -23,8 +23,6 @@ alphas = np.array([0.1, 0.01, 0.01, 0.1, 0.01, 0.01])
 lmarks = np.array([[6, 4],
                    [-7, 8],
                    [6, -4]]).T
-# lmarks = np.array([[6],
-                #    [4]])
 num_lms = lmarks.shape[1]
 
 # UKF
