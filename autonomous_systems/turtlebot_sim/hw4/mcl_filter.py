@@ -41,8 +41,6 @@ class MCL():
         self.w = self.w / np.sum(self.w)
         self.Chi, inds = self.low_variance_sampler()
 
-        # self.P = np.cov(self.Chi)
-
         self.xhat = np.mean(self.Chi, axis=1) 
 
         est_errors = self.Chi - self.xhat[:,None]

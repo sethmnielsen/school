@@ -124,10 +124,6 @@ class Turtlebot():
         phi = wrap(phi)
 
         # Check for landmarks within range of sensor
-        # lmarks_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
-        # detected = xp.flatnonzero(lmarks_mask)
-        # inds_detected = (xp.array([[0],[1]]), lmarks_mask)
-
         r += r_noise
         detected_mask = (abs(phi) <= self.pm.fov/2) & (r <= self.pm.rho)
         phi += phi_noise

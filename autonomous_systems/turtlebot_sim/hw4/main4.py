@@ -1,5 +1,4 @@
 #!/usr/env python3
-
 import sys
 sys.path.append('..')
 import numpy as np
@@ -11,7 +10,7 @@ from turtlebot import Turtlebot
 from utils import wrap
 import params as pm
 
-np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=160)
+np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=120)
 
 tbot = Turtlebot()
 mcl = MCL(tbot)

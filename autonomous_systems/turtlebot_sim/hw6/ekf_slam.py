@@ -1,14 +1,13 @@
 #! usr/env/python
 '''
-For this assignment, you are to modify your EKF localization algorithm and simulation to become an EKF SLAM algorithm and simulation.
+For this assignment, you are to implement the Fast SLAM algorithm (Table 13.1) on the same landmark world that you used for the EKF SLAM assignment. 
 
-1) For starters, assume that your sensor is omnidirectional with unlimited range. This means that your sensor can see all landmarks all the time. Show that your EKF SLAM algorithm works by plotting the state estimates (robot pose and landmark locations) against the true states and showing they track/converge. You will likely want to use a few landmarks (<10) to get your algorithm working and debugged. Once it is working, you can increase the number of landmarks. Show that increasing the number of landmarks improves the state estimation accuracy.
+1) For starters, assume that your sensor is omnidirectional with unlimited range. This means that your sensor can see all landmarks from any place in the environment. Keep in mind that the FastSLAM algorithm that we implement assumes that only a single feature is measured at each point in time. Show that your Fast SLAM algorithm works by plotting the state estimates (robot pose and landmark locations) against the true states and showing they track/converge. You will likely want to use a few landmarks (<10) to get your algorithm working and debugged. Once it is working, you can increase the number of landmarks. Show that increasing the number of landmarks improves the state estimation accuracy.
 
-2) Plot the final covariance matrix values to illustrate the correlation between landmark states.
+2) Narrow the field of view of your sensor to 180 deg, 90 deg, and 45 deg. How does this affect the localization and mapping results? Create an animation of landmark true locations, estimated locations, and estimation covariance (ellipses, 2-sigma) versus time for your simulation.
 
-3) Narrow the field of view of your sensor to 180 deg, 90 deg, and 45 deg. How does this affect the localization and mapping results? Create an animation of landmark true locations, estimated locations, and estimation covariance (ellipses, 2-sigma) versus time for your simulation.
+3) Compare the performance of your Fast SLAM algorithm to that of your EKF SLAM algorithm. How do they compare as you increase the level of your linear and angular input velocity uncertainties are increased?
 
-4) Create a loop-closing scenario with a narrow FOV sensor on your robot. Show how closing the loop (seeing landmarks for second time), results in a drop in landmark location uncertainty for recently viewed landmarks.
 '''
 import shared
 
