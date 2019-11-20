@@ -2,6 +2,7 @@
 import sys
 sys.path.append('..')
 import numpy as np
+np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=120)
 from scipy.io import loadmat
 
 from mcl_filter import MCL
@@ -10,40 +11,26 @@ from turtlebot import Turtlebot
 from utils import wrap
 import params as pm
 
-np.set_printoptions(precision=3, suppress=False, sign=' ', linewidth=120)
 
-tbot = Turtlebot()
-mcl = MCL(tbot)
+# ------------------------ INITIALIZATION ----------------------------#
 
 animate = True
-
 plotter = Plotter(animate)
 
-# Parse cmd line args
-args = sys.argv[1:]
-if len(args) == 0: # Compute truth ourselves
-    tbot.build_vel_and_state()
-elif len(args) == 1 and args[0] in [1, 4, 5]:
-    # Load mat_file data
-    mat_file = f'ukf_data_{args[0]}.mat'
-    data = loadmat(mat_file)
-    omg = data['om'].flatten()
-    t = data['t'].flatten()
-    th = data['th'].flatten()
-    v = data['v'].flatten()
-    x = data['x'].flatten()
-    y = data['y'].flatten()
-    del data
-    # tbot.pass_matlab_data()
-
+tbot = Turtlebot()
+tbot.build_vel_and_state()
+mcl = MCL(tbot)
 
 N = tbot.N
-for i in range(N):
-    state = tbot.states[:,i]
 
+
+# ------------------------ BEGIN MAIN LOOP ----------------------------#
+for i in range(N):
     # update plot animation
+    state = tbot.states[:,i]
     plotter.update_mcl_plot(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
 
+    # algorithm
     z = tbot.get_measurements(state, particles=False)
     mcl.update(tbot.vc[i], tbot.omgc[i], z)
 

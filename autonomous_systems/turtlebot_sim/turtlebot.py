@@ -9,7 +9,7 @@ else:
 from utils import wrap
 
 class Turtlebot():
-    def __init__(self, params, vc=None, omgc=None):
+    def __init__(self, params, particles=False, vc=None, omgc=None):
         self.pm = params
         
         # time
@@ -33,11 +33,11 @@ class Turtlebot():
         self.omg = xp.zeros(self.N)
 
         if build_vel_arrays:
-            self.build_vel_and_state()
+            self.build_vel_and_state(particles)
         else:
-            self.states = self.sample_motion_model(self.vc, self.omgc, self.states)
+            self.states = self.sample_motion_model(self.vc, self.omgc, self.states, particles)
 
-    def build_vel_and_state(self):
+    def build_vel_and_state(self, particles=False):
         alphas = self.pm.alphas
         
         # v/omg commands
@@ -45,7 +45,7 @@ class Turtlebot():
         self.omgc = -0.2 + 2 * xp.cos(2 * xp.pi * 0.6 * self.pm.t_arr) # 0.6 on HW3 pdf
         
         # v/omg real outputs (noise added)
-        self.states = self.sample_motion_model(self.vc, self.omgc, self.states)
+        self.states = self.sample_motion_model(self.vc, self.omgc, self.states, particles)
 
     def sample_motion_model(self, vc, omgc, state, particles=False):
         # Accepts either number or array of numbers for vc, omgc, state

@@ -17,11 +17,13 @@ if shared.USE_CUPY:
 else:
     import numpy as np
 
+from turtlebot import Turtlebot
 from utils import wrap
 
 class Fast_SLAM():
-    def __init__(self, params):
+    def __init__(self, params, tbot: Turtlebot):
         self.pm = params
+        self.tbot = tbot
 
         self.N = self.pm.num_lms
         self.M = self.pm.M
@@ -79,110 +81,6 @@ class Fast_SLAM():
         self.write_history(0)
 
     def prediction_step(self, vc, omgc):
-        # convenience terms
-        th = self.xhat[2]
-        th_plus = wrap(th + omgc*self.pm.dt)
-        vo = vc/omgc
-        c = np.cos(th) - np.cos(th_plus)
-        s = np.sin(th) - np.sin(th_plus)
-        vos = vo*s
-        voc = vo*c
+        self.Chi = self.tbot.sample_motion_model(vc, omgc, self.Chi, particles=True)
 
-        ## G matrix ##
-        g02 = -voc
-        g12 = -vos
-        self.Ga[:2, 2] = np.stack((g02, g12))
-
-        # V matrix
-        v00 = -s / omgc
-        v10 =  c / omgc  
-        v01 =  vc*s / omgc**2  +  vc*np.cos(th_plus)*self.pm.dt / omgc
-        v11 = -vc*c / omgc**2  +  vc*np.sin(th_plus)*self.pm.dt / omgc
-        self.V[:] = np.stack([np.stack([v00, v01]),
-                              np.stack([v10, v11]),
-                              np.array([  0, self.pm.dt])])
-
-        # M matrix
-        a1, a2, a3, a4 = self.pm.alphas
-        self.M[0,0] = a1*vc**2 + a2*omgc**2
-        self.M[1,1] = a3*vc**2 + a4*omgc**2
-
-        # Q matrix
-        self.Qa[:3,:3] = self.V @ self.M @ self.V.T
-
-        # Prediction state and covariance
-        dyn = np.stack([-vos, voc, omgc*self.pm.dt])
-        self.xhat[:3] += dyn
-        self.xhat[2] = wrap(self.xhat[2])
-        self.Pa = self.Ga @ self.Pa @ self.Ga.T + self.Qa
-        
-    def measurement_correction(self, z_full, detected_mask):
-        r, phi = z_full
-        x, y, th = self.xhat[:3]
-        detected_inds = np.flatnonzero(detected_mask)
-        
-        lmarks_estimates = np.vstack((self.xhat[3::2], self.xhat[4::2]))
-        newly_discovered_inds = np.flatnonzero(~self.discovered & detected_mask )
-        self.discovered[newly_discovered_inds] = True
-        lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
-
-        if len(newly_discovered_inds) > 0:
-            r_init, phi_init = z_full[lmarks_new_inds]
-            rel_meas = np.stack([r_init*np.cos(phi_init+th), r_init*np.sin(phi_init+th)])
-            lmarks_estimates[lmarks_new_inds] = self.xhat[:2,None] + rel_meas
-
-        self.xhat[3::2] = lmarks_estimates[0]
-        self.xhat[4::2] = lmarks_estimates[1]
-
-        
-        for i, m in enumerate( detected_inds ):
-            delta = lmarks_estimates[:,m] - self.xhat[:2]
-            q = delta @ delta
-            r_hat = np.sqrt(q)
-            phi_hat = np.arctan2(delta[1], delta[0]) - th
-
-            self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
-                                             delta[1], -delta[0], -q, -delta[1], delta[0]
-                                             )).reshape(2,5)
-            inds = (np.array([0,1]).reshape(2,1), self.H_inds[m]) 
-            Ha = self.Ha[inds]
-            
-            z = np.stack([r[m], phi[m]])
-            zhat = np.stack([r_hat, phi_hat])
-            zdiff = z - zhat
-            zdiff[1] = wrap(zdiff[1])
-            
-            S = Ha @ self.Pa @ Ha.T + self.R
-            K = self.Pa @ Ha.T @ np.linalg.inv(S)
-
-            self.xhat += K@(zdiff)
-            self.xhat[2] = wrap(self.xhat[2])
-            self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
-        
-    def compute_eigs(self):
-        # unpack data for discovered landmarks
-        p = self.Pa[3:,3:]
-
-        # unpack values of each landmark 2x2 covariance matrix block
-        self.a = p.diagonal()[::2][self.discovered]
-        self.b = p.diagonal()[1::2][self.discovered]
-        self.c = p.ravel()[1::p.shape[0]+1][::2][self.discovered]
-
-        # quadratic formula to find eigenvalues
-        q = np.sqrt( (self.a-self.b)*(self.a-self.b)/4 + self.c*self.c )
-        r = (self.a+self.b)/2
-        w = np.vstack([r+q, r-q])
-
-        # setting vx of all eigenvecs as 1, compute vy using eigenvalues (w)
-        vy = (w[0]-self.a)/self.c  # only need major eigvec
-
-        # compute angle from x-axis to eigvec pointing along major axis
-        # (i.e., eigvec with largest eigval)
-        p_angs = np.arctan(vy)  # arctan(vy/vx), with all vx = 1
-
-        self.w[:,self.discovered] = w
-        self.P_angs[self.discovered] = p_angs
-
-    def write_history(self, i):
-        self.xhat_hist[:,i] = self.xhat[:3]
-        self.error_cov_hist[:,i] = self.Pa.diagonal()[3:]
+    def 
