@@ -20,8 +20,9 @@ m = sz*0.8
 lmarks = np.array([[6, 4],
                    [-7, 8],
                    [6, -4]]).T
-
-N = 300
+t_end = 30
+dt = 0.05
+N = int(t_end/dt)
 vc = xp.ones(N) * 2
 omgc = xp.ones(N) * xp.pi/10
 
@@ -34,8 +35,7 @@ rho = 8
 sig_r = 0.1
 sig_phi = 0.05
 
-dt = 0.1
-t_arr = np.arange(0, N//dt, dt)
+t_arr = np.arange(0, t_end, dt)
 
 
 # Particles

@@ -28,21 +28,17 @@ class Fast_SLAM():
         self.N = self.pm.num_lms
         self.M = self.pm.M
 
-        # self.chi = np.zeros((3,pm.M))
-        # self.chi[:2] = np.random.uniform(-10, 10, (2, self.M))
-        # self.chi[2]  = np.random.uniform(-np.pi, np.pi, self.M)
-
         self.chi_xhat = np.zeros((3, self.M))
+        self.chi_xhat[:2] = np.random.uniform(-5, 15, (2, self.M))
+        self.chi_xhat[2]  = np.random.uniform(-np.pi, np.pi, self.M)
+
         self.chi_lm   = np.zeros((self.N, 2, self.M))
         self.chi_p    = np.zeros((self.N, self.M, 2, 2))
 
-        self.xhat = np.mean(self.chi, axis=1)
-        x_errors = wrap(self.chi - self.xhat[:,None], dim=2)
+        self.xhat = np.mean(self.chi_xhat, axis=1)
+        x_errors = wrap(self.chi_xhat - self.xhat[:,None], dim=2)
         self.P = np.cov(x_errors)
         
-        self.dim = 3 + 2*self.N
-        self.xhat = np.zeros(self.dim)
-        self.xhat[:3] = np.array(self.pm.state0)
         # self.discovered = np.full(self.N, False)
         self.discovered = np.full(self.N, True)
 
@@ -72,11 +68,6 @@ class Fast_SLAM():
         pa_init_inds = (np.arange(3,self.dim), np.arange(3,self.dim))
         self.Pa[pa_init_inds] = 1e5
 
-
-        self.Ga = np.eye(self.dim) # Jacobian of g(u_t, x_t-1) wrt state (motion)
-        self.V = np.zeros((3,2))  # Jacobian of g(u_t, x_t-1) wrt inputs
-        self.M = np.zeros((2,2))  # noise in control space
-        self.Qa = np.zeros((self.dim, self.dim))
         self.Ha = np.zeros((2,self.dim))
 
         # create history arrays

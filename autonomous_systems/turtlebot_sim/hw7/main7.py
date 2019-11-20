@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     # ------------------------ INITIALIZATION ----------------------------#
 
-    tbot = turtlebot.Turtlebot(pm, pm.vc, pm.omgc)
+    tbot = turtlebot.Turtlebot(pm, vc=pm.vc, omgc=pm.omgc)
     tbot.states[:,0] = pm.state0
     fslam = Fast_SLAM(pm, tbot)
 
