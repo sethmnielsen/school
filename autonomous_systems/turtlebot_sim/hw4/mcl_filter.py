@@ -28,7 +28,7 @@ class MCL():
         self.w.fill(1/pm.M)
 
     def update(self, vc, omgc, z):
-        w_lmarks = np.ones((pm.num_lms,pm.M))
+        w_lmarks = np.ones((pm.num_lms, pm.M))
         self.Chi = self.tbot.sample_motion_model(vc, omgc, self.Chi, particles=True)
         for i in range(pm.num_lms):
             zhat = self.tbot.get_measurements(self.Chi, pm.lmarks[:,i], particles=True)

@@ -49,17 +49,15 @@ class Turtlebot():
 
     def sample_motion_model(self, vc, omgc, state, particles=False):
         # Accepts either number or array of numbers for vc, omgc, state
-        alphas = self.pm.alphas
-
-        sd_v   = xp.sqrt( alphas[0]*(vc**2) + alphas[1]*(omgc**2) )
-        sd_omg = xp.sqrt( alphas[2]*(vc**2) + alphas[3]*(omgc**2) )
+        sd_v   = xp.sqrt( self.pm.alphas[0]*(vc**2) + self.pm.alphas[1]*(omgc**2) )
+        sd_omg = xp.sqrt( self.pm.alphas[2]*(vc**2) + self.pm.alphas[3]*(omgc**2) )
 
         if particles:
             m = 10  # noise multiplier
             n = self.pm.M  # number of random numbers to generate
             propagate = self.propagate_particles
 
-            sd_gam = xp.sqrt( alphas[4]*(vc**2) + alphas[5]*(omgc**2) )
+            sd_gam = xp.sqrt( self.pm.alphas[4]*(vc**2) + self.pm.alphas[5]*(omgc**2) )
             noise_gam = xp.random.randn( n )
 
         else:
@@ -70,8 +68,8 @@ class Turtlebot():
             sd_gam = xp.zeros(self.v.shape)
             noise_gam = 0
 
-        self.v = vc + sd_v*xp.random.randn( n ) * m
-        self.omg = omgc + sd_omg*xp.random.randn( n ) * m
+        self.v = vc + sd_v * xp.random.randn( n ) * m
+        self.omg = omgc + sd_omg * xp.random.randn( n ) * m
         gam = sd_gam*noise_gam * m
         
         return propagate(state, self.v, self.omg, gam)
@@ -85,13 +83,10 @@ class Turtlebot():
         return state
 
     def propagate_particles(self, Chi, vhat, omghat, gamhat=0):
-        Chi = self.compute_next_particles(Chi, vhat, omghat, gamhat)
-        return Chi
-
-    def compute_next_particles(self, Chi, vhat, omghat, gamhat):
         Chi = self.compute_next_state(Chi, vhat, omghat, gamhat)
-        mask = abs(Chi[2]) > xp.pi
-        Chi[2][mask] = wrap(Chi[2][mask])
+        if Chi.shape[-1] == 3:
+            mask = abs(Chi[2]) > xp.pi
+            Chi[2][mask] = wrap(Chi[2][mask])
         return Chi
 
     def compute_next_state(self, x, v, omg, gam):

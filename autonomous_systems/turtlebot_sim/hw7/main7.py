@@ -41,7 +41,7 @@ if __name__ == '__main__':
         for j in range(pm.num_lms):   # j is landmark index
             state = tbot.states[:,i]  # true state
 
-            fslam.prediction_step(tbot.vc[i-1], tbot.omgc[i-1]) # propagate all particles forward
+            fslam.prediction_step(tbot.vc[i-1], tbot.omgc[i-1], j) # propagate all particles forward
             
             z, detected_mask = tbot.get_measurements(state)
             if xp.any(detected_mask):
