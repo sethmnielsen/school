@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     animate = True
 
-    # plotter = Plotter(animate, pm)
+    plotter = Plotter(animate, pm)
 
     finished = False
     N = pm.N
@@ -45,3 +45,19 @@ if __name__ == '__main__':
         z, detected_mask = tbot.get_measurements(state, particles=True)
         if xp.any(detected_mask):
             fslam.measurement_correction(z, detected_mask)
+
+        
+        fslam.compute_eigs()
+        fslam.write_history(i)
+
+        # update plot animation
+        try:
+            plotter.update_ekfs_plot(state, fslam.xhat, fslam.Pa, fslam.P_angs, fslam.w, i)
+        except KeyboardInterrupt:
+            break
+
+        if i == N-1:
+            finished = True
+
+    # if finished:
+        # plotter.make_plots_ekfs(pm.t_arr)

@@ -104,3 +104,21 @@ class Fast_SLAM():
 
             self.chi_lm[j] += (K@zdiff.T.reshape(self.M,2,1)).squeeze().T
             self.chi_P[j] = (np.eye(2) - K@H) @ self.chi_P[j]
+
+
+    def measurement_prob(self, zdiff, sigs):
+        # zdiff.shape is (2,3), sigs.shape is (2,)
+        temp1 = 1/np.sqrt(2*np.pi*sigs[:,None]**2)
+        temp2 = np.exp( -zdiff**2 / (2*sigs[:,None]**2) )
+        prob = temp1*temp2
+        return np.prod( prob, axis=0 )
+    
+    def low_variance_sampler(self):
+        M_inv = 1/pm.M
+        r = np.random.uniform(0, M_inv)
+        c = np.cumsum(self.w)
+        U = np.arange(pm.M)*M_inv + r
+        diff = c- U[:,None]
+        inds = np.argmax(diff > 0, axis=1)
+        
+        return self.Chi[:,inds], inds
