@@ -58,7 +58,7 @@ class Fast_SLAM():
 
         # self.write_history(0)
 
-    def prediction_step(self, vc, omgc, j):
+    def prediction_step(self, vc, omgc):
         self.chi_xhat = self.tbot.sample_motion_model(
             vc, omgc, self.chi_xhat, particles=True)
 
@@ -70,12 +70,12 @@ class Fast_SLAM():
         newly_discovered_inds = np.flatnonzero(~self.discovered & detected_mask )
         self.discovered[newly_discovered_inds] = True
         lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
-    
+        
         # ------------------------ modify this loop ----------------------------#
         if len(newly_discovered_inds) > 0:
             r_init, phi_init = z_full[lmarks_new_inds]
             rel_meas = np.stack([r_init*np.cos(phi_init+th), r_init*np.sin(phi_init+th)])
-            lmarks_estimates[lmarks_new_inds] = self.xhat[:2,None] + rel_meas
+            self.chi_lm[lmarks_new_inds] = self.chi_xhat + rel_meas
         # ------------------------ modify this loop ----------------------------#
 
         for j in detected_inds:
@@ -85,29 +85,22 @@ class Fast_SLAM():
             r_hat = np.sqrt(q)               # (M)
             phi_hat = np.arctan2(delta[1], delta[0]) - th  # (M)
             
-            z = np.vstack(r[j], phi[j])  # (2,M)
-            zhat = np.vstack(r_hat, phi_hat)  # (2,M)
+            z = np.vstack((r[j], phi[j]))  # (2,M)
+            zhat = np.vstack((r_hat, phi_hat))  # (2,M)
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])  #(2,M)
             
 
-            ##### Fix this mess ######
             a = -delta[0]/r_hat
             b = -delta[1]/r_hat
             c = delta[1]/q
             d = delta[0]/q
 
-            H = np.array([a,b,c,d]).reshape(1000,2,2)
+            H = np.array([a,b,c,d]).reshape(self.M,2,2)
             HT = np.transpose(H, (0,2,1))
-            # H[:,0,0] = a
-            # H[:,0,1] = b
-            # H[:,1,0] = c
-            # H[:,1,1] = d
             
-            P = self.chi_P[j]
-            S = H @ P @ HT + self.R
-            K = P @ HT @ np.linalg.inv(S)
+            S = H @ self.chi_P[j] @ HT + self.R
+            K = self.chi_P[j] @ HT @ np.linalg.inv(S)
 
-            self.chi_lm[j] += K@(zdiff)
-            self.xhat[2] = wrap(self.xhat[2])
-            self.Pa = (np.eye(self.dim) - K @ H) @ self.Pa
+            self.chi_lm[j] += (K@zdiff.T.reshape(self.M,2,1)).squeeze().T
+            self.chi_P[j] = (np.eye(2) - K@H) @ self.chi_P[j]
