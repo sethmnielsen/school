@@ -36,8 +36,6 @@ class Fast_SLAM():
         self.chi_p    = np.zeros((self.N, self.M, 2, 2))
 
         self.xhat = np.mean(self.chi_xhat, axis=1)
-        x_errors = wrap(self.chi_xhat - self.xhat[:,None], dim=2)
-        self.P = np.cov(x_errors)
         
         # self.discovered = np.full(self.N, False)
         self.discovered = np.full(self.N, True)
@@ -50,16 +48,7 @@ class Fast_SLAM():
         self.P_angs = np.zeros(self.N)  # angle of covar ellipse (from max eigen vec)
 
 
-        self.Fx = np.hstack(( np.eye(3), np.zeros((3,2*self.N)) ))
-        cols_order = []
-        cols = np.arange(self.dim)
-        for i in range(1,self.N+1):
-            cols_select = np.copy(cols)
-            k = 2*i-2
-            cols_select[3:] = np.roll(cols_select[3:], shift=k)
-            cols_order.append(cols_select.tolist())
-        self.H_inds = np.array(cols_order)
-        self.Ha = np.zeros((2,self.dim))
+        self.H = np.zeros((2,self.))
 
         self.K = np.zeros(3)
         self.R = np.diag([self.pm.sig_r**2, self.pm.sig_phi**2])
