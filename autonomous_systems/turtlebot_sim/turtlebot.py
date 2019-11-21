@@ -9,7 +9,7 @@ else:
 from utils import wrap
 
 class Turtlebot():
-    def __init__(self, params, particles=False, vc=None, omgc=None):
+    def __init__(self, params, vc=None, omgc=None):
         self.pm = params
         
         # time
@@ -21,21 +21,11 @@ class Turtlebot():
 
         # velocities
         if vc is not None and omgc is not None:
-            build_vel_arrays = False
             self.vc = vc
             self.omgc = omgc
-        else:
-            build_vel_arrays = True
-            self.vc = xp.zeros(self.N)
-            self.omgc = xp.zeros(self.N)
 
         self.v = xp.zeros(self.N)
         self.omg = xp.zeros(self.N)
-
-        if build_vel_arrays:
-            self.build_vel_and_state(particles)
-        else:
-            self.states = self.sample_motion_model(self.vc, self.omgc, self.states, particles)
 
     def build_vel_and_state(self, particles=False):
         alphas = self.pm.alphas
@@ -83,11 +73,23 @@ class Turtlebot():
         return state
 
     def propagate_particles(self, Chi, vhat, omghat, gamhat=0):
-        Chi = self.compute_next_state(Chi, vhat, omghat, gamhat)
+        Chi = self.compute_next_state_particles(Chi, vhat, omghat, gamhat)
         if Chi.shape[-1] == 3:
             mask = abs(Chi[2]) > xp.pi
             Chi[2][mask] = wrap(Chi[2][mask])
         return Chi
+
+    def compute_next_state_particles(self, x, v, omg, gam):
+        vo = v/omg
+        th = x[2]
+        th_plus = th + omg*self.pm.dt
+        
+        x += xp.vstack((-vo*xp.sin(th) + vo*xp.sin(th_plus),
+                      vo*xp.cos(th) - vo*xp.cos(th_plus),
+                      omg*self.pm.dt + gam*self.pm.dt))
+        
+        return x
+
 
     def compute_next_state(self, x, v, omg, gam):
         vo = v/omg
@@ -126,4 +128,3 @@ class Turtlebot():
         
         z = xp.vstack((r, phi))
         return z, detected_mask
-

@@ -8,7 +8,7 @@ import numpy as np
 
 
 ## NUMPY OR CUPY SPECIFIC ARRAYS
-num_lms = 100
+num_lms = 3
 sz = 12
 center = 5
 state0 = xp.array([0, 0, 0])

@@ -23,12 +23,12 @@ if __name__ == '__main__':
     # ------------------------ INITIALIZATION ----------------------------#
 
     tbot = turtlebot.Turtlebot(pm, vc=pm.vc, omgc=pm.omgc)
-    tbot.states[:,0] = pm.state0
-    fslam = Fast_SLAM(pm, tbot)
+    tbot.states = tbot.sample_motion_model(pm.vc, pm.omgc, tbot.states)
+    fslam = Fast_SLAM(pm)
 
     animate = True
 
-    plotter = Plotter(animate, pm)
+    # plotter = Plotter(animate, pm)
 
     finished = False
     N = pm.N
@@ -38,11 +38,10 @@ if __name__ == '__main__':
     
     
     for i in range(1,N):              # i is timestep
-        for j in range(pm.num_lms):   # j is landmark index
-            state = tbot.states[:,i]  # true state
+        state = tbot.states[:,i]  # true state
 
-            fslam.prediction_step(tbot.vc[i-1], tbot.omgc[i-1], j) # propagate all particles forward
-            
-            z, detected_mask = tbot.get_measurements(state)
-            if xp.any(detected_mask):
-                fslam.measurement_correction(z, detected_mask)
+        fslam.prediction_step(tbot.vc[i-1], tbot.omgc[i-1]) # propagate all particles forward
+        
+        z, detected_mask = tbot.get_measurements(state, particles=True)
+        if xp.any(detected_mask):
+            fslam.measurement_correction(z, detected_mask)

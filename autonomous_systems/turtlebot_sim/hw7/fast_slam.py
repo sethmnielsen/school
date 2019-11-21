@@ -21,9 +21,9 @@ from turtlebot import Turtlebot
 from utils import wrap
 
 class Fast_SLAM():
-    def __init__(self, params, tbot: Turtlebot):
+    def __init__(self, params):
         self.pm = params
-        self.tbot = tbot
+        self.tbot = Turtlebot(self.pm)
 
         self.N = self.pm.num_lms
         self.M = self.pm.M
@@ -33,7 +33,7 @@ class Fast_SLAM():
         self.chi_xhat[2]  = np.random.uniform(-np.pi, np.pi, self.M)
 
         self.chi_lm   = np.zeros((self.N, 2, self.M))
-        self.chi_p    = np.zeros((self.N, self.M, 2, 2))
+        self.chi_P    = np.zeros((self.N, self.M, 2, 2))
 
         self.xhat = np.mean(self.chi_xhat, axis=1)
         
@@ -48,31 +48,24 @@ class Fast_SLAM():
         self.P_angs = np.zeros(self.N)  # angle of covar ellipse (from max eigen vec)
 
 
-        self.H = np.zeros((2,self.))
+        self.H = np.zeros((self.M, 2, 2))
 
         self.K = np.zeros(3)
         self.R = np.diag([self.pm.sig_r**2, self.pm.sig_phi**2])
-        self.P = np.eye(3)
-        self.Pa = np.zeros((self.dim,self.dim))
-        pa_init_inds = (np.arange(3,self.dim), np.arange(3,self.dim))
-        self.Pa[pa_init_inds] = 1e5
-
-        self.Ha = np.zeros((2,self.dim))
 
         # create history arrays
         self.xhat_hist = np.zeros((3, self.pm.N))
         self.error_cov_hist = np.zeros((2*self.N, self.pm.N))
 
-        self.write_history(0)
+        # self.write_history(0)
 
     def prediction_step(self, vc, omgc, j):
-        self.chi_lm[j] = self.tbot.sample_motion_model(
-            vc, omgc, self.chi_lm[j], particles=True)
+        self.chi_xhat = self.tbot.sample_motion_model(
+            vc, omgc, self.chi_xhat, particles=True)
 
-    def measurement_correction(self, z_full, detected_mask, j):
-        r, phi = z_full
+    def measurement_correction(self, z_full, detected_mask):
+        r, phi = z_full  # r: (N), phi (N)
         x, y, th = self.chi_xhat  # (3, M)
-        lmj_estimates = self.chi_lm[j]  # (2, M)
         detected_inds = np.flatnonzero(detected_mask)
         
         newly_discovered_inds = np.flatnonzero(~self.discovered & detected_mask )
@@ -86,26 +79,26 @@ class Fast_SLAM():
             lmarks_estimates[lmarks_new_inds] = self.xhat[:2,None] + rel_meas
         # ------------------------ modify this loop ----------------------------#
 
-        delta = lmj_estimates - self.chi_xhat[:2]  # (2, M)
-        q = delta @ delta  # (M, M)
-        r_hat = np.sqrt(q) # 
-        phi_hat = np.arctan2(delta[1], delta[0]) - th
+        for j in detected_inds:
+            lmj = self.chi_lm[j]  # (2, M)
+            delta = lmj - self.chi_xhat[:2]  # (2, M)
+            q = delta[0]**2 + delta[1]**2    # (M)
+            r_hat = np.sqrt(q) 
+            phi_hat = np.arctan2(delta[1], delta[0]) - th
+            
+            z = np.stack([r[j], phi[j]])
+            zhat = np.stack([r_hat, phi_hat])
+            zdiff = z - zhat
+            zdiff[1] = wrap(zdiff[1])
+            
 
-        self.Ha[:,:5] = 1/q * np.hstack((-r_hat*delta, 0, r_hat*delta, 
-                                            delta[1], -delta[0], -q, -delta[1], delta[0]
-                                            )).reshape(2,5)
-        inds = (np.array([0,1]).reshape(2,1), self.H_inds[j]) 
-        Ha = self.Ha[inds]
-        
-        z = np.stack([r[j], phi[j]])
-        zhat = np.stack([r_hat, phi_hat])
-        zdiff = z - zhat
-        zdiff[1] = wrap(zdiff[1])
-        
-        S = Ha @ self.Pa @ Ha.T + self.R
-        K = self.Pa @ Ha.T @ np.linalg.inv(S)
+            ##### Fix this mess ######
+            H = np.array([[ -delta[0]/r_hat, -delta[1]/r_hat],
+                          [  delta[1]/q,      delta[0]/q    ]]).T
+            S = H @ self.Pa @ H.T + self.R
+            K = self.Pa @ H.T @ np.linalg.inv(S)
 
-        self.xhat += K@(zdiff)
-        self.xhat[2] = wrap(self.xhat[2])
-        self.Pa = (np.eye(self.dim) - K @ Ha) @ self.Pa
+            self.xhat += K@(zdiff)
+            self.xhat[2] = wrap(self.xhat[2])
+            self.Pa = (np.eye(self.dim) - K @ H) @ self.Pa
         

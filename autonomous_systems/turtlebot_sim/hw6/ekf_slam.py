@@ -124,7 +124,7 @@ class EKF_SLAM():
         self.xhat[4::2] = lmarks_estimates[1]
 
         
-        for i, m in enumerate( detected_inds ):
+        for m in detected_inds:
             delta = lmarks_estimates[:,m] - self.xhat[:2]
             q = delta @ delta
             r_hat = xp.sqrt(q)
