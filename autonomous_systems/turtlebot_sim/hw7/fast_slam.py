@@ -48,8 +48,7 @@ class Fast_SLAM():
         self.P_angs = np.zeros(self.N)  # angle of covar ellipse (from max eigen vec)
 
 
-        self.H = np.zeros((self.M, 2, 2))
-
+        self.H = np.zeros((self.N, self.M, 2, 2))
         self.K = np.zeros(3)
         self.R = np.diag([self.pm.sig_r**2, self.pm.sig_phi**2])
 
@@ -80,25 +79,35 @@ class Fast_SLAM():
         # ------------------------ modify this loop ----------------------------#
 
         for j in detected_inds:
-            lmj = self.chi_lm[j]  # (2, M)
-            delta = lmj - self.chi_xhat[:2]  # (2, M)
+            lmj = self.chi_lm[j]  # (2,M)
+            delta = lmj - self.chi_xhat[:2]  # (2,M)
             q = delta[0]**2 + delta[1]**2    # (M)
-            r_hat = np.sqrt(q) 
-            phi_hat = np.arctan2(delta[1], delta[0]) - th
+            r_hat = np.sqrt(q)               # (M)
+            phi_hat = np.arctan2(delta[1], delta[0]) - th  # (M)
             
-            z = np.stack([r[j], phi[j]])
-            zhat = np.stack([r_hat, phi_hat])
+            z = np.vstack(r[j], phi[j])  # (2,M)
+            zhat = np.vstack(r_hat, phi_hat)  # (2,M)
             zdiff = z - zhat
-            zdiff[1] = wrap(zdiff[1])
+            zdiff[1] = wrap(zdiff[1])  #(2,M)
             
 
             ##### Fix this mess ######
-            H = np.array([[ -delta[0]/r_hat, -delta[1]/r_hat],
-                          [  delta[1]/q,      delta[0]/q    ]]).T
-            S = H @ self.Pa @ H.T + self.R
-            K = self.Pa @ H.T @ np.linalg.inv(S)
+            a = -delta[0]/r_hat
+            b = -delta[1]/r_hat
+            c = delta[1]/q
+            d = delta[0]/q
 
-            self.xhat += K@(zdiff)
+            H = np.array([a,b,c,d]).reshape(1000,2,2)
+            HT = np.transpose(H, (0,2,1))
+            # H[:,0,0] = a
+            # H[:,0,1] = b
+            # H[:,1,0] = c
+            # H[:,1,1] = d
+            
+            P = self.chi_P[j]
+            S = H @ P @ HT + self.R
+            K = P @ HT @ np.linalg.inv(S)
+
+            self.chi_lm[j] += K@(zdiff)
             self.xhat[2] = wrap(self.xhat[2])
             self.Pa = (np.eye(self.dim) - K @ H) @ self.Pa
-        
