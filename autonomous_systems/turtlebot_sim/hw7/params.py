@@ -17,9 +17,9 @@ alphas = np.array([0.1, 0.01, 0.01, 0.1, 0.01, 0.01])
 m = sz*0.8
 # lmarks = xp.random.rand(2,num_lms) * 2*m - m
 # lmarks[1] += center
-lmarks = np.array([[6, 4],
+lmarks = np.array([[7, 4],
                    [-7, 8],
-                   [6, -4]]).T
+                   [5, -4]]).T
 t_end = 30
 dt = 0.05
 N = int(t_end/dt)
@@ -29,8 +29,8 @@ omgc = xp.ones(N) * xp.pi/10
 
 ## OTHER VARIABLES
 
-fov = np.radians(45)
-rho = 8 
+fov = np.radians(360)
+rho = 20 
 
 sig_r = 0.1
 sig_phi = 0.05
@@ -39,4 +39,4 @@ t_arr = np.arange(0, t_end, dt)
 
 
 # Particles
-M = 1000
+M = 100
