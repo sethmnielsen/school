@@ -34,7 +34,7 @@ class Fast_SLAM():
 
         self.chi_lm = np.zeros((self.N, 2, self.M))
         self.chi_P = np.zeros((self.N, self.M, 2, 2))
-        self.w = np.ones((self.M))
+        self.w = np.ones(self.M)
 
         self.xhat = np.mean(self.chi_xhat, axis=1)
         
@@ -64,6 +64,8 @@ class Fast_SLAM():
             vc, omgc, self.chi_xhat, particles=True)
 
     def measurement_correction(self, z_full, detected_mask):
+        self.w = np.ones(self.M)
+
         r, phi = z_full  # r: (N), phi (N)
         x, y, th = self.chi_xhat  # (3, M)
         detected_inds = np.flatnonzero(detected_mask)
@@ -121,14 +123,8 @@ class Fast_SLAM():
         H = np.array([a,b,c,d]).reshape(self.M,2,2)
         return zhat, H
  
-
-        temp1 = 1/np.sqrt(2*np.pi*sigs[:,None]**2)
-        temp2 = np.exp( -zdiff**2 / (2*sigs[:,None]**2) )
-        prob = temp1*temp2
-        return np.prod( prob, axis=0 )
-    
     def low_variance_sampler(self):
-        M_inv = 1/pm.M
+        M_inv = 1/self.M
         r = np.random.uniform(0, M_inv)
         c = np.cumsum(self.w)
         U = np.arange(pm.M)*M_inv + r
