@@ -32,8 +32,9 @@ class Fast_SLAM():
         self.chi_xhat[:2] = np.random.uniform(-5, 15, (2, self.M))
         self.chi_xhat[2]  = np.random.uniform(-np.pi, np.pi, self.M)
 
-        self.chi_lm   = np.zeros((self.N, 2, self.M))
-        self.chi_P    = np.zeros((self.N, self.M, 2, 2))
+        self.chi_lm = np.zeros((self.N, 2, self.M))
+        self.chi_P = np.zeros((self.N, self.M, 2, 2))
+        self.w = np.ones((self.M))
 
         self.xhat = np.mean(self.chi_xhat, axis=1)
         
@@ -44,7 +45,7 @@ class Fast_SLAM():
         self.a = np.zeros(self.pm.num_lms)
         self.b = np.array(self.a)
         self.c = np.array(self.a)
-        self.w = np.zeros((2,self.N))   # eigen values
+        self.eigval = np.zeros((2,self.N))   # eigen values
         self.P_angs = np.zeros(self.N)  # angle of covar ellipse (from max eigen vec)
 
 
@@ -71,43 +72,56 @@ class Fast_SLAM():
         self.discovered[newly_discovered_inds] = True
         lmarks_new_inds = (np.array([[0],[1]]), newly_discovered_inds)
         
-        # ------------------------ modify this loop ----------------------------#
         if len(newly_discovered_inds) > 0:
+            # pose init
             r_init, phi_init = z_full[lmarks_new_inds]
             rel_meas = np.stack([r_init*np.cos(phi_init+th), r_init*np.sin(phi_init+th)])
             self.chi_lm[lmarks_new_inds] = self.chi_xhat + rel_meas
-        # ------------------------ modify this loop ----------------------------#
+            # covariance init
+            _, H = self.expected_measurement(self.chi_lm[lmarks_new_inds])
+            H_inv = np.linalg.inv(H)
+            H_invT = np.transpose(H_inv, (0,2,1))
+            self.chi_P[lmarks_new_inds] = H_inv @ self.R @ H_invT
 
         for j in detected_inds:
-            lmj = self.chi_lm[j]  # (2,M)
-            delta = lmj - self.chi_xhat[:2]  # (2,M)
-            q = delta[0]**2 + delta[1]**2    # (M)
-            r_hat = np.sqrt(q)               # (M)
-            phi_hat = np.arctan2(delta[1], delta[0]) - th  # (M)
-            
+            zhat, H = self.expected_measurement(self.chi_lm[j])
             z = np.vstack((r[j], phi[j]))  # (2,M)
-            zhat = np.vstack((r_hat, phi_hat))  # (2,M)
             zdiff = z - zhat
             zdiff[1] = wrap(zdiff[1])  #(2,M)
             
-
-            a = -delta[0]/r_hat
-            b = -delta[1]/r_hat
-            c = delta[1]/q
-            d = delta[0]/q
-
-            H = np.array([a,b,c,d]).reshape(self.M,2,2)
             HT = np.transpose(H, (0,2,1))
-            
             S = H @ self.chi_P[j] @ HT + self.R
-            K = self.chi_P[j] @ HT @ np.linalg.inv(S)
+            S_inv = np.linalg.inv(S)
+            K = self.chi_P[j] @ HT @ S_inv
 
             self.chi_lm[j] += (K@zdiff.T.reshape(self.M,2,1)).squeeze().T
             self.chi_P[j] = (np.eye(2) - K@H) @ self.chi_P[j]
 
+            S_2pi_det = np.linalg.det(2*np.pi*S)
+            denom = np.sqrt(S_2pi_det * np.exp(-0.5 * (zdiff.T @ S_inv @ zdiff)))
+            res = 1.0/denom
+            self.w *= res
+        wsum = np.sum(self.w)
+        wsum_inv = 1/wsum
+        self.w *= wsum_inv
 
-    def measurement_prob(self, zdiff, sigs):
-        # zdiff.shape is (2,3), sigs.shape is (2,)
+    def expected_measurement(self, lmj):
+        th = self.chi_xhat[2]
+
+        delta = lmj - self.chi_xhat[:2]  # (2,M)
+        q = delta[0]**2 + delta[1]**2    # (M)
+        r_hat = np.sqrt(q)               # (M)
+        phi_hat = np.arctan2(delta[1], delta[0]) - th  # (M)
+        zhat = np.vstack((r_hat, phi_hat))  # (2,M)
+        
+        a = -delta[0]/r_hat
+        b = -delta[1]/r_hat
+        c = delta[1]/q
+        d = delta[0]/q
+        H = np.array([a,b,c,d]).reshape(self.M,2,2)
+        return zhat, H
+ 
+
         temp1 = 1/np.sqrt(2*np.pi*sigs[:,None]**2)
         temp2 = np.exp( -zdiff**2 / (2*sigs[:,None]**2) )
         prob = temp1*temp2
@@ -118,7 +132,7 @@ class Fast_SLAM():
         r = np.random.uniform(0, M_inv)
         c = np.cumsum(self.w)
         U = np.arange(pm.M)*M_inv + r
-        diff = c- U[:,None]
+        diff = c - U[:,None]
         inds = np.argmax(diff > 0, axis=1)
         
         return self.Chi[:,inds], inds

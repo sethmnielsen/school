@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # ------------------------ BEGIN MAIN LOOP ----------------------------#
     
     
-    for i in range(1,N):              # i is timestep
+    for i in range(1,N): # i is timestep
         state = tbot.states[:,i]  # true state
 
         fslam.prediction_step(tbot.vc[i-1], tbot.omgc[i-1]) # propagate all particles forward
@@ -46,7 +46,6 @@ if __name__ == '__main__':
         if xp.any(detected_mask):
             fslam.measurement_correction(z, detected_mask)
 
-        
         fslam.compute_eigs()
         fslam.write_history(i)
 
