@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     animate = True
 
-    plotter = Plotter(animate, pm)
+    # plotter = Plotter(animate, pm)
 
     finished = False
     N = pm.N

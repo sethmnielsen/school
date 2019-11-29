@@ -90,7 +90,7 @@ class Fast_SLAM():
                 H_invT = np.transpose(H_inv, (0,2,1))
                 self.chi_P[j] = H_inv @ self.R @ H_invT
 
-        self.w = np.ones(,self.M)
+        self.w = np.ones(self.M)
         for j in detected_inds:
             zhat, H = self.expected_measurement(self.chi_lm[j])
             z = np.vstack((r[j], phi[j]))  # (2,M)
