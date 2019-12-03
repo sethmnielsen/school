@@ -7,8 +7,8 @@ from pyqtgraph.Qt import QtCore, QtGui
 # from pyqtgraph import QtCore, QtGui, Qt
 import pyqtgraph as pg
 
-from hw5.og_mapping import OGMapping
-import hw5.params as pm
+from hw8.mdp import MDP
+import hw8.params as pm
 
 class App(QtGui.QMainWindow):
     def __init__(self, x_state, z, thk, parent=None):
