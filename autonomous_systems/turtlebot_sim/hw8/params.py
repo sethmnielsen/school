@@ -17,9 +17,9 @@ r_else = -2
 data = sio.loadmat('matlab_data/mdp_map.mat')
 rows = data['Mm'].item()
 cols = data['Nm'].item()
-obs   = xp.array(data['obs'])   * r_obs
-goal  = xp.array(data['goal'])  * r_goal
-walls = xp.array(data['walls']) * r_walls
+obs   = np.array(data['obs'])   * r_obs
+goal  = np.array(data['goal'])  * r_goal
+walls = np.array(data['walls']) * r_walls
 rew_map = walls + obs + goal
 rew_map[rew_map == 0] = r_else
 

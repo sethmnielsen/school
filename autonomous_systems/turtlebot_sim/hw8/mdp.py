@@ -26,9 +26,9 @@ class MDP():
             for i in range(1, pm.rows-1):
                 for j in range(1, pm.cols-1):
                    if self.rew_map[i,j] == pm.r_else:
-                        V_north = (self.pf * (pm.walls[i+1, j  ] + pm.obs[i+1, j  ] + pm.goal[i+1, j] + self.map[i+1,j]) + \
-                                   self.pr * (pm.walls[i  , j+1] + pm.obs[i  , j+1] + pm.goal[i, j+1] + self.map[i, j+1]) + \
-                                   self.pl * (pm.walls[i  , j-1] + pm.obs[i  , j-1] + pm.goal[i, j-1] + self.map[i, j-1])) + self.rew_map[i,j]
+                        V_north =  self.pf * self.value_map[i+1, j  ] + \
+                                   self.pr * self.value_map[i  , j+1] + \
+                                   self.pl * self.value_map[i  , j-1] + self.rew_map[i,j]
                         V_south = (self.pf * (pm.walls[i-1, j  ] + pm.obs[i-1, j  ] + pm.goal[i-1, j] + self.map[i-1, j]) + \
                                    self.pr * (pm.walls[i  , j+1] + pm.obs[i  , j+1] + pm.goal[i, j+1] + self.map[i, j+1]) + \
                                    self.pl * (pm.walls[i  , j-1] + pm.obs[i  , j-1] + pm.goal[i, j-1] + self.map[i, j-1])) + self.rew_map[i,j]
