@@ -12,7 +12,7 @@ sys.path.append("..")
 
 
 r_obs = -5000
-r_goal = 1e6
+r_goal = 1e5
 r_walls = -100
 r_else = -2
 
@@ -22,6 +22,7 @@ cols = data['Nm'].item()
 obs   = np.array(data['obs'])   * r_obs
 goal  = np.array(data['goal'])  * r_goal
 walls = np.array(data['walls']) * r_walls
+dmap = data['map']
 rew_map = walls + obs + goal
 rew_map[rew_map == 0] = r_else
 

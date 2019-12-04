@@ -4,59 +4,70 @@ from utils import wrap
 
 class MDP():
     def __init__(self):
-        self.map = pm.rew_map
+        self.map = np.zeros_like(pm.rew_map)
         self.policy = np.full(pm.rew_map.shape, np.nan)
         self.rew_map = pm.rew_map
-        self.value_map = np.copy(self.rew_map)
+        self.value_map = np.zeros_like(self.rew_map)
+        # self.value_map += pm.goal
 
         self.pf = pm.p_forw
         self.pr = pm.p_right
         self.pl = pm.p_left
         self.iter = 0
 
+    def post_map_setup(self):
+        self.map[pm.walls<0] = pm.r_walls
+        self.map[pm.goal>0] = pm.r_goal 
+        self.map[pm.obs<0] = pm.r_obs
+        self.map = self.map.T #np.flip(self.map.T, axis=1)
+        self.policy = self.policy.T #np.flip(self.policy.T, axis=1)
 
         
     def calcValues1(self):
         diff = 1e6
         epsilon = 300
-        V_n1 = np.zeros(4)
-        V_n2 = np.zeros(4)
+        V_n = np.zeros(4)
+        V_s = np.zeros(4)
+        V_e = np.zeros(4)
+        V_w = np.zeros(4)
         while diff > epsilon:
             temp_diff = []
             for i in range(1, pm.rows-1):
                 for j in range(1, pm.cols-1):
                    if self.rew_map[i,j] == pm.r_else:
-                        V_n1[0] = self.pf * self.value_map[i+1, j  ]
-                        V_n1[1] = self.pr * self.value_map[i  , j+1]
-                        V_n1[2] = self.pl * self.value_map[i  , j-1]
-                        V_n1[3] = self.rew_map[i,j]
-                        V_north  = np.sum(V_n1)
+                        V_n[0] = self.pf * (self.rew_map[i+1, j  ] + self.value_map[i+1, j  ])
+                        V_n[1] = self.pr * (self.rew_map[i  , j+1] + self.value_map[i  , j+1])
+                        V_n[2] = self.pl * (self.rew_map[i  , j-1] + self.value_map[i  , j-1])
+                        V_n[3] = self.rew_map[i,j]
+                        V_north  = np.sum(V_n)
 
-                        V_n2[0] = self.pf * (pm.walls[i+1, j  ] + pm.obs[i+1, j  ] + pm.goal[i+1, j] + self.map[i+1, j])
-                        V_n2[1] = self.pr * (pm.walls[i  , j+1] + pm.obs[i  , j+1] + pm.goal[i, j+1] + self.map[i, j+1])
-                        V_n2[2] = self.pl * (pm.walls[i  , j-1] + pm.obs[i  , j-1] + pm.goal[i, j-1] + self.map[i, j-1])
-                        V_n2[3] = self.rew_map[i,j]
-                        V_north2 = np.sum(V_n2)
+                        V_s[0] = self.pf * (self.rew_map[i-1, j  ] + self.value_map[i-1, j  ])
+                        V_s[1] = self.pr * (self.rew_map[i  , j-1] + self.value_map[i  , j-1])
+                        V_s[2] = self.pl * (self.rew_map[i  , j+1] + self.value_map[i  , j+1])
+                        V_s[3] = self.rew_map[i,j]
+                        V_south  = np.sum(V_s)
 
-                        V_south = (self.pf * (pm.walls[i-1, j  ] + pm.obs[i-1, j  ] + pm.goal[i-1, j] + self.map[i-1, j]) + \
-                                   self.pr * (pm.walls[i  , j-1] + pm.obs[i  , j-1] + pm.goal[i, j-1] + self.map[i, j-1]) + \
-                                   self.pl * (pm.walls[i  , j+1] + pm.obs[i  , j+1] + pm.goal[i, j+1] + self.map[i, j+1])) + self.rew_map[i,j]
+                        V_e[0] = self.pf * (self.rew_map[i  , j+1] + self.value_map[i  , j+1])
+                        V_e[1] = self.pr * (self.rew_map[i+1, j  ] + self.value_map[i+1, j  ])
+                        V_e[2] = self.pl * (self.rew_map[i-1, j  ] + self.value_map[i-1, j  ])
+                        V_e[3] = self.rew_map[i,j]
+                        V_east  = np.sum(V_e)
 
-                        V_east  = (self.pf * (pm.walls[i  , j+1] + pm.obs[i  , j+1] + pm.goal[i, j+1] + self.map[i, j+1]) + \
-                                   self.pr * (pm.walls[i+1, j  ] + pm.obs[i+1, j  ] + pm.goal[i+1, j] + self.map[i+1, j]) + \
-                                   self.pl * (pm.walls[i-1, j  ] + pm.obs[i-1, j  ] + pm.goal[i-1, j] + self.map[i-1, j])) + self.rew_map[i,j]
+                        V_w[0] = self.pf * (self.rew_map[i  , j-1] + self.value_map[i  , j-1])
+                        V_w[1] = self.pr * (self.rew_map[i-1, j  ] + self.value_map[i-1, j  ])
+                        V_w[2] = self.pl * (self.rew_map[i+1, j  ] + self.value_map[i+1, j  ])
+                        V_w[3] = self.rew_map[i,j]
+                        V_west  = np.sum(V_w)
 
-                        V_west  = (self.pf * (pm.walls[i  , j-1] + pm.obs[i  , j-1] + pm.goal[i, j-1] + self.map[i, j-1]) + \
-                                   self.pr * (pm.walls[i-1, j  ] + pm.obs[i-1, j  ] + pm.goal[i-1, j] + self.map[i-1, j]) + \
-                                   self.pl * (pm.walls[i+1, j  ] + pm.obs[i+1, j  ] + pm.goal[i+1, j] + self.map[i+1, j])) + self.rew_map[i,j]
                         V = [V_north, V_south, V_east, V_west]
-                        max = np.max(V)
+                        vmax = np.max(V)
                         argmax = np.argmax(V)
                         self.policy[i, j] = argmax
-                        temp_diff.append(np.abs(self.map[i,j] - max * self.gamma))
-                        self.map[i,j] = max * self.gamma
+                        temp_diff.append(np.abs(self.value_map[i,j] - vmax * pm.gamma))
+                        self.value_map[i,j] = pm.gamma*vmax
             diff = np.sum(temp_diff)
             self.iter += 1
+            print(f'diff: {diff}, iter: {self.iter}')
 
 
     def calcValues2(self):
@@ -70,6 +81,8 @@ class MDP():
         idx_c = pm.cols - 1
 
         while diff > epsilon:
+            V_north = self.pf * self.value_map[1:pm.rows, 1:pm.cols-1] + \
+                      self.pr * self.value_map[1:pm.]
             #Value for the traveling north reward policy. Need to add the cost of being in that state
             V_north = self.pf * self.map[idx_r0+1:idx_r+1, idx_c0:idx_c] + \
                       self.pr * self.map[idx_r0:idx_r, idx_c0+1:idx_c+1] + \
