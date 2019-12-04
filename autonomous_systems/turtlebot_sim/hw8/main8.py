@@ -23,26 +23,21 @@ sys.path.append('..')
 import numpy as np
 
 from utils import wrap
-import hw8.params as pm
-
-from pyqtgraph.Qt import QtCore, QtGui
-from hw8.turtlebot_app import App, TurtleApp
+import params as pm
+from mdp import MDP
 
 np.set_printoptions(precision=3, suppress=True, sign=' ', linewidth=120)
 
-z[np.isnan(z)] = np.inf
-z_r, z_phi = z
+if __name__ == "__main__":
+    mdp = MDP()
 
-app = QtGui.QApplication(sys.argv)
-thisapp = App(X, z, thk)
-thisapp.show()
-sys.exit(app.exec_())
+    mdp.calcValues1()
+    # mdp.correcStaticCells()
 
+    # plt.figure(1)
+    # ax = plt.imshow(mdp.map * 255)
+    # ax = drawArrows(ax, mdp.map, mdp.policy)
+    # ax = drawPath(ax, params.x0, params.y0, mdp.policy)
+    # plt.colorbar()
 
-    
-
-    # update plot animation
-    # plotter.update_mcl_plot(state, mcl.xhat, mcl.Chi, mcl.P.diagonal(), i)
-
-    # z = tbot.get_measurements(state, particles=False)
-    # mcl.update(tbot.vc[i], tbot.omgc[i], z)
+    # plt.show()

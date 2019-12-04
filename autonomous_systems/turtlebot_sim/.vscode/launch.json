@@ -17,8 +17,8 @@
             "name": "HW",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/hw7/main7.py",
-            "cwd": "/home/seth/school/autonomous_systems/turtlebot_sim/hw7",
+            "program": "${workspaceFolder}/hw8/main8.py",
+            "cwd": "/home/seth/school/autonomous_systems/turtlebot_sim",
             "console": "integratedTerminal",
             "justMyCode": true
         },
