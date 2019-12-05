@@ -19,8 +19,10 @@ class MDP():
         self.map[pm.walls<0] = pm.r_walls
         self.map[pm.goal>0] = pm.r_goal 
         self.map[pm.obs<0] = pm.r_obs
-        self.map = self.map.T #np.flip(self.map.T, axis=1)
-        self.policy = self.policy.T #np.flip(self.policy.T, axis=1)
+        self.map = self.map.T 
+        self.policy = self.policy.T
+        # self.map = np.flip(self.map.T, axis=1)
+        # self.policy = np.flip(self.policy.T, axis=1)
 
         
     def calcValues1(self):
@@ -81,16 +83,21 @@ class MDP():
         idx_c = pm.cols - 1
 
         while diff > epsilon:
-            V_north = self.pf * self.value_map[1:pm.rows, 1:pm.cols-1] + \
-                      self.pr * self.value_map[1:pm.]
-            #Value for the traveling north reward policy. Need to add the cost of being in that state
-            V_north = self.pf * self.map[idx_r0+1:idx_r+1, idx_c0:idx_c] + \
-                      self.pr * self.map[idx_r0:idx_r, idx_c0+1:idx_c+1] + \
-                      self.pl * self.map[idx_r0:idx_r, idx_c0-1:idx_c-1] 
+            V_north = self.pf * self.value_map[2:pm.rows, 1:pm.cols-1] + \
+                      self.pr * self.value_map[1:pm.rows, 1:pm.cols-1] + \
+                      self.pl * self.value_map[1:pm.rows, 1:pm.cols-1] 
+
+            #Value for the traveling north reward policy. 
+            V_north = self.pf * self.map[idx_r0+1:idx_r+1, idx_c0  :idx_c  ] + \
+                      self.pr * self.map[idx_r0  :idx_r  , idx_c0+1:idx_c+1] + \
+                      self.pl * self.map[idx_r0  :idx_r  , idx_c0-1:idx_c-1] 
+                      
             #Value for going south
             V_south = self.pf * self.map[idx_r0-1:idx_r-1, idx_c0:idx_c] + self.pr * self.map[idx_r0:idx_r, idx_c0+1:idx_c+1] + self.pl * self.map[idx_r0:idx_r, idx_c0-1:idx_c-1] 
+            
             #Value for going East
             V_east = self.pf * self.map[idx_r0:idx_r, idx_c0+1:idx_c+1] + self.pr * self.map[idx_r0-1:idx_r-1, idx_c0:idx_c] + self.pl * self.map[idx_r0+1:idx_r+1, idx_c0:idx_c]
+            
             #Value for Going West
             V_west = self.pf * self.map[idx_r0:idx_r, idx_c0-1:idx_c-1] + self.pr * self.map[idx_r0-1:idx_r-1, idx_c0:idx_c] + self.pl * self.map[idx_r0+1:idx_r+1, idx_c0:idx_c]
 
