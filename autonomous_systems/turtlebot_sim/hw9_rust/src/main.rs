@@ -15,7 +15,7 @@ extern crate ndarray;
 use ndarray::prelude::*;
 
 fn main() {
-    let T = 1;
+    // let T = 1;
     let gamma = 1.0;
     let N = 2;
 
@@ -24,27 +24,29 @@ fn main() {
     let pz = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
 
     let k = 1;
-    let mut Y = Array2::<f64>::zeros((k, N));
-    let Y0 = array![[-100, 100], [100, -50]];
+    let mut y = Array2::<f64>::zeros((k, N));
+    let y0 = array![[-100, 100], [100, -50]];
     let prune_res = 0.0001;
 
     // Y[[2, 1]] = 75;
 
-    println!("Final: {:2}", Y);
+    sense(y, pz);
+
+    println!("Final: {:2}", y);
 }
 
-fn sense(Y: &mut Array2<f64>, pz: &Array2<f64>) {
-    let Ypr1 = Y * pz.index_axis(Axis(1), 0);
-    let Ypr2 = Y * pz.index_axis(Axis(1), 1);
+fn sense(y: &mut Array2<f64>, pz: &Array2<f64>) {
+    let ypr1 = pz.index_axis(Axis(1), 0);
+    let ypr2 = pz.index_axis(Axis(1), 1);
 
-    println!("\nYpr1: {}", Ypr1);
-    println!("Ypr2: {}", Ypr2);
+    println!("\nYpr1: {}", ypr1);
+    println!("Ypr2: {}", ypr2);
 }
 
-fn predict(Y: &mut Array2<f64>) {
+fn predict(y: &mut Array2<f64>) {
 
 }
 
-fn prune(Y: &mut Array2<f64>) {
+fn prune(y: &mut Array2<f64>) {
 
 }
