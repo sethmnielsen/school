@@ -24,7 +24,27 @@ fn main() {
     let pz = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
 
     let k = 1;
-    let mut Y = Array::<f64>::zeros((1, N));
+    let mut Y = Array2::<f64>::zeros((k, N));
+    let Y0 = array![[-100, 100], [100, -50]];
+    let prune_res = 0.0001;
 
-    println!("{:2}", Y);
+    // Y[[2, 1]] = 75;
+
+    println!("Final: {:2}", Y);
+}
+
+fn sense(Y: &mut Array2<f64>, pz: &Array2<f64>) {
+    let Ypr1 = Y * pz.index_axis(Axis(1), 0);
+    let Ypr2 = Y * pz.index_axis(Axis(1), 1);
+
+    println!("\nYpr1: {}", Ypr1);
+    println!("Ypr2: {}", Ypr2);
+}
+
+fn predict(Y: &mut Array2<f64>) {
+
+}
+
+fn prune(Y: &mut Array2<f64>) {
+
 }
