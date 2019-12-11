@@ -10,6 +10,7 @@
 5) Using the probability and payoff parameters of your choice, use the associated value function to choose control actions. Assume that your true initial state is x1 and that your belief is 0.6. What outcomes do you obtain for 10 trials? Do you outcomes align with your expectations? Did your value function produce good results?
 */
 
+#![allow(non_snake_case)]
 extern crate ndarray;
 
 use ndarray::prelude::*;
@@ -21,32 +22,32 @@ fn main() {
 
     let reward = array![[-100, 100, -1], [ 100, -50, -1]];
     let pt = array![[0.2, 0.8], [0.8, 0.2]]; // transition probabilities
-    let pz = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
+    let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
 
     let k = 1;
-    let mut y = Array2::<f64>::zeros((k, N));
-    let y0 = array![[-100, 100], [100, -50]];
+    let mut Y: Array2<f64> = Array2::<f64>::zeros((k, N));
+    let y0: Array2<i32> = arr2(&[[-100, 100], [100, -50]]);
     let prune_res = 0.0001;
 
     // Y[[2, 1]] = 75;
 
-    sense(y, pz);
+    sense(&mut Y, pz);
 
-    println!("Final: {:2}", y);
+    println!("Final: {:2}", Y);
 }
 
-fn sense(y: &mut Array2<f64>, pz: &Array2<f64>) {
-    let ypr1 = pz.index_axis(Axis(1), 0);
-    let ypr2 = pz.index_axis(Axis(1), 1);
+fn sense<A>(Y: &mut Array2<f64>, pz: Array2<A>) {
+    let ypr1 = pz.index_axis(Axis(1), 0) * Y;
+    let ypr2 = pz.index_axis(Axis(1), 1) * Y;
 
     println!("\nYpr1: {}", ypr1);
     println!("Ypr2: {}", ypr2);
 }
 
-fn predict(y: &mut Array2<f64>) {
+fn predict(Y: &mut Array2<f64>) {
 
 }
 
-fn prune(y: &mut Array2<f64>) {
+fn prune(Y: &mut Array2<f64>) {
 
 }
