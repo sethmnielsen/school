@@ -37,11 +37,13 @@ fn main() {
 }
 
 fn sense<A>(Y: &mut Array2<f64>, pz: Array2<A>) {
-    let ypr1 = pz.index_axis(Axis(1), 0) * Y;
-    let ypr2 = pz.index_axis(Axis(1), 1) * Y;
+    // let Ypr1 = pz.slice(s![.., 0]) * Y;
+    // let Ypr2 = pz.slice(s![.., 1]) * Y;
+    let Ypr1 = pz.column(0) * Y;
+    let Ypr2 = pz.column(1) * Y;
 
-    println!("\nYpr1: {}", ypr1);
-    println!("Ypr2: {}", ypr2);
+    let rng = Array::range(0., Y.nrows() as f64, 1.);
+    
 }
 
 fn predict(Y: &mut Array2<f64>) {

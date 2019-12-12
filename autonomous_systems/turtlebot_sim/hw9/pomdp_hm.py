@@ -67,14 +67,12 @@ class POMDP:
         Ypr2 = np.multiply(self.Y, self.pz[:, 1])
         rng = np.arange(0, len(self.Y))
         combos = np.vstack((np.tile(rng, self.K), np.repeat(rng, self.K)))
-        self.Y = Ypr1[combos[0, :]] + Ypr2[combos[1, :]]
+        self.Y = Ypr1[combos[0]] + Ypr2[combos[1]]
 
-        print("\nYpr1:", Ypr1)
-        print("Ypr2:", Ypr2)
-        print("rng:", rng)
-        print("combos:", combos)
-        print("self.Y:", self.Y)        
-        print("self.pz:\n", self.pz)
+        print("\nYpr1:\n", Ypr1)
+        print("Ypr2:\n", Ypr2)
+        print("combos:\n", combos)
+        print("self.Y:\n", self.Y)        
 
     def Prediction(self):
         self.Y = self.gamma*((self.Y @ self.pt) - 1)

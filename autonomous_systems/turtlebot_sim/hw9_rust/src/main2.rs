@@ -4,16 +4,23 @@ extern crate ndarray;
 use ndarray::prelude::*;
 
 fn main() {
-    let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
+    let pz = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
 
-    let mut Y: Array2<f64> = Array2::<f64>::zeros((1, 2));
-    let y0: Array2<i32> = arr2(&[[-100, 100], [100, -50]]);
+    let mut Y = Array2::<f64>::zeros((1, 2));
 
-    sense(&mut Y, pz);
+    for i in 1..10 {
+        do_some_maths(&mut Y, pz);
+        // other functions that will modify Y
+    }
+    
+    println!("Result: {}", Y);
 }
 
-fn sense<A>(Y: &mut Array2<f64>, pz: Array2<A>) {
-    let Ypr = pz.index_axis(Axis(1), 0) * Y;
+fn do_some_maths(Y: &mut Array2<f64>, pz: Array2<f64>) {
+    // let Yp = Y * pz.index_axis(Axis(1), 0);
+    let Yp = Y * pz.slice(s![.., 0]);  // <-- this is the problem
 
-    println!("\nYpr: {}", Ypr);
+    // do lots of matrix math with Yp
+    // ...
+    // then modify Y's data using Yp (hence Y needs to be &mut)
 }
