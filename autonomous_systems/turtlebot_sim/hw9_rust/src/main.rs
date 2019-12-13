@@ -15,35 +15,48 @@ extern crate ndarray;
 
 use ndarray::prelude::*;
 
-fn main() {
-    // let T = 1;
-    let gamma = 1.0;
-    let N = 2;
+// Params
+const T: i32 = 1;
+const GAMMA: f64 = 1.0;
+const PRUNE_RES: f64 = 0.0001;
 
+fn main() {
     let reward = array![[-100, 100, -1], [ 100, -50, -1]];
     let pt = array![[0.2, 0.8], [0.8, 0.2]]; // transition probabilities
     let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
 
     let k = 1;
-    let mut Y: Array2<f64> = Array2::<f64>::zeros((k, N));
-    let y0: Array2<i32> = arr2(&[[-100, 100], [100, -50]]);
-    let prune_res = 0.0001;
+    let mut Y: Array2<f64> = Array2::<f64>::zeros((1, 2));
+    let extra_arr = [[-100, 100], [100, -50]];
+    let y0: Array2<i32> = arr2(&extra_arr);
 
     // Y[[2, 1]] = 75;
-
-    sense(&mut Y, pz);
+    for i in 1..T {
+        sense(&mut Y, &pz);
+        // other functions that will modify Y
+    }
 
     println!("Final: {:2}", Y);
 }
 
-fn sense<A>(Y: &mut Array2<f64>, pz: Array2<A>) {
-    // let Ypr1 = pz.slice(s![.., 0]) * Y;
-    // let Ypr2 = pz.slice(s![.., 1]) * Y;
-    let Ypr1 = pz.column(0) * Y;
-    let Ypr2 = pz.column(1) * Y;
+fn sense(Y: &mut Array2<f64>, pz: &Array2<f64>) {
+    let Ypr1 = Y * pz.column(0);
+    let Ypr2 = Y * pz.column(1);
 
     let rng = Array::range(0., Y.nrows() as f64, 1.);
     
+}
+
+fn largest(list: &[i32]) -> i32 {
+    let mut largest = list[0];
+
+    for &item in list.iter() {
+        if item > largest {
+            largest = item;
+        }
+    }
+
+    largest
 }
 
 fn predict(Y: &mut Array2<f64>) {
