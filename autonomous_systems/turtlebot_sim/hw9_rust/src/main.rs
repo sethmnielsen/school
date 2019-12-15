@@ -45,7 +45,7 @@ fn sense(Y: Array2<f64>, pz: &Array2<f64>) -> Array2<f64> {
 
     let rng = Array::range(0., Y.nrows() as f64, 1.);
 
-    
+    let c = 
     
     Y
 }
