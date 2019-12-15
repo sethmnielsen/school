@@ -32,19 +32,22 @@ fn main() {
 
     // Y[[2, 1]] = 75;
     for i in 1..T {
-        sense(&mut Y, &pz);
+        Y = sense(Y, &pz);
         // other functions that will modify Y
     }
 
     println!("Final: {:2}", Y);
 }
 
-fn sense(Y: &mut Array2<f64>, pz: &Array2<f64>) {
-    let Ypr1 = Y * pz.column(0);
-    let Ypr2 = Y * pz.column(1);
+fn sense(Y: Array2<f64>, pz: &Array2<f64>) -> Array2<f64> {
+    let Ypr1 = &Y * &pz.column(0);
+    let Ypr2 = &Y * &pz.column(1);
 
     let rng = Array::range(0., Y.nrows() as f64, 1.);
+
     
+    
+    Y
 }
 
 fn largest(list: &[i32]) -> i32 {
