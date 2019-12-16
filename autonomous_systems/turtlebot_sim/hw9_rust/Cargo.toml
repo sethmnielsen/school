@@ -12,4 +12,6 @@ name = "main"
 path = "src/main.rs"
 
 [dependencies]
-ndarray = "0.13.0"
+ndarray = { version = "0.13.0", features = ["blas"] }
+blas-src = { version = "0.2.0", default-features = false, features = ["openblas"] }
+openblas-src = { version = "0.6.0", default-features = false, features = ["cblas", "system"] }

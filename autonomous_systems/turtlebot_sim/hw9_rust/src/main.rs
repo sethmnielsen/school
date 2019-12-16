@@ -16,39 +16,58 @@ extern crate ndarray;
 use ndarray::prelude::*;
 
 // Params
-const T: i32 = 1;
+const T: i32 = 2;
 const GAMMA: f64 = 1.0;
 const PRUNE_RES: f64 = 0.0001;
 
 fn main() {
-    let reward = array![[-100, 100, -1], [ 100, -50, -1]];
-    let pt = array![[0.2, 0.8], [0.8, 0.2]]; // transition probabilities
     let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
+    let pt: Array2<f64> = array![[0.2, 0.8], [0.8, 0.2]]; // transition probabilities
+    let rew: Array2<i32> = array![[-100, 100, -1], [ 100, -50, -1]];
+    let y0: Array2<i32> = array![[-100, 100], [100, -50]];
 
     let k = 1;
     let mut Y: Array2<f64> = Array2::<f64>::zeros((1, 2));
-    let extra_arr = [[-100, 100], [100, -50]];
-    let y0: Array2<i32> = arr2(&extra_arr);
 
-    // Y[[2, 1]] = 75;
-    for i in 1..T {
-        Y = sense(Y, &pz);
-        // other functions that will modify Y
+    for i in 0..T {
+        Y = sense(&Y, &pz);
+        println!("Y at {}: {:2}", i, Y);
     }
 
     println!("Final: {:2}", Y);
 }
 
-fn sense(Y: Array2<f64>, pz: &Array2<f64>) -> Array2<f64> {
-    let Ypr1 = &Y * &pz.column(0);
-    let Ypr2 = &Y * &pz.column(1);
-
-    let rng = Array::range(0., Y.nrows() as f64, 1.);
-
-    let c = 
+fn sense(Y: &Array2<f64>, pz: &Array2<f64>) -> Array2<f64> {
+    let y1 = Y * &pz.column(0);
+    let y2 = Y * &pz.column(1);
+    println!("y1: {}", y1);
+    println!("y2: {}", y2);
     
-    Y
+    let rows = Y.nrows();
+    let mut Y_new: Array2<f64> = Array2::<f64>::zeros((rows.pow(2), 2));
+    for i in 0..rows {
+        let start: usize = &i*rows;
+        let end: usize = &(i+1)*rows;
+        let res = &y1 + &y2.row(i);
+        println!("res: {:2}", res);
+        Y_new.slice_mut(s![start..end, ..]).assign(&res);
+    }
+    Y_new
 }
+
+fn predict(Y: &Array2<f64>, pt: &Array2<f64>) -> Array2<f64> {
+    let rows = Y.nrows();
+    let mut Y_new: Array2<f64> = Array2::<f64>::zeros((rows+2, 2));
+
+    let V1 = (*Y).dot(&pt) - 1;
+
+    Y_new
+}
+
+fn prune(Y: &mut Array2<f64>) {
+
+}
+
 
 fn largest(list: &[i32]) -> i32 {
     let mut largest = list[0];
@@ -60,12 +79,4 @@ fn largest(list: &[i32]) -> i32 {
     }
 
     largest
-}
-
-fn predict(Y: &mut Array2<f64>) {
-
-}
-
-fn prune(Y: &mut Array2<f64>) {
-
 }

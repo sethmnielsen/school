@@ -28,13 +28,15 @@ class POMDP:
         self.Nz = 2  # number of measurements (z1,z2) = (sense forward, sense backward)
 
         # rewards and probabilities
-        self.r = np.array([[-100, 100, -1], [100, -50, -1]])  # reward r(x_i, u_iu)
+        self.r = np.array([[-100, 100, -1], 
+                            [100, -50, -1]])  # reward r(x_i, u_iu)
         self.pt = np.array([[0.2, 0.8], [0.8, 0.2]])  # transition probabilities pt(x_i ' | x_j, u_iu)
         self.pz = np.array([[0.7, 0.3], [0.3, 0.7]])  # measurement probabilites px(z_iz | x_j)
 
         self.K = 1  # number of linear constraint functions
         self.Y = np.zeros((self.K, self.N))
         self.Y0 = np.hstack((self.r[0, 0:self.N].reshape(-1, 1), self.r[1, 0:self.N].reshape(-1, 1)))
+        print(f"Y0: {self.Y0}")
         self.pruning_res = 0.0001
         self.Y_final_w_commands = self.Y
 
@@ -54,7 +56,7 @@ class POMDP:
             if self.live_viz:
                 self.VisualizeValues()
             self.Sense()
-            self.Prune()
+            # self.Prune()
             self.Prediction()
             self.Prune()
         self.VisualizeValues()
@@ -63,20 +65,26 @@ class POMDP:
         print(self.Y)
 
     def Sense(self):
+        # print("******INISDE SENSE*****")
+        # print(f"self.Y.shape = {self.Y.shape}")
         Ypr1 = np.multiply(self.Y, self.pz[:, 0])
         Ypr2 = np.multiply(self.Y, self.pz[:, 1])
         rng = np.arange(0, len(self.Y))
         combos = np.vstack((np.tile(rng, self.K), np.repeat(rng, self.K)))
         self.Y = Ypr1[combos[0]] + Ypr2[combos[1]]
 
-        print("\nYpr1:\n", Ypr1)
-        print("Ypr2:\n", Ypr2)
-        print("combos:\n", combos)
-        print("self.Y:\n", self.Y)        
+        # print("\nYpr1:\n", Ypr1)
+        # print("Ypr2:\n", Ypr2)
+        # print("combos:\n", combos)
+        # print("self.Y:\n", self.Y)        
 
     def Prediction(self):
         self.Y = self.gamma*((self.Y @ self.pt) - 1)
         self.Y = np.vstack((self.Y0, self.Y))
+        # print("******INSIDE PREDICT******")
+        # print(f"Y before: \n{self.Y}")
+        # print(f"Y middle: \n{self.Y}")
+        # print(f"Y after: \n{self.Y}")
 
     def Prune(self):
         probs = np.vstack([np.arange(0, 1+self.pruning_res, self.pruning_res), np.arange(0, 1+self.pruning_res, self.pruning_res)[::-1]])
@@ -148,7 +156,7 @@ class POMDP:
                 break
 
 if __name__ == "__main__":
-    pomdp = POMDP(4)       # MDP algorithm object
+    pomdp = POMDP(3)       # MDP algorithm object
     pomdp.CreateValueMap()
 #     pomdp.Play()
 #     plt.show()
