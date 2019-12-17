@@ -31,6 +31,7 @@ fn main() {
 
     for i in 0..T {
         Y = sense(&Y, &pz);
+        Y = predict(&Y, &pt, &)
         println!("Y at {}: {:2}", i, Y);
     }
 
@@ -59,13 +60,14 @@ fn predict(Y: &Array2<f64>, pt: &Array2<f64>) -> Array2<f64> {
     let rows = Y.nrows();
     let mut Y_new: Array2<f64> = Array2::<f64>::zeros((rows+2, 2));
 
-    let V1 = (*Y).dot(&pt) - 1;
+    let V1 = (Y.dot(pt) - 1.)*GAMMA;
+    
 
     Y_new
 }
 
 fn prune(Y: &mut Array2<f64>) {
-
+  
 }
 
 
