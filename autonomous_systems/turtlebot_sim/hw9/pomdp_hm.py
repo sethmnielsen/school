@@ -87,7 +87,9 @@ class POMDP:
         # print(f"Y after: \n{self.Y}")
 
     def Prune(self):
-        probs = np.vstack([np.arange(0, 1+self.pruning_res, self.pruning_res), np.arange(0, 1+self.pruning_res, self.pruning_res)[::-1]])
+        probs = np.vstack([
+            np.arange(0, 1+self.pruning_res, self.pruning_res), 
+            np.arange(0, 1+self.pruning_res, self.pruning_res)[::-1]])
         lines = self.Y @ probs
         index = np.unique(np.argmax(lines, axis=0))
         self.Y = self.Y[index]
