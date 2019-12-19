@@ -24,7 +24,7 @@ fn main() {
     let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
     let pt: Array2<f64> = array![[0.2, 0.8], [0.8, 0.2]]; // transition probabilities
     let rew: Array2<i32> = array![[-100, 100, -1], [ 100, -50, -1]];
-    let y0: Array2<i32> = array![[-100, 100], [100, -50]];
+    let y0: Array2<f64> = array![[-100, 100], [100, -50]];
 
     let k = 1;
     let mut Y: Array2<f64> = Array2::<f64>::zeros((1, 2));
@@ -56,7 +56,7 @@ fn sense(Y: &Array2<f64>, pz: &Array2<f64>) -> Array2<f64> {
     Y_new
 }
 
-fn predict(Y: &Array2<f64>, pt: &Array2<f64>, y0: &Array2<i32>) -> Array2<f64> {
+fn predict(Y: &Array2<f64>, pt: &Array2<f64>, y0: &Array2<f64>) -> Array2<f64> {
     let rows = Y.nrows();
     let mut Y_new: Array2<f64> = Array2::<f64>::zeros((rows+2, 2));
 
