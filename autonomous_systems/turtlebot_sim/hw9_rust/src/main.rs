@@ -14,6 +14,9 @@
 extern crate ndarray;
 
 use ndarray::prelude::*;
+use ndarray::{stack,Zip};
+use ndarray::parallel::par_azip;
+use ndarray_stats::QuantileExt;
 
 // Params
 const T: i32 = 2;
@@ -24,7 +27,10 @@ fn main() {
     let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
     let pt: Array2<f64> = array![[0.2, 0.8], [0.8, 0.2]]; // transition probabilities
     let rew: Array2<i32> = array![[-100, 100, -1], [ 100, -50, -1]];
-    let y0: Array2<f64> = array![[-100, 100], [100, -50]];
+    let y0: Array2<f64> = array![[-100., 100.], [100., -50.]];
+    
+    let prune_rng = Array::range(0., PRUNE_RES+1., PRUNE_RES);
+    let probs = stack![ Axis(0), prune_rng, prune_rng.slice(s![..;-1]) ];
 
     let k = 1;
     let mut Y: Array2<f64> = Array2::<f64>::zeros((1, 2));
@@ -67,8 +73,14 @@ fn predict(Y: &Array2<f64>, pt: &Array2<f64>, y0: &Array2<f64>) -> Array2<f64> {
     Y_new
 }
 
-fn prune(Y: &Array2<f64>) {
-    
+fn prune(Y: &Array2<f64>, probs: &Array2<f64>) {
+    // index = np.unique(np.argmax(lines, axis=0))
+    let lines = Y.dot(probs);
+    let mut args = Array1::zeros(lines.ncols());
+    Zip::from(&mut args)
+        .and(lines.gencolumns())
+        .par_apply(|args, col| *args = col.argmax().unwrap());
+     
 }
 
 

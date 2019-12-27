@@ -89,9 +89,18 @@ class POMDP:
     def Prune(self):
         probs = np.vstack([
             np.arange(0, 1+self.pruning_res, self.pruning_res), 
-            np.arange(0, 1+self.pruning_res, self.pruning_res)[::-1]])
+            np.arange(0, 1+self.pruning_res, self.pruning_res)[::-1]
+            ])
         lines = self.Y @ probs
+        print("\nPRUNING")
+        print("shape:", lines.shape)
+        print("lines:\n", lines)
+        arggy = np.argmax(lines, axis=0)
+        print(f'argmax(lines, axis=0): {arggy}; shape: {arggy.shape}')
+        print(f'unique(): {np.unique(arggy)}; shape: {np.unique(arggy).shape}')
         index = np.unique(np.argmax(lines, axis=0))
+        print('index:', index)
+        print('index shape:', index.shape)
         self.Y = self.Y[index]
         self.K = len(self.Y)
 

@@ -12,6 +12,9 @@ name = "main"
 path = "src/main.rs"
 
 [dependencies]
-ndarray = { version = "0.13.0", features = ["blas"] }
+ndarray = { version = "^0.13", features = ["blas", "rayon"] }
 blas-src = { version = "0.2.0", default-features = false, features = ["openblas"] }
 openblas-src = { version = "0.6.0", default-features = false, features = ["cblas", "system"] }
+
+ndarray-stats = "^0.3"
+noisy_float = "^0.1"
