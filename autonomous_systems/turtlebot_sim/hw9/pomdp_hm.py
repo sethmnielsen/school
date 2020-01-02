@@ -37,7 +37,7 @@ class POMDP:
         self.Y = np.zeros((self.K, self.N))
         self.Y0 = np.hstack((self.r[0, 0:self.N].reshape(-1, 1), self.r[1, 0:self.N].reshape(-1, 1)))
         print(f"Y0: {self.Y0}")
-        self.pruning_res = 0.0001
+        self.pruning_res = 0.001
         self.Y_final_w_commands = self.Y
 
         # action simulation params
@@ -97,13 +97,16 @@ class POMDP:
         print("shape:", lines.shape)
         print("lines:\n", lines)
         arggy = np.argmax(lines, axis=0)
+        np.set_printoptions(threshold=np.inf)
         print(f'argmax(lines, axis=0): {arggy}; shape: {arggy.shape}')
+        np.set_printoptions(threshold=1000)
         print(f'unique(): {np.unique(arggy)}; shape: {np.unique(arggy).shape}')
         index = np.unique(np.argmax(lines, axis=0))
+        print(f'\nY before pruning: \n{self.Y}')
         self.Y = self.Y[index]
         self.K = len(self.Y)
 
-        print(f'\nY_pruned:\n{self.Y}')
+        print(f'Y_pruned:\n{self.Y}')
 
     def VisualizeValues(self):
         plt.clf()

@@ -20,11 +20,13 @@ use ndarray_stats::QuantileExt;
 
 use itertools::Itertools;
 use std::iter::FromIterator;
+// use std::io::prelude::*;
+// use std::io::BufWriter;
 
 // Params
 const T: i32 = 2;
 const GAMMA: f64 = 1.0;
-const PRUNE_RES: f64 = 0.0001;
+const PRUNE_RES: f64 = 0.001;
 
 fn main() {
     let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
@@ -40,7 +42,7 @@ fn main() {
 
     for i in 0..T {
         Y = sense(&Y, &pz);
-        // Y = prune(&Y, &probs);
+        prune(&Y, &probs);
         Y = predict(&Y, &pt, &y0);
         // println!("Y at {}: {:2}", i, Y);
     }
@@ -84,30 +86,23 @@ fn predict(Y: &Array2<f64>, pt: &Array2<f64>, y0: &Array2<f64>) -> Array2<f64> {
 fn prune(Y: &Array2<f64>, probs: &Array2<f64>) -> Array2<f64> {
     // index = np.unique(np.argmax(lines, axis=0))
     let lines = Y.dot(probs);
-    let mut args = Array1::zeros(lines.ncols());
+    let mut args: Array1<i32> = Array1::zeros(lines.ncols());
+    println!("\nargmax: \n");
     Zip::from(&mut args)
-         .and(lines.gencolumns())
-         .par_apply(|args, col| *args = col.argmax().unwrap());
+        .and(lines.gencolumns())
+        .apply( |arg, col| *arg = col.argmax().unwrap() as i32 );
+        // .apply( |arg, col| {
+        //     let v: i32 = col.argmax().unwrap() as i32;
+        //     print!("{:#?} ", v);
+        //     std::io::stdout().flush();
+        // } );
     
     let indexes = Array::from_iter(args.into_iter().unique());
     let mut Y_new: Array2<f64> = Array2::<f64>::zeros((args.len(), 2));
 
-    Zip::from(&mut Y_new)
-         .and(indexes)
-         .par_apply
+    // Zip::from(Y_new.genrows_mut())
+    //      .and(&indexes)
+    //      .apply( |Y_new_row, index| Y_new_row.assign(&Y.slice(s![index, ..])) ); 
     
     Y_new
-}
-
-
-fn largest(list: &[i32]) -> i32 {
-    let mut largest = list[0];
-
-    for &item in list.iter() {
-        if item > largest {
-            largest = item;
-        }
-    }
-
-    largest
 }
