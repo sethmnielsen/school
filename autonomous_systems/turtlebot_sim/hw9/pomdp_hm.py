@@ -53,10 +53,11 @@ class POMDP:
 
     def CreateValueMap(self):
         for tau in range(self.T):
+            print(f"\n%%%%%%%%%%%%%%%%%%%% BEGIN LOOP {tau} %%%%%%%%%%%%%%%%%%%%%%")
             if self.live_viz:
                 self.VisualizeValues()
             self.Sense()
-            # self.Prune()
+            self.Prune()
             self.Prediction()
             self.Prune()
         self.VisualizeValues()
@@ -65,26 +66,26 @@ class POMDP:
         print(self.Y)
 
     def Sense(self):
-        # print("******INISDE SENSE*****")
-        # print(f"self.Y.shape = {self.Y.shape}")
+        print("\n******INISDE SENSE*****")
+        print(f"self.Y.shape = {self.Y.shape}")
         Ypr1 = np.multiply(self.Y, self.pz[:, 0])
         Ypr2 = np.multiply(self.Y, self.pz[:, 1])
         rng = np.arange(0, len(self.Y))
         combos = np.vstack((np.tile(rng, self.K), np.repeat(rng, self.K)))
         self.Y = Ypr1[combos[0]] + Ypr2[combos[1]]
 
-        # print("\nYpr1:\n", Ypr1)
-        # print("Ypr2:\n", Ypr2)
-        # print("combos:\n", combos)
-        # print("self.Y:\n", self.Y)        
+        print("\nYpr1:\n", Ypr1)
+        print("Ypr2:\n", Ypr2)
+        print("combos:\n", combos)
+        print("self.Y:\n", self.Y)        
 
     def Prediction(self):
+        print("\n******INSIDE PREDICT******")
+        print(f"Y before: \n{self.Y}")
         self.Y = self.gamma*((self.Y @ self.pt) - 1)
+        print(f"Y middle: \n{self.Y}")
         self.Y = np.vstack((self.Y0, self.Y))
-        # print("******INSIDE PREDICT******")
-        # print(f"Y before: \n{self.Y}")
-        # print(f"Y middle: \n{self.Y}")
-        # print(f"Y after: \n{self.Y}")
+        print(f"Y after: \n{self.Y}")
 
     def Prune(self):
         probs = np.vstack([
@@ -99,10 +100,10 @@ class POMDP:
         print(f'argmax(lines, axis=0): {arggy}; shape: {arggy.shape}')
         print(f'unique(): {np.unique(arggy)}; shape: {np.unique(arggy).shape}')
         index = np.unique(np.argmax(lines, axis=0))
-        print('index:', index)
-        print('index shape:', index.shape)
         self.Y = self.Y[index]
         self.K = len(self.Y)
+
+        print(f'\nY_pruned:\n{self.Y}')
 
     def VisualizeValues(self):
         plt.clf()
