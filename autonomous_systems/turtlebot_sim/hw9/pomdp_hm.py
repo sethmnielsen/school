@@ -36,8 +36,8 @@ class POMDP:
         self.K = 1  # number of linear constraint functions
         self.Y = np.zeros((self.K, self.N))
         self.Y0 = np.hstack((self.r[0, 0:self.N].reshape(-1, 1), self.r[1, 0:self.N].reshape(-1, 1)))
-        print(f"Y0: {self.Y0}")
-        self.pruning_res = 0.001
+        #print(f"Y0: {self.Y0}")
+        self.pruning_res = 0.0001
         self.Y_final_w_commands = self.Y
 
         # action simulation params
@@ -48,44 +48,44 @@ class POMDP:
         self.cost = 0
 
         # plotter init
-        plt.figure(1)
+        # plt.figure(1)
         self.live_viz = False
 
     def CreateValueMap(self):
         for tau in range(self.T):
-            print(f"\n%%%%%%%%%%%%%%%%%%%% BEGIN LOOP {tau} %%%%%%%%%%%%%%%%%%%%%%")
+            #print(f"\n%%%%%%%%%%%%%%%%%%%% BEGIN LOOP {tau} %%%%%%%%%%%%%%%%%%%%%%")
             if self.live_viz:
                 self.VisualizeValues()
             self.Sense()
             self.Prune()
             self.Prediction()
             self.Prune()
-        self.VisualizeValues()
+        # self.VisualizeValues()
         self.Y_final_w_commands = np.hstack((np.hstack((0, 1, np.ones(len(self.Y)-2)*2)).reshape(-1, 1), self.Y))
-        print("------------------VALUE MAP RESULTS------------------")
-        print(self.Y)
+        #print("------------------VALUE MAP RESULTS------------------")
+        #print(self.Y)
 
     def Sense(self):
-        print("\n******INISDE SENSE*****")
-        print(f"self.Y.shape = {self.Y.shape}")
+        #print("\n******INISDE SENSE*****")
+        #print(f"self.Y.shape = {self.Y.shape}")
         Ypr1 = np.multiply(self.Y, self.pz[:, 0])
         Ypr2 = np.multiply(self.Y, self.pz[:, 1])
         rng = np.arange(0, len(self.Y))
         combos = np.vstack((np.tile(rng, self.K), np.repeat(rng, self.K)))
         self.Y = Ypr1[combos[0]] + Ypr2[combos[1]]
 
-        print("\nYpr1:\n", Ypr1)
-        print("Ypr2:\n", Ypr2)
-        print("combos:\n", combos)
-        print("self.Y:\n", self.Y)        
+        #print("\nYpr1:\n", Ypr1)
+        #print("Ypr2:\n", Ypr2)
+        #print("combos:\n", combos)
+        #print("self.Y:\n", self.Y)        
 
     def Prediction(self):
-        print("\n******INSIDE PREDICT******")
-        print(f"Y before: \n{self.Y}")
+        #print("\n******INSIDE PREDICT******")
+        #print(f"Y before: \n{self.Y}")
         self.Y = self.gamma*((self.Y @ self.pt) - 1)
-        print(f"Y middle: \n{self.Y}")
+        #print(f"Y middle: \n{self.Y}")
         self.Y = np.vstack((self.Y0, self.Y))
-        print(f"Y after: \n{self.Y}")
+        #print(f"Y after: \n{self.Y}")
 
     def Prune(self):
         probs = np.vstack([
@@ -93,20 +93,20 @@ class POMDP:
             np.arange(0, 1+self.pruning_res, self.pruning_res)[::-1]
             ])
         lines = self.Y @ probs
-        print("\nPRUNING")
-        print("shape:", lines.shape)
-        print("lines:\n", lines)
+        #print("\nPRUNING")
+        #print("shape:", lines.shape)
+        #print("lines:\n", lines)
         arggy = np.argmax(lines, axis=0)
-        np.set_printoptions(threshold=np.inf)
-        print(f'argmax(lines, axis=0): {arggy}; shape: {arggy.shape}')
-        np.set_printoptions(threshold=1000)
-        print(f'unique(): {np.unique(arggy)}; shape: {np.unique(arggy).shape}')
+        # np.set_printoptions(threshold=np.inf)
+        #print(f'argmax(lines, axis=0): {arggy}; shape: {arggy.shape}')
+        # np.set_printoptions(threshold=1000)
+        #print(f'unique(): {np.unique(arggy)}; shape: {np.unique(arggy).shape}')
         index = np.unique(np.argmax(lines, axis=0))
-        print(f'\nY before pruning: \n{self.Y}')
+        #print(f'\nY before pruning: \n{self.Y}')
         self.Y = self.Y[index]
         self.K = len(self.Y)
 
-        print(f'Y_pruned:\n{self.Y}')
+        #print(f'Y_pruned:\n{self.Y}')
 
     def VisualizeValues(self):
         plt.clf()
@@ -152,10 +152,10 @@ class POMDP:
 
             # check if terminal action
             if self.action_command[-1] != 2:
-                print("")
-                print("------------------SIMULATING------------------")
-                print("Final Score: ", self.cost)
-                print("Total Number of Actions: ", len(self.action_command))
+                #print("")
+                #print("------------------SIMULATING------------------")
+                #print("Final Score: ", self.cost)
+                #print("Total Number of Actions: ", len(self.action_command))
                 if (self.r[self.x_true[-1], self.action_command[-1]] == self.r[0,0]) or (self.r[self.x_true[-1], self.action_command[-1]] == self.r[1,1]):
                     if self.action_command[-1] == 0:
                         print("Drove Forward into lava. You Lose...")

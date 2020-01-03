@@ -10,23 +10,8 @@
 5) Using the probability and payoff parameters of your choice, use the associated value function to choose control actions. Assume that your true initial state is x1 and that your belief is 0.6. What outcomes do you obtain for 10 trials? Do you outcomes align with your expectations? Did your value function produce good results?
 */
 
-#![allow(non_snake_case)]
-extern crate ndarray;
+mod lib;
 
-use ndarray::prelude::*;
-use ndarray::{stack,Zip};
-// use ndarray::parallel::par_azip;
-use ndarray_stats::QuantileExt;
-
-use itertools::Itertools;
-use std::iter::FromIterator;
-// use std::io::prelude::*;
-// use std::io::BufWriter;
-
-// Params
-const T: i32 = 2;
-const GAMMA: f64 = 1.0;
-const PRUNE_RES: f64 = 0.001;
 
 fn main() {
     let pz: Array2<f64> = array![[0.7, 0.3], [0.3, 0.7]]; // measurement probabilities
@@ -41,68 +26,13 @@ fn main() {
     let mut Y: Array2<f64> = Array2::<f64>::zeros((1, 2));
 
     for i in 0..T {
+        println!("\n%%%%%%%%%%%%%%%%%%%% BEGIN LOOP {} %%%%%%%%%%%%%%%%%%%%%%", i);
         Y = sense(&Y, &pz);
-        prune(&Y, &probs);
+        Y = prune(&Y, &probs);
         Y = predict(&Y, &pt, &y0);
-        // println!("Y at {}: {:2}", i, Y);
+        Y = prune(&Y, &probs);
+        println!("\nY at {}: \n{}", i, Y);
     }
 
-    println!("Final: {:2}", Y);
-}
-
-fn sense(Y: &Array2<f64>, pz: &Array2<f64>) -> Array2<f64> {
-    let y1 = Y * &pz.column(0);
-    let y2 = Y * &pz.column(1);
-    println!("\n y1: \n{:2}", y1);
-    println!(" y2: \n{:2}", y2);
-    
-    let rows = Y.nrows();
-    let mut Y_new: Array2<f64> = Array2::<f64>::zeros((rows.pow(2), 2));
-    for i in 0..rows {
-        let start: usize = &i*rows;
-        let end: usize = &(i+1)*rows;
-        let res = &y1 + &y2.row(i);
-        println!("res: \n{:2}", res);
-        Y_new.slice_mut(s![start..end, ..]).assign(&res);
-    }
-    Y_new
-}
-
-fn predict(Y: &Array2<f64>, pt: &Array2<f64>, y0: &Array2<f64>) -> Array2<f64> {
-    let rows = Y.nrows();
-    let mut Y_new: Array2<f64> = Array2::<f64>::zeros((rows+2, 2));
-
-    let V1 = (Y.dot(pt) - 1.)*GAMMA;
-    Y_new.slice_mut(s![..2, ..]).assign(&y0);
-    Y_new.slice_mut(s![2.., ..]).assign(&V1);
-    
-    Y_new
-    // println!("\nV1: \n{}", &V1);
-    // println!("V1 shape: {:?}", &V1.shape());
-    // println!("Y_new: \n{}", &Y_new);
-    // println!("Y_new shape: {:?}", &Y_new.shape());
-}    
-
-fn prune(Y: &Array2<f64>, probs: &Array2<f64>) -> Array2<f64> {
-    // index = np.unique(np.argmax(lines, axis=0))
-    let lines = Y.dot(probs);
-    let mut args: Array1<i32> = Array1::zeros(lines.ncols());
-    println!("\nargmax: \n");
-    Zip::from(&mut args)
-        .and(lines.gencolumns())
-        .apply( |arg, col| *arg = col.argmax().unwrap() as i32 );
-        // .apply( |arg, col| {
-        //     let v: i32 = col.argmax().unwrap() as i32;
-        //     print!("{:#?} ", v);
-        //     std::io::stdout().flush();
-        // } );
-    
-    let indexes = Array::from_iter(args.into_iter().unique());
-    let mut Y_new: Array2<f64> = Array2::<f64>::zeros((args.len(), 2));
-
-    // Zip::from(Y_new.genrows_mut())
-    //      .and(&indexes)
-    //      .apply( |Y_new_row, index| Y_new_row.assign(&Y.slice(s![index, ..])) ); 
-    
-    Y_new
+    println!("Final: \n{:.2}", Y);
 }
