@@ -171,7 +171,7 @@ class POMDP:
                 break
 
 if __name__ == "__main__":
-    pomdp = POMDP(3)       # MDP algorithm object
+    pomdp = POMDP(20)       # MDP algorithm object
     pomdp.CreateValueMap()
 #     pomdp.Play()
 #     plt.show()
