@@ -16,7 +16,7 @@ const PRUNE_RES: f64 = 0.0001;
 
 pub fn play() {
     let r = random::<f64>();
-    // if r <= 
+    if r <= 
 }
 
 pub fn create_value_map() {
