@@ -14,6 +14,13 @@
 mod lib;
 use lib::*;
 
+use std::time::SystemTime;
+
 fn main() {
+    let t0 = SystemTime::now();
     create_value_map();
+    let t1 = SystemTime::now();
+    let total_time = t1.duration_since(t0)
+                       .expect("Bad");
+    println!("Total time: {:?}", total_time);
 }

@@ -8,6 +8,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 # Generic Partially Observable Markov Decision Process Model (From Probablistic Robotics)
 
@@ -62,6 +63,7 @@ class POMDP:
             self.Prune()
         # self.VisualizeValues()
         self.Y_final_w_commands = np.hstack((np.hstack((0, 1, np.ones(len(self.Y)-2)*2)).reshape(-1, 1), self.Y))
+        # print(f'Y_final_w_commands: \n{self.Y_final_w_commands}')
         #print("------------------VALUE MAP RESULTS------------------")
         #print(self.Y)
 
@@ -171,7 +173,11 @@ class POMDP:
                 break
 
 if __name__ == "__main__":
-    pomdp = POMDP(20)       # MDP algorithm object
+    t0 = time.time()
+    pomdp = POMDP()       # MDP algorithm object
     pomdp.CreateValueMap()
 #     pomdp.Play()
 #     plt.show()
+
+    t1 = time.time()
+    print(f'Total time: {t1-t0}')
