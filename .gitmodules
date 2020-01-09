@@ -1,9 +1,0 @@
-[submodule "flight_dynamics"]
-	path = flight_dynamics
-	url = git@github.com:sethmnielsen/mavsim_template_files.git
-[submodule "deep_learning"]
-	path = deep_learning
-	url = git@github.com:sethmnielsen/cs474_labs_f2019.git
-[submodule "autonomous_systems/vaporlite_final_proj"]
-	path = autonomous_systems/vaporlite_final_proj
-	url = git@magiccvs.byu.edu:jaringson/vaporlite_ekf.git
