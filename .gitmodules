@@ -1,0 +1,6 @@
+[submodule "nonlinear"]
+	path = nonlinear
+	url = git@github.com:sethmnielsen/nonlinear-system-theory.git
+[submodule "optimization"]
+	path = optimization
+	url = git@github.com:sethmnielsen/optimization-techniques.git
